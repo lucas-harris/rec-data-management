@@ -1,0 +1,54 @@
+.entire-body {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+#myChart {
+    border: 1px black solid;
+}
+
+.top-bar {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid black;
+}
+
+.bottom-bar {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-top: 1px solid black;
+}
+
+.body {
+    border: 1px solid black;
+}
+
+.body-row {
+    margin: 10px;
+}
+
+.btn-outline-primary {
+    color: black !important;
+    border: black 1px solid !important;
+    box-shadow: none !important;
+}
+
+.btn-outline-primary:hover:not([disabled]) {
+    color: black !important;
+    background-color: white !important;
+}
+
+.checkbox {
+}
+#data-select-confirm {
+    margin-top: 25px;
+}
+
+a, a:hover, a:visited {
+    color: black;
+}
+ 
+label {
+    font-size: .6rem;
+}
+

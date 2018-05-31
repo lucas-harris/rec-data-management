@@ -1,0 +1,18 @@
+[
+    {
+      "model": "pages.Data",
+      "pk": 1,
+      "fields": {
+        "value": 15,
+        "week": 10
+      }
+    },
+    {
+      "model": "pages.Data",
+      "pk": 2,
+      "fields": {
+        "value": 20,
+        "week": 40
+      }
+    }
+  ]

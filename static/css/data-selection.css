@@ -1,0 +1,24 @@
+.section {
+    margin: 20px;
+}
+
+.section-title {
+    color: black;
+}
+
+.facility-button {
+    width: 150px;
+}
+
+.checkbox {
+    display: none;
+}
+
+.select-multiple {
+    height: 200px;
+}
+
+#increment-text {
+    font-style: italic;
+    font-size: .75em;
+}
