@@ -23,13 +23,24 @@ def chartcreation(request):
     if (request.method == "POST"):
         dataset_form = DatasetForm(request.POST)
         if dataset_form.is_valid():
-            # querier = Query()
-            request.session.get['current_datasets'].append(5)
+            querier = Query()
+            pulled_session = request.session.get('current_datasets')
+            pulled_session.append(querier.sort_results(dataset_form))
+            request.session['current_datasets'] = pulled_session
+
             return HttpResponseRedirect(request.path_info)
     else:
         dataset_form = DatasetForm()
-    query = request.session.get('current_datasets')
-    return render(request, 'pages/chart-creation.html', {'variable':query, 'chart_form':chart_form})
+    datasets = request.session.get('current_datasets')
+    key_list = []
+    value_list = []
+    for x in datasets:
+        key_list.append(list(x.keys()))
+        value_list.append(list(x.values()))
+
+
+    query = value_list
+    return render(request, 'pages/chart-creation.html', {'variable':query, 'chart_form':chart_form, 'labels':key_list[0], 'values':value_list})
 
 def date_creation_loop(start, end):
     flag = True

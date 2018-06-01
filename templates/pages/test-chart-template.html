@@ -16,9 +16,11 @@
                 type: chart_type,
                 data: {
                     labels: {{ labels|safe }},
-                    datasets: [{
+                    datasets: [
+                    {% for x in values %}
+                    {
                         label: '# of People',
-                        data: {{ values|safe }},
+                        data: {{ x|safe }},
                     backgroundColor: [
                         'rgba(0, 0, 255, 0.2)'
                         ],
@@ -26,7 +28,9 @@
                         'rgba(0,99,132,1)'
                     ],
                         borderWidth: 1
-                    }]
+                    },
+                    {% endfor %}
+                    ]
                 },
                 options: {
                     scales: {
@@ -41,20 +45,24 @@
         };
         testChart = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: {{ labels|safe }},
-                datasets: [{
-                    label: '# of People',
-                    data: {{ values|safe }},
-                backgroundColor: [
-                    'rgba(0, 0, 255, 0.2)'
+                data: {
+                    labels: {{ labels|safe }},
+                    datasets: [
+                    {% for x in values %}
+                    {
+                        label: '# of People',
+                        data: {{ x|safe }},
+                    backgroundColor: [
+                        'rgba(0, 0, 255, 0.2)'
+                        ],
+                    borderColor: [
+                        'rgba(0,99,132,1)'
                     ],
-                borderColor: [
-                    'rgba(0,99,132,1)'
-                ],
-                    borderWidth: 1
-                }]
-            },
+                        borderWidth: 1
+                    },
+                    {% endfor %}
+                    ]
+                },
             options: {
                 scales: {
                     yAxes: [{

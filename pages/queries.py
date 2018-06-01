@@ -25,6 +25,9 @@ class Query():
         elif inc=='month':
             for key in sorted(dictionary, key=cmp_to_key(self.compare_month)):
                 return_dictionary[key] = dictionary[key]
+        elif inc=='year':
+            for key in sorted(dictionary):
+                return_dictionary[key] = dictionary[key]
         return return_dictionary
 
 
