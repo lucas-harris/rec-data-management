@@ -28,6 +28,8 @@ class Query():
         elif inc=='year':
             for key in sorted(dictionary):
                 return_dictionary[key] = dictionary[key]
+        elif inc=='all':
+            return_dictionary = dictionary
         return return_dictionary
 
 
@@ -85,6 +87,7 @@ class Query():
 
 
 #Combination of Queries-------------------------
+    #Creates a dictionary of dictionaries. The upper level dicts contain 100 or less dicts that contain query results
     def query_every_day(self, form):
         return_query = Data.objects.none()
         dates = self.create_date_group(form)
@@ -100,8 +103,6 @@ class Query():
                 queries_dict[dict_index] = Data.objects.none()
             queries_dict[dict_index] = queries_dict[dict_index] | self.query_all(form, dates[x].date)
             index += 1
-        # for key in queries_dict:
-        #     return_query = return_query | queries_dict[key]
         return queries_dict
 
     def query_all(self, form, date):
@@ -216,6 +217,16 @@ class Query():
             return self.group_by_day(self.query_every_day(form))
         elif inc=='hour':
             return self.group_by_hour(self.query_every_day(form))
+        elif inc=='all':
+            return self.group_by_all(self.query_every_day(form))
+
+    def group_by_all(self, dictionary):
+        value = 0
+        for key in dictionary:
+            for x in dictionary[key]:
+                value += x.value
+        return {'all':value}
+
 
     def group_by_year(self, dictionary):
         year_dict = OrderedDict()

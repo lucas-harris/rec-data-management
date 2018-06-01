@@ -12,7 +12,7 @@ class Date(models.Model):
         return str(self.date)
 
 class Data(models.Model):
-    id = models.CharField(primary_key=True, max_length=50)
+    key = models.CharField(primary_key=True, max_length=50)
     value = models.IntegerField()
     facility = models.CharField(max_length=10)
     area = models.CharField(max_length=10)
@@ -29,6 +29,19 @@ class Data(models.Model):
     def make_key(self):
         return str(self.date) + '-' + str(self.facility) + str(self.area) + '-' + str(self.gender) + '-' + str(self.time)
 
+class ChartSet(models.Model):
+    id = models.IntegerField(primary_key=True)
+
+class Chart(models.Model):
+    id = models.IntegerField(primary_key=True)
+    type = models.CharField(max_length=10)
+    title = models.CharField(max_length=50)
+    chart_set = models.ForeignKey(ChartSet, on_delete=models.CASCADE)
+
+class Graph(models.Model):
+    id = models.IntegerField(primary_key=True)
+    chart = models.ForeignKey(Chart, on_delete=models.CASCADE)
+    label = models.ManyToManyField('Data')
 
 
 class Dataset(models.Model):

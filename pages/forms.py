@@ -1,14 +1,15 @@
 from django import forms
 from django.forms import ModelForm
+from django.forms.widgets import *
 from pages.models import *
 
 class DataForm(ModelForm):
     class Meta:
         model = Data
-        fields = ['id', 'value', 'date', 'facility', 'area']
+        fields = ['key', 'value', 'date', 'facility', 'area']
     # facility = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(),
     #                                      choices=((1, 'Rec Center'), (2, 'Clawson'), (3, 'North Quad'), (4,'All')))
-
+    
 
 class DatasetForm(forms.Form):
 
@@ -18,7 +19,7 @@ class DatasetForm(forms.Form):
                                          choices=(('all','All'), ('strength', 'Strength'), ('cardio', 'Cardio'), ('room-x', 'Room X'), ('room-a','Room A'), ('room-b', 'Room B')))
     start_date = forms.DateTimeField(label="Start Date")
     end_date = forms.DateTimeField(label='End Date')
-    units = forms.ChoiceField(choices = (('hour', 'Hour'), ('day', 'Day'), ('week', 'Week'), ('month', 'Month'), ('year', 'Year')), label='Increment Units')
+    units = forms.ChoiceField(choices = (('hour', 'Hour'), ('day', 'Day'), ('week', 'Week'), ('month', 'Month'), ('year', 'Year'), ('all', 'One Group')), label='Increment Units')
     gender = forms.ChoiceField(choices=(('all', 'All'), ('m', 'Male'), ('f', 'Female')), label='Gender')
     year = forms.MultipleChoiceField(choices=(('all', 'All'), ('2018', '2018'), ('2017', '2017'), ('2016', '2016'), ('2015', '2015'), ('2014', '2014'), ('2013', '2013'), ('2012', '2012'),
                                             ('2011', '2011'), ('2010', '2010'),('2009', '2009'), ('2008', '2008'),('2007', '2007'), ('2006', '2006')))
@@ -48,7 +49,7 @@ class DatasetForm(forms.Form):
                                             ('1030', '10:30'), ('1130', '11:30'), ('1230', '12:30'), ('1330', '13:30'), ('1430', '14:30'),
                                             ('1530', '15:30'), ('1630', '16:30'), ('1730', '17:30'), ('1830', '18:30'), ('1930', '19:30'),
                                             ('2030', '20:30'), ('2130', '21:30'), ('2230', '22:30')))
-
+    color = forms.ChoiceField(required=True, choices=(('blue', 'Blue'), ('red', 'Red'), ('green', 'Green')))
 
 class ChartCreationForm(forms.Form):
     type = forms.ChoiceField(required=True, choices=(('line', 'Line Chart'), ('bar', 'Bar Chart'), ('pie', 'Pie Chart'),

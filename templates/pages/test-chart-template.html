@@ -9,7 +9,9 @@
         var testChart = new Chart(ctx, {});
         var chart_type = 'line';
         var list = document.getElementById('id_type');
+        var titles = {{ titles|safe }} ;
         list.onchange = function() {
+            var title_index = 0;
             testChart.destroy();
             chart_type = list.options[list.selectedIndex].value;
             testChart = new Chart(ctx, {
@@ -17,19 +19,19 @@
                 data: {
                     labels: {{ labels|safe }},
                     datasets: [
-                    {% for x in values %}
-                    {
-                        label: '# of People',
-                        data: {{ x|safe }},
-                    backgroundColor: [
-                        'rgba(0, 0, 255, 0.2)'
+                        {% for x in values %}
+                        {
+                            label: titles[title_index++],
+                            data: {{ x|safe }},
+                        backgroundColor: [
+                            'rgba(0, 0, 255, 0.2)'
+                            ],
+                        borderColor: [
+                            'rgba(0,99,132,1)'
                         ],
-                    borderColor: [
-                        'rgba(0,99,132,1)'
-                    ],
-                        borderWidth: 1
-                    },
-                    {% endfor %}
+                            borderWidth: 1
+                        },
+                        {% endfor %}
                     ]
                 },
                 options: {
@@ -43,6 +45,7 @@
                 }
             });
         };
+        var title_index = 0;
         testChart = new Chart(ctx, {
             type: 'line',
                 data: {
@@ -50,7 +53,7 @@
                     datasets: [
                     {% for x in values %}
                     {
-                        label: '# of People',
+                        label: titles[title_index++],
                         data: {{ x|safe }},
                     backgroundColor: [
                         'rgba(0, 0, 255, 0.2)'
