@@ -9,10 +9,11 @@ from datetime import *
 class Query():
 
 #Sort Results
-    def sort_results(self, form):
-        dictionary = self.group_queries(form)
+    def sort_results(self, graph):
+        """Sorts a dictionary based on the increment units selected in Dataset form"""
+        dictionary = self.group_queries(graph)
         return_dictionary = OrderedDict()
-        inc = form.cleaned_data['units']
+        inc = graph.unit
         if inc=='day':
             for key in sorted(dictionary, key=cmp_to_key(self.compare_day)):
                 return_dictionary[key] = dictionary[key]
@@ -34,6 +35,7 @@ class Query():
 
 
     def compare_month(self, month1, month2):
+        """Sorts a dictionary by the month"""
         calendar = {'January':0, 'February':1, 'March':2, 'April':3, 'May':4, 'June':5, 'July':6, 'August':7, 'September':8, 'October':9, 'November':10, 'December':11}
         split_month1 = month1.split(' ')
         split_month2 = month2.split(' ')
@@ -46,8 +48,9 @@ class Query():
             return 1
 
     def compare_week(self, week1, week2):
-        if week1[9:13] <= week2[9:13]:
-            if week1[5:7] < week2[5:7]:
+        """Sorts a dictionary by the week"""
+        if week1[9:13] <= week2[9:13]: #Year
+            if week1[5:7] < week2[5:7]: #Week
                 return -1
             else:
                 return 1
@@ -55,9 +58,10 @@ class Query():
             return 1
 
     def compare_day(self, day1, day2):
-        if day1[6:10] <= day2[6:10]:
-            if day1[0:2] <= day2[0:2]:
-                if day1[3:5] < day2[3:5]:
+        """Sorts a dictionary by the day"""
+        if day1[6:10] <= day2[6:10]: #Year
+            if day1[0:2] <= day2[0:2]: #Month
+                if day1[3:5] < day2[3:5]: #Day
                     return -1
                 else:
                     return 1
@@ -67,7 +71,8 @@ class Query():
             return 1
 
     def compare_hour(self, hour1, hour2):
-        day_check = False #Checks if hour1's day comes before/equals hour2's
+        """Sorts a dictionary by the hour"""
+        day_check = False 
         if hour1[13:17] <= hour2[13:17]: #Year
             if hour1[7:9] <= hour2[7:9]: #Month
                 if hour1[10:12] < hour2[10:12]: #Day
@@ -88,9 +93,10 @@ class Query():
 
 #Combination of Queries-------------------------
     #Creates a dictionary of dictionaries. The upper level dicts contain 100 or less dicts that contain query results
-    def query_every_day(self, form):
+    def query_every_day(self, graph):
+        """Returns a QuerySet of all date and non-date variables of the Dataset form combined"""
         return_query = Data.objects.none()
-        dates = self.create_date_group(form)
+        dates = self.create_date_group(graph)
         size = len(dates)
         queries_dict = dict()
         index = 0
@@ -101,19 +107,22 @@ class Query():
                 dict_index += 1
             if not dict_index in queries_dict:
                 queries_dict[dict_index] = Data.objects.none()
-            queries_dict[dict_index] = queries_dict[dict_index] | self.query_all(form, dates[x].date)
+            queries_dict[dict_index] = queries_dict[dict_index] | self.query_all(graph, dates[x].date)
             index += 1
         return queries_dict
 
-    def query_all(self, form, date):
-        return self.query_facilities(form, date) & self.query_area(form, date) & self.query_gender(form, date) & self.query_time(form, date)
+    def query_all(self, graph, date):
+        """Returns a QuerySet that matches all the non-date attributes of Dataset form"""
+        return self.query_facilities(graph, date) & self.query_area(graph, date) & self.query_gender(graph, date) & self.query_time(graph, date)
 
-    def create_date_group(self, form):
-        return self.get_period_queries(form) & self.get_date_queries(form)
+    def create_date_group(self, graph):
+        """Returns a QuerySet that is the period and date queries combined"""
+        return self.get_period_queries(graph) & self.get_date_queries(graph)
 
-    def get_period_queries(self, form):
-        start = form.cleaned_data['start_date']
-        end = form.cleaned_data['end_date']
+    def get_period_queries(self, graph):
+        """Returns a QuerySet of all dates between the start and end date in Dataset form"""
+        start = graph.start_date
+        end = graph.end_date
         dates = Date.objects.none()
         flag = True
         while (flag):
@@ -123,80 +132,100 @@ class Query():
             start += timedelta(days=1)
         dates = dates
         return dates
-
-    def get_date_queries(self, form):
-        return self.query_month(form) & self.query_week(form)  & self.query_year(form) & self.query_day_of_month(form) & self.query_day_of_week(form)
+    
+    def get_date_queries(self, graph):
+        """Returns a QuerySet of all dates that match the values chosen in Dataset form"""
+        return self.query_month(graph) & self.query_week(graph)  & self.query_year(graph) & self.query_day_of_month(graph) & self.query_day_of_week(graph)
 
 
 #Date Queries-------------------------
-    def query_year(self, form):
+    
+    def query_year(self, graph):
+        """Returns a QuerySet of all the years selected in the Dataset form"""
+        years = self.replace_characters(graph.year)
         ret = Date.objects.none()
-        for x in form.cleaned_data['year']:
+        for x in years:
             if x == 'all':
                 return Date.objects.all()
             ret = ret | Date.objects.filter(year=x)
         return ret
 
-    def query_month(self, form):
+    def query_month(self, graph):
+        """Returns a QuerySet of all the months selected in the Dataset form"""
+        months = self.replace_characters(graph.month)
         ret = Date.objects.none()
-        for x in form.cleaned_data['month']:
+        for x in months:
             if x == 'all':
                 return Date.objects.all()
             ret = ret | Date.objects.filter(month=x)
         return ret
 
-    def query_day_of_month(self, form):
+    def query_day_of_month(self, graph):
+        """Returns a QuerySet of all the days of the month selected in the Dataset form"""
+        days = self.replace_characters(graph.day_of_month)
         ret = Date.objects.none()
-        for x in form.cleaned_data['day_of_month']:
+        for x in days:
             if x == 'all':
                 return Date.objects.all()
             ret = ret | Date.objects.filter(day_of_month=x)
         return ret
 
-    def query_week(self, form):
+    def query_week(self, graph):
+        """Returns a QuerySet of all the weeks selected in the Dataset form"""
+        weeks = self.replace_characters(graph.week)
         ret = Date.objects.none()
-        for x in form.cleaned_data['week']:
+        for x in weeks:
             if x == 'all':
                 return Date.objects.all()
             ret = ret | Date.objects.filter(week=x)
         return ret
 
-    def query_day_of_week(self, form):
+    def query_day_of_week(self, graph):
+        """Returns a QuerySet of all the days of the week selected in the Dataset form"""
+        days = self.replace_characters(graph.day_of_week)
         ret = Date.objects.none()
-        for x in form.cleaned_data['day_of_week']:
+        for x in days:
             if x == 'all':
                 return Date.objects.all()
             ret = ret | Date.objects.filter(day_of_week=x)
         return ret
 
 #Data Queries-------------------------
-    def query_facilities(self, form, date):
+    def query_facilities(self, graph, date):
+        """Returns a QuerySet of all the facilities selected in the Dataset form"""
+        facilities = self.replace_characters(graph.facility)
         ret = Date.objects.get(date=date).data_set.none()
-        for x in form.cleaned_data['facility']:
+        for x in facilities:
             if x == 'all':
                 return Date.objects.get(date=date).data_set.all()
             ret = ret | Date.objects.get(date=date).data_set.filter(facility=x)
         return ret
 
-    def query_area(self, form, date):
+    def query_area(self, graph, date):
+        """Returns a QuerySet of all the areas selected in the Dataset form"""
+        areas = self.replace_characters(graph.area)
         ret = Date.objects.get(date=date).data_set.none()
-        for x in form.cleaned_data['area']:
+        for x in areas:
             if x == 'all':
                 return Date.objects.get(date=date).data_set.all()
             ret = ret | Date.objects.get(date=date).data_set.filter(area=x)
         return ret
 
-    def query_gender(self, form, date):
+    def query_gender(self, graph, date):
+        """Returns a QuerySet of the gender selected in the Dataset form"""
+        gender = self.replace_characters(graph.gender)[0]
         ret = Date.objects.get(date=date).data_set.none()
-        if form.cleaned_data['gender'] == 'all':
+        if gender == 'all':
             return Date.objects.get(date=date).data_set.all()
         else:
-            ret = ret | Date.objects.get(date=date).data_set.filter(gender=form.cleaned_data['gender'])
+            ret = ret | Date.objects.get(date=date).data_set.filter(gender=gender)
         return ret
 
-    def query_time(self, form, date):
+    def query_time(self, graph, date):
+        """Returns a QuerySet of all the times selected in the Dataset form"""
+        times = self.replace_characters(graph.time)
         ret = Date.objects.get(date=date).data_set.none()
-        for x in form.cleaned_data['time']:
+        for x in times:
             if x == 'all':
                 return Date.objects.get(date=date).data_set.all()
             ret = ret | Date.objects.get(date=date).data_set.filter(time=x)
@@ -205,22 +234,25 @@ class Query():
 
 #Increment Grouping
 
-    def group_queries(self, form):
-        inc = form.cleaned_data['units']
+    def group_queries(self, graph):
+        """Returns a dictionary containing the values of the Data selected in the Dataset form"""
+        """grouped by the increment unit selected in the form"""
+        inc = graph.unit
         if inc=='year':
-            return self.group_by_year(self.query_every_day(form))
+            return self.group_by_year(self.query_every_day(graph))
         elif inc=='month':
-            return self.group_by_month(self.query_every_day(form))
+            return self.group_by_month(self.query_every_day(graph))
         elif inc=='week':
-            return self.group_by_week(self.query_every_day(form))
+            return self.group_by_week(self.query_every_day(graph))
         elif inc=='day':
-            return self.group_by_day(self.query_every_day(form))
+            return self.group_by_day(self.query_every_day(graph))
         elif inc=='hour':
-            return self.group_by_hour(self.query_every_day(form))
+            return self.group_by_hour(self.query_every_day(graph))
         elif inc=='all':
-            return self.group_by_all(self.query_every_day(form))
+            return self.group_by_all(self.query_every_day(graph))
 
     def group_by_all(self, dictionary):
+        """Returns a dictionary with one value that is equal to the sum of all values selected"""
         value = 0
         for key in dictionary:
             for x in dictionary[key]:
@@ -229,6 +261,7 @@ class Query():
 
 
     def group_by_year(self, dictionary):
+        """Returns a dictionary with values grouped by the year they took place in"""
         year_dict = OrderedDict()
         for key in dictionary:
             for x in dictionary[key]:
@@ -241,9 +274,11 @@ class Query():
         return year_dict
 
     def make_year_key(self, data):
+        """Returns a string that represents a year group"""
         return str(data.date.year)
 
     def group_by_month(self, dictionary):
+        """Returns a dictionary with values grouped by the month they took place in"""
         month_dict = OrderedDict()
         for key in dictionary:
             for x in dictionary[key]:
@@ -256,9 +291,11 @@ class Query():
         return month_dict
 
     def make_month_key(self, data):
+        """Returns a string that represents a month group"""
         return calendar.month_name[int(data.date.month)] + ' ' + str(data.date.year)
 
     def group_by_week(self, dictionary):
+        """Returns a dictionary with values grouped by the week they took place in"""
         week_dict = OrderedDict()
         for key in dictionary:
             for x in dictionary[key]:
@@ -271,9 +308,11 @@ class Query():
         return week_dict
 
     def make_week_key(self, data):
+        """Returns a string that represents a week group"""
         return 'Week ' + data.date.week + ', ' + str(data.date.year)
 
     def group_by_day(self, dictionary):
+        """Returns a dictionary with values grouped by the day they took place in"""
         day_dict = OrderedDict()
         for key in dictionary:
             for x in dictionary[key]:
@@ -286,6 +325,7 @@ class Query():
         return day_dict
 
     def make_day_key(self, data):
+        """Returns a string that represents a day group"""
         month = ''
         day = ''
         if int(data.date.month)<10:
@@ -300,6 +340,7 @@ class Query():
         return month + '/' + day + '/' + str(data.date.year)
 
     def group_by_hour(self, dictionary):
+        """Returns a dictionary with values grouped by the hour they took place in"""
         hour_dict = OrderedDict()
         for key in dictionary:
             for x in dictionary[key]:
@@ -312,6 +353,7 @@ class Query():
         return hour_dict
 
     def make_hour_key(self, data):
+        """Returns a string that represents a hour group"""
         month = ''
         day = ''
         if int(data.date.month)<10:
@@ -325,3 +367,16 @@ class Query():
         hour = data.time[0:2]
         minute = data.time[2:5]
         return hour + ':' + minute + ', ' + month + '/' + day + '/' + str(data.date.year)
+
+    #Replace Characters
+    def replace_characters(self, attributes):
+        """Replaces characters and splits a attributes to return a list of strings"""
+        if type(attributes) is list:
+            return attributes
+        else:
+            attributes = attributes.replace('[','')
+            attributes = attributes.replace(']','')
+            attributes = attributes.replace("'",'')
+            attributes = attributes.replace(",",'')
+            attributes = attributes.split()
+            return attributes

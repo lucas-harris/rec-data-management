@@ -10,8 +10,7 @@
         <link rel="stylesheet" href="{% static 'css/chart-creation.css' %}">
         <script src="{% static 'js/chartjs/dist/Chart.js' %}" type="text/javascript"></script>
         <script>
-            var chart_data = {{ variable|safe }} ;
-
+            
         </script>
 
     </head>
@@ -36,7 +35,16 @@
                             <button type="button" class="btn btn-outline-primary">Delete</button>
                         </div>
                         <div class="col-6">
-                            <p>{{ variable }}</p>
+                            <div class="container dataset-names">
+                                {{variable}}
+                                <!-- {#{% for x in graphs %}#}
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ x.label }}
+                                    </div>
+                                </div>
+                                {#{% endfor %}#} -->
+                            </div>
                         </div>
                     </div>
                 </div>

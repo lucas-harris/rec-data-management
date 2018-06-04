@@ -39,29 +39,21 @@ class Chart(models.Model):
     chart_set = models.ForeignKey(ChartSet, on_delete=models.CASCADE)
 
 class Graph(models.Model):
+
     id = models.IntegerField(primary_key=True)
     chart = models.ForeignKey(Chart, on_delete=models.CASCADE)
-    label = models.ManyToManyField('Data')
-
-
-class Dataset(models.Model):
-    id = models.CharField(primary_key=True, max_length=50)
-    facility = models.CharField(max_length=20)
-    area = models.CharField(max_length=10)
-    start_date = models.CharField(max_length=10)
-    end_date = models.CharField(max_length=10)
-    gender = models.CharField(max_length=6)
-    year = models.CharField(max_length=10)
-    month = models.CharField(max_length=9)
-    week = models.CharField(max_length=10)
-    day_of_month = models.CharField(max_length=10)
-    day_of_week = models.CharField(max_length=9)
-    time = models.CharField(max_length=7)
-    units = models.CharField(max_length=10)
-    data = models.ManyToManyField(Data, through='DataInSet')
-    value = models.IntegerField()
-
-
-class DataInSet(models.Model):
-    data = models.ForeignKey(Data, on_delete=models.CASCADE)
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    data = models.ManyToManyField('Data')
+    color = models.CharField(max_length=25, default='red')
+    label = models.CharField(max_length=40, default='set')
+    unit = models.CharField(max_length=15, default='hour')
+    facility = models.CharField(max_length=20, default='rec')
+    area = models.CharField(max_length=20, default='strength')
+    start_date = models.DateTimeField(max_length=20, default='2018-01-01 00:00:00')
+    end_date = models.DateTimeField(max_length=20, default='2018-01-01 00:00:00')
+    gender = models.CharField(max_length=20, default='rec')
+    year = models.CharField(max_length=4, default='2018')
+    month = models.CharField(max_length=2, default='January')
+    week = models.CharField(max_length=4, default='01')
+    day_of_month = models.CharField(max_length=4, default='1')
+    day_of_week = models.CharField(max_length=20, default='Monday')
+    time = models.CharField(max_length=5, default='0630')

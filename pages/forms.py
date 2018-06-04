@@ -25,8 +25,8 @@ class DatasetForm(forms.Form):
                                             ('2011', '2011'), ('2010', '2010'),('2009', '2009'), ('2008', '2008'),('2007', '2007'), ('2006', '2006')))
     month = forms.MultipleChoiceField(choices=(('all', 'All'), ('1', 'January'), ('2', 'February'), ('3', 'March'), ('4', 'April'), ('5', 'May'), ('6', 'June'),
                                             ('7', 'July'), ('8', 'August'), ('9', 'September'), ('10', 'October'),('11', 'November'), ('12', 'December')))
-    week = forms.MultipleChoiceField(choices=(('all', 'All'), ('1', 'Week 1'), ('2', 'Week 2'), ('3', 'Week 3'), ('4', 'Week 4'), ('5', 'Week 5'), ('6', 'Week 6'),
-                                              ('7', 'Week 7'), ('w8', 'Week 8'), ('w9', 'Week 9'),('w10', 'Week 10'), ('w11', 'Week 11'),('w12', 'Week 12'),
+    week = forms.MultipleChoiceField(choices=(('all', 'All'), ('01', 'Week 1'), ('02', 'Week 2'), ('03', 'Week 3'), ('04', 'Week 4'), ('05', 'Week 5'), ('06', 'Week 6'),
+                                              ('07', 'Week 7'), ('08', 'Week 8'), ('09', 'Week 9'),('10', 'Week 10'), ('11', 'Week 11'),('12', 'Week 12'),
                                               ('13', 'Week 13'), ('14', 'Week 14'), ('15', 'Week 15'), ('16', 'Week 16'), ('17', 'Week 17'),
                                               ('18', 'Week 18'), ('19', 'Week 19'), ('20', 'Week 20'), ('21', 'Week 21'), ('22', 'Week 22'),
                                               ('23', 'Week 23'), ('24', 'Week 24'), ('25', 'Week 25'), ('26', 'Week 26'), ('27', 'Week 27'),
@@ -49,8 +49,7 @@ class DatasetForm(forms.Form):
                                             ('1030', '10:30'), ('1130', '11:30'), ('1230', '12:30'), ('1330', '13:30'), ('1430', '14:30'),
                                             ('1530', '15:30'), ('1630', '16:30'), ('1730', '17:30'), ('1830', '18:30'), ('1930', '19:30'),
                                             ('2030', '20:30'), ('2130', '21:30'), ('2230', '22:30')))
-    color = forms.ChoiceField(required=True, choices=(('blue', 'Blue'), ('red', 'Red'), ('green', 'Green')))
 
 class ChartCreationForm(forms.Form):
-    type = forms.ChoiceField(required=True, choices=(('line', 'Line Chart'), ('bar', 'Bar Chart'), ('pie', 'Pie Chart'),
+    type = forms.ChoiceField(initial=('line', 'Line Chart'), required=True, widget=forms.RadioSelect(), choices=(('line', 'Line Chart'), ('bar', 'Bar Chart'), ('pie', 'Pie Chart'),
                                                   ('scatter', 'Scatter Plot')))

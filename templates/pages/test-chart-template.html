@@ -7,17 +7,28 @@
     <script>
         var ctx = document.getElementById("template-chart");
         var testChart = new Chart(ctx, {});
-        var chart_type = 'line';
-        var list = document.getElementById('id_type');
-        var titles = {{ titles|safe }} ;
-        list.onchange = function() {
+        var titles = ['1' , '2', '3', '4'] ;
+        var radio = document.getElementById('id_type');
+
+        radio.onchange = function() {
+            if(document.getElementById('id_type_0').checked) {
+                var chart_type = 'line'
+            }
+            else if(document.getElementById('id_type_1').checked) {
+                var chart_type = 'bar'
+            }
+            else if(document.getElementById('id_type_2').checked) {
+                var chart_type = 'pie'
+            }
+            else if(document.getElementById('id_type_3').checked) {
+                var chart_type = 'scatter'
+            }
             var title_index = 0;
             testChart.destroy();
-            chart_type = list.options[list.selectedIndex].value;
             testChart = new Chart(ctx, {
                 type: chart_type,
                 data: {
-                    labels: {{ labels|safe }},
+                    labels: titles,
                     datasets: [
                         {% for x in values %}
                         {
@@ -45,11 +56,12 @@
                 }
             });
         };
+
         var title_index = 0;
         testChart = new Chart(ctx, {
             type: 'line',
                 data: {
-                    labels: {{ labels|safe }},
+                    labels: titles,
                     datasets: [
                     {% for x in values %}
                     {
