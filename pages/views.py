@@ -1,4 +1,3 @@
-
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -12,9 +11,20 @@ from django.db.models import Max
 
 #Index View -----------------------------------
 def index(request):
+    request.session['current_chartset'] = ChartSet.objects.latest('id').id
+    chart_list = []
+    for x in Chart.objects.filter(chart_set_id=request.session.get('current_chart')):
+        chart_list.append(x)
     request.session['current_datasets'] = []
     request.session['current_titles'] = []
-    return render(request, 'pages/index.html',)
+    label_list = []
+    value_list = []
+    title_list = []
+    chart_number = len(Chart.objects.filter(chart_set_id=request.session.get('current_chartset')))
+    chartset_dict = chartset_to_json(ChartSet.objects.latest('id'))
+    chartset_json = json.dumps(chartset_dict)
+    # return_chartset = json.loads(chartset_dict)
+    return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number)})
 
 def create_chartset_index(request):
     new_chart_set = ChartSet()
@@ -34,7 +44,6 @@ def chartcreation(request):
         if request.method == "POST":
             dataset_form = DatasetForm(request.POST)
             if dataset_form.is_valid():
-                querier = Query()
                 graph = Graph(id=Graph.objects.latest('id').id + 1, chart_id=Chart.objects.latest('id').id, unit=dataset_form.cleaned_data['units'], 
                     facility=dataset_form.cleaned_data['facility'], area=dataset_form.cleaned_data['area'], start_date=dataset_form.cleaned_data['start_date'], 
                     end_date=dataset_form.cleaned_data['end_date'], gender=dataset_form.cleaned_data['gender'], year=dataset_form.cleaned_data['year'], 
@@ -46,34 +55,23 @@ def chartcreation(request):
                     for data_object in query_dicts[single_dictionary]:
                         graph.data.add(data_object)
                 graph.save()
-                request.session['check'] = 'true'
                 return HttpResponseRedirect('/data-visualizer/chart-creation')
             else:
-                request.session['check'] = dataset_form.is_valid()
                 dataset_form = DatasetForm()
-    titles = request.session.get('current_titles')
+    return_query = chartset_to_json(ChartSet.objects.latest('id'))
+    label_list = ['1', '2', '3']
+    value_list = [1, 2, 3]
+    title_list = ['yes', 'no']
+    return render(request, 'pages/chart-creation.html', {'variable':return_query, 'chart_form':chart_form, 'labels':label_list, 'values':value_list, 'titles':title_list})
 
-    graph_list = []
-    for x in Graph.objects.filter(chart_id=request.session.get('current_chart')):
-        graph_list.append(x)
-    titles_list = []
-    for title in graph_list:
-        titles_list.append(title.label) 
-    value_list = []
-    for graph in graph_list:
-        graph_data = []
-        for data in graph.data.all():
-            graph_data.append(data.value)
-        value_list.append(graph_data)
-    query = Query().sort_results(Graph.objects.latest('id'))
-    return render(request, 'pages/chart-creation.html', {'variable':query, 'chart_form':chart_form, 'graphs':graph_list, 'labels':titles_list, 'values':value_list, 'titles':'hello'})
+#Data Selection View -----------------------------------
+def dataselection(request):
 
-def convert_queryset_to_list(queryset):
-    return_list = []
-    for x in queryset:
-        return_list.append(x)
-    return return_list
+    dataset_form = DatasetForm()
+    return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form})
 
+
+#Additional Methods -----------------------------------
 def date_creation_loop(start, end):
     flag = True
     while (flag):
@@ -83,11 +81,17 @@ def date_creation_loop(start, end):
         date.create_date()
         start += timedelta(days=1)
 
-def create_label(form):
-    dates =  str(form.cleaned_data['start_date'].month) + '/' + str(form.cleaned_data['start_date'].day) + '/' + str(form.cleaned_data['start_date'].year) + '-'
-    dates =  dates + str(form.cleaned_data['end_date'].month) + '/' + str(form.cleaned_data['end_date'].day) + '/' + str(form.cleaned_data['end_date'].year)
-    facility = str(form.cleaned_data['facility'])
-    area = str(form.cleaned_data['area'])
+def create_label(graph):
+    dates =  str(graph.start_date.month) + '/' + str(graph.start_date.day) + '/' + str(graph.start_date.year) + '-'
+    dates =  dates + str(graph.end_date.month) + '/' + str(graph.end_date.day) + '/' + str(graph.end_date.year)
+    facility = ''
+    facility_list = Query().replace_characters(graph.facility)
+    for x in facility_list:
+        facility += x + ':'
+    area = ''
+    area_list = Query().replace_characters(graph.area)
+    for x in area_list:
+        area += x + ':'
     return dates + ', ' + facility + ', ' + area
 
 def create_dates():
@@ -95,10 +99,32 @@ def create_dates():
     end = datetime(2020, 12, 31)
     date_creation_loop(start, end)
 
-#Data Selection View -----------------------------------
-def dataselection(request):
+def chartset_to_json(chartset):
+    query = Chart.objects.filter(chart_set_id=chartset.id)
+    chart_list = []
+    index = 0
+    for chart in query:
+        chart_list.append(chart_to_json(chart, index))
+        index+=1
+    return {'chartset':chart_list}
 
-    dataset_form = DatasetForm()
-    return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form})
+def chart_to_json(chart, passed_index):
+    query = Graph.objects.filter(chart_id=chart.id)
+    graph_list = []
+    index = 0
+    for graph in query:
+        graph_list.append(graph_to_json(graph, index))
+        index+=1
+    return {'charts':graph_list, 'title':chart.title, 'type':chart.type}
 
+def graph_to_json(graph, passed_index):
+    graph_values = Query().sort_results(graph)
+    data_list = []
+    index = 0
+    for data in graph_values:
+        data_list.append(data_to_json(data, graph_values[data]))
+        index+=1
+    return {'graph':data_list, 'color':graph.color}
 
+def data_to_json(key, value):
+    return {'data':{key:value}}

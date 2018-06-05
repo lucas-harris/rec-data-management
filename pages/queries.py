@@ -8,6 +8,21 @@ from datetime import *
 
 class Query():
 
+#Return Methods
+    def return_keys(self, dictionary):
+        """Returns a list of all keys from the dictionary containing the sorted results"""
+        ret_list = []
+        for x in dictionary:
+            ret_list.append(x)
+        return ret_list
+    
+    def return_values(self, dictionary):
+        """Returns a list of all values from the dictionary containing the sorted results"""
+        ret_list = []
+        for x in dictionary:
+            ret_list.append(dictionary[x])
+        return ret_list
+
 #Sort Results
     def sort_results(self, graph):
         """Sorts a dictionary based on the increment units selected in Dataset form"""
