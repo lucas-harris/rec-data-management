@@ -124,7 +124,7 @@ def graph_to_json(graph, passed_index):
     for data in graph_values:
         data_list.append(data_to_json(data, graph_values[data]))
         index+=1
-    return {'graph':data_list, 'color':graph.color}
+    return {'graph':data_list, 'color':graph.color, 'label':graph.label}
 
 def data_to_json(key, value):
     return {'data':{key:value}}
