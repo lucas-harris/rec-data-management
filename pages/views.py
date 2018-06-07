@@ -58,11 +58,16 @@ def chartcreation(request):
                 return HttpResponseRedirect('/data-visualizer/chart-creation')
             else:
                 dataset_form = DatasetForm()
-    return_query = chartset_to_json(ChartSet.objects.latest('id'))
-    label_list = ['1', '2', '3']
+    return_query = []
+    set_list = []
+
+    for dataset in Graph.objects.filter(chart_id=request.session.get('current_chart')):
+        set_list.append(dataset.label)
+    set_list_length = len(set_list)
     value_list = [1, 2, 3]
     title_list = ['yes', 'no']
-    return render(request, 'pages/chart-creation.html', {'variable':return_query, 'chart_form':chart_form, 'labels':label_list, 'values':value_list, 'titles':title_list})
+    return_query = 'yes'
+    return render(request, 'pages/chart-creation.html', {'variable':return_query, 'chart_form':chart_form, 'labels':set_list, 'label_index':range(set_list_length), 'values':value_list, 'titles':title_list})
 
 #Data Selection View -----------------------------------
 def dataselection(request):

@@ -12,33 +12,123 @@
         var datasetValue = [];
         var chartData = charts{{x}}.charts;
         var labels = []
-        for (var j = 0; j < charts{{x}}.charts.length; j++) { 
-            var dataValues = []
-            labels[j] = []
-            for(var i in charts{{x}}.charts[j].graph) {
-                labels[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data));
-                dataValues.push(Object.values(charts{{x}}.charts[j].graph[i].data));
-            } 
-            datasetValue[j] = {
-                backgroundColor: charts{{x}}.charts[j].color,
-                hoverBackgroundColor: darkenColor(charts{{x}}.charts[j].color),
-                pointBackgroundColor: darkenColor(charts{{x}}.charts[j].color),
-                borderColor: darkenColor(charts{{x}}.charts[j].color),
-                strokeColor : charts{{x}}.charts[j].color,
-                title :'2013',
-                data: dataValues,
-                fill: false
+        var chartType = charts{{x}}.type;
+        if(chartType=='line' | chartType=='bar') {
+            for (var j = 0; j < charts{{x}}.charts.length; j++) { 
+                var dataValues = []
+                labels[j] = []
+                for(var i in charts{{x}}.charts[j].graph) {
+                    labels[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data));
+                    dataValues.push(Object.values(charts{{x}}.charts[j].graph[i].data));
+                } 
+                datasetValue[j] = {
+                    backgroundColor: charts{{x}}.charts[j].color,
+                    hoverBackgroundColor: darkenColor(charts{{x}}.charts[j].color),
+                    pointBackgroundColor: darkenColor(charts{{x}}.charts[j].color),
+                    borderColor: darkenColor(charts{{x}}.charts[j].color),
+                    strokeColor : charts{{x}}.charts[j].color,
+                    title :'2013',
+                    data: dataValues,
+                    fill: false,
+                    label: charts{{x}}.charts[j].label,
+                }
+            }
+        }
+        else if(chartType=='pie') {
+            if(charts{{x}}.charts.length==1) {
+                labels[0] = [];
+                var colors = [];
+                var dataValues = [];
+                for(var i in charts{{x}}.charts[0].graph) {
+                    labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data));
+                    dataValues.push(Object.values(charts{{x}}.charts[0].graph[i].data));
+                    colors.push(createRandomColor());
+                } 
+                datasetValue[0] = {
+                    backgroundColor: colors,
+                    title :'2013',
+                    data: dataValues,
+                    fill: false
+                }
+            }
+            else {
+                var dataValues = []
+                var colors = []
+                labels[0] = []
+                for (var j in charts{{x}}.charts) { 
+                    labels[0].push(charts{{x}}.charts[j].label);
+                    dataValues.push(0);
+                    colors.push(charts{{x}}.charts[j].color)
+                    for(var i in charts{{x}}.charts[j].graph) {
+                        dataValues[j] = parseInt(dataValues[j]) + parseInt(Object.values(charts{{x}}.charts[j].graph[i].data));
+                    } 
+                }
+                datasetValue[0] = {
+                    backgroundColor: colors,
+                    // hoverBackgroundColor: darkenArrayOfColors(colors),
+                    pointBackgroundColor: darkenArrayOfColors(colors),
+                    borderColor: 'white',
+                    // strokeColor : darkenArrayOfColors(colors),
+                    title :'2013',
+                    data: dataValues,
+                    fill: false
+                }
+            }    
+        }
+        else if(chartType=='scatter') {
+            if(charts{{x}}.charts.length >= 2) {
+                labels[0] = [];
+                var colors = [charts{{x}}.charts[0].color, charts{{x}}.charts[1].color];
+                for (var j = 0; j < 2; j++) { 
+                    var dataValues = []
+                    for(var i in charts{{x}}.charts[j].graph) {
+                        dataValues[i] = {
+                            x: Object.values(charts{{x}}.charts[0].graph[i].data),
+                            y: Object.values(charts{{x}}.charts[1].graph[i].data)
+                        }
+                        labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data));
+                    } 
+                    datasetValue[0] = {
+                        backgroundColor: charts{{x}}.charts[0].color,
+                        pointBackgroundColor: charts{{x}}.charts[0].color,
+                        pointHoverBackgroundColor: charts{{x}}.charts[0].color,
+                        borderColor: charts{{x}}.charts[1].color,
+                        pointHoverBorderColor: charts{{x}}.charts[1].color,
+                        strokeColor : charts{{x}}.charts[0].color,
+                        title :'2013',
+                        data: dataValues,
+                        fill: false,
+                        label: 'x: ' + charts{{x}}.charts[0].label +  ' vs. y: ' + charts{{x}}.charts[1].label,
+                        pointRadius: 7,
+                        pointHoverRadius: 8
+                    }
+                }
             }
         }
         var title = charts{{x}}.title;
         var chart = new Chart(ctx, {
-            type: charts{{x}}.type,
+            type: chartType,
                 data: { 
                     labels: labels[0],
                     datasets: datasetValue,
                     lineTension: 1,
                 },
                 options: {
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                if(tooltipItem.xLabel>0 & tooltipItem.yLabel>0) {
+                                    return data.labels[tooltipItem.index] + ': (' + tooltipItem.xLabel + ', ' + tooltipItem.yLabel + ')';
+                                }
+                                else {
+                                    return data.labels[tooltipItem.index];
+                                }
+                            },
+                            // labelColor: function(tooltipItem, data) {
+                            //     return data.datasets[0].backgroundColor;
+                            // }
+                        }
+                    },
                     scales: {
                         yAxes: [{
                             ticks: {
@@ -49,12 +139,22 @@
                 }
             });
         
+        function createRandomColor() {
+            return 'rgb(' + Math.floor(Math.random()*255) + ', ' + Math.floor(Math.random()*255) + ', ' + Math.floor(Math.random()*255) + ', 0.5)'; 
+        }
+
         function darkenColor(color) {
             color = color.substring(4);
-            color = color.replace('(', "");
-            color = color.replace('(', "");
             color = color.split(',')
             return 'rgb(' + color[0].toString() + ',' +  color[1].toString() + ',' + color[2].toString() + ', ' + '0.5)'; 
+        }
+
+        function darkenArrayOfColors(colors) {
+
+            for(var color in colors) {
+                colors[color] = darkenColor(colors[color]);
+            }
+            return colors;
         }
 
     </script>
