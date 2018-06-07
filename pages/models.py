@@ -34,7 +34,7 @@ class ChartSet(models.Model):
 
 class Chart(models.Model):
     id = models.IntegerField(primary_key=True)
-    type = models.CharField(max_length=10)
+    type = models.CharField(max_length=10, default='line')
     title = models.CharField(max_length=50)
     chart_set = models.ForeignKey(ChartSet, on_delete=models.CASCADE)
 
@@ -43,7 +43,7 @@ class Graph(models.Model):
     id = models.IntegerField(primary_key=True)
     chart = models.ForeignKey(Chart, on_delete=models.CASCADE)
     data = models.ManyToManyField('Data')
-    color = models.CharField(max_length=25, default='red')
+    color = models.CharField(max_length=25, default='rgb(255, 0, 0, .3')
     label = models.CharField(max_length=40, default='set')
     unit = models.CharField(max_length=15, default='hour')
     facility = models.CharField(max_length=20, default='rec')
