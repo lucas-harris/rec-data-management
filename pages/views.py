@@ -11,6 +11,16 @@ from django.db.models import Max
 
 #Index View -----------------------------------
 def index(request):
+    if request.method == "POST":
+        chart_form = ChartForm(request.POST)
+        if chart_form.is_valid():
+            chart = Chart.objects.get(id=request.session.get('current_chart'))
+            chart.type=chart_form.cleaned_data['type']
+            chart.save()
+            return HttpResponseRedirect('/data-visualizer/dashboard')
+        else:
+            dataset_form = DatasetForm()
+    request.session['current_page'] = 'dashboard'
     request.session['current_chartset'] = ChartSet.objects.latest('id').id
     chart_list = []
     for x in Chart.objects.filter(chart_set_id=request.session.get('current_chart')):
@@ -22,8 +32,7 @@ def index(request):
     title_list = []
     chart_number = len(Chart.objects.filter(chart_set_id=request.session.get('current_chartset')))
     chartset_dict = chartset_to_json(ChartSet.objects.latest('id'))
-    chartset_json = json.dumps(chartset_dict)
-    # return_chartset = json.loads(chartset_dict)
+    chartset_json = json.dumps(chartset_dict) 
     return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number)})
 
 def create_chartset_index(request):
@@ -32,15 +41,19 @@ def create_chartset_index(request):
     request.session['current_chartset'] = ChartSet.objects.latest('id').id
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
+
+
 #Chart Creation View -----------------------------------
 def chartcreation(request):
     query = ''
-    chart_form = ChartCreationForm()
-    if request.META.get('HTTP_REFERER') == 'http://127.0.0.1:8000/data-visualizer/dashboard/':
-            chart = Chart(chart_set_id=ChartSet.objects.latest('id').id)
-            chart.save()
-            request.session['current_chart'] = Chart.objects.latest('id').id
-    elif request.META.get('HTTP_REFERER') == 'http://127.0.0.1:8000/data-visualizer/data-selection/':
+    chart_form = ChartForm()
+    if request.session.get('current_page') == 'dashboard':
+        request.session['current_page'] = 'chart-creation'
+        chart = Chart(chart_set_id=ChartSet.objects.latest('id').id)
+        chart.save()
+        request.session['current_chart'] = Chart.objects.latest('id').id
+    elif request.session.get('current_page') == 'data-selection':
+        request.session['current_page'] = 'chart-creation'
         if request.method == "POST":
             dataset_form = DatasetForm(request.POST)
             if dataset_form.is_valid():
@@ -48,7 +61,8 @@ def chartcreation(request):
                     facility=dataset_form.cleaned_data['facility'], area=dataset_form.cleaned_data['area'], start_date=dataset_form.cleaned_data['start_date'], 
                     end_date=dataset_form.cleaned_data['end_date'], gender=dataset_form.cleaned_data['gender'], year=dataset_form.cleaned_data['year'], 
                     month=dataset_form.cleaned_data['month'], week=dataset_form.cleaned_data['week'], day_of_month=dataset_form.cleaned_data['day_of_month'], 
-                    day_of_week=dataset_form.cleaned_data['day_of_week'], time=dataset_form.cleaned_data['time'], )
+                    day_of_week=dataset_form.cleaned_data['day_of_week'], time=dataset_form.cleaned_data['time'], label=dataset_form.cleaned_data['label'],
+                    color=dataset_form.cleaned_data['color'])
                 graph.save()
                 query_dicts = Query().query_every_day(graph)
                 for single_dictionary in query_dicts:
@@ -58,25 +72,25 @@ def chartcreation(request):
                 return HttpResponseRedirect('/data-visualizer/chart-creation')
             else:
                 dataset_form = DatasetForm()
-    return_query = []
-    set_list = []
-
-    for dataset in Graph.objects.filter(chart_id=request.session.get('current_chart')):
-        set_list.append(dataset.label)
-    set_list_length = len(set_list)
-    value_list = [1, 2, 3]
-    title_list = ['yes', 'no']
-    return_query = 'yes'
-    return render(request, 'pages/chart-creation.html', {'variable':return_query, 'chart_form':chart_form, 'labels':set_list, 'label_index':range(set_list_length), 'values':value_list, 'titles':title_list})
+    labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=request.session.get('current_chart')))
+    graphs_json = json.dumps(labels_and_colors) 
+    graph_count = range(len(Graph.objects.filter(chart_id=request.session.get('current_chart'))))
+    return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 
+    'graphs':graphs_json})
 
 #Data Selection View -----------------------------------
 def dataselection(request):
-
+    request.session['current_page'] = 'data-selection'
     dataset_form = DatasetForm()
     return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form})
 
 
 #Additional Methods -----------------------------------
+def create_dates():
+    start = datetime(2015, 1, 1)
+    end = datetime(2015, 12, 31)
+    date_creation_loop(start, end)
+
 def date_creation_loop(start, end):
     flag = True
     while (flag):
@@ -98,11 +112,6 @@ def create_label(graph):
     for x in area_list:
         area += x + ':'
     return dates + ', ' + facility + ', ' + area
-
-def create_dates():
-    start = datetime(2016, 1, 1)
-    end = datetime(2020, 12, 31)
-    date_creation_loop(start, end)
 
 def chartset_to_json(chartset):
     query = Chart.objects.filter(chart_set_id=chartset.id)
@@ -133,3 +142,9 @@ def graph_to_json(graph, passed_index):
 
 def data_to_json(key, value):
     return {'data':{key:value}}
+
+def graph_to_json_no_data(graph_list):
+    return_list = []
+    for graph in graph_list:
+        return_list.append({'label':graph.label, 'color':graph.color, 'id':graph.id})
+    return return_list

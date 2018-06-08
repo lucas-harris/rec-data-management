@@ -12,7 +12,6 @@ class DateEntryScript:
         self.week = ''
         self.year = ''
 
-
     def create_fields(self):
         self.day_of_month = self.date.day
         self.month = self.date.month
