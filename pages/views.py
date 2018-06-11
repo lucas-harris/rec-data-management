@@ -11,6 +11,7 @@ from django.db.models import Max
 
 #Index View -----------------------------------
 def index(request):
+    save_template_form = SaveTemplateForm()
     if request.method == "POST":
         chart_form = ChartForm(request.POST)
         if chart_form.is_valid():
@@ -19,28 +20,39 @@ def index(request):
             chart.save()
             return HttpResponseRedirect('/data-visualizer/dashboard')
         else:
-            dataset_form = DatasetForm()
+            chart_form = ChartForm()
     request.session['current_page'] = 'dashboard'
     request.session['current_chartset'] = ChartSet.objects.latest('id').id
-    chart_list = []
-    for x in Chart.objects.filter(chart_set_id=request.session.get('current_chart')):
-        chart_list.append(x)
-    request.session['current_datasets'] = []
-    request.session['current_titles'] = []
-    label_list = []
-    value_list = []
-    title_list = []
     chart_number = len(Chart.objects.filter(chart_set_id=request.session.get('current_chartset')))
     chartset_dict = chartset_to_json(ChartSet.objects.latest('id'))
     chartset_json = json.dumps(chartset_dict) 
-    return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number)})
+    text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
+    name_taken_flag = request.session.get('name_taken_flag')
+    return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number), 'save_template_form': save_template_form, 'text':text, 
+    'name_taken_flag':name_taken_flag})
 
-def create_chartset_index(request):
+def createchartset(request):
     new_chart_set = ChartSet()
     new_chart_set.save()
     request.session['current_chartset'] = ChartSet.objects.latest('id').id
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
+def savechartset(request):
+    request.session['name_taken_flag'] = False
+    if request.method == "POST":
+        save_template_form = SaveTemplateForm(request.POST)
+        if save_template_form.is_valid():
+            if ChartSet.objects.filter(name=save_template_form.cleaned_data['name']).count()==0:
+                chartset = ChartSet.objects.get(id=request.session.get('current_chartset'))
+                chartset.name = save_template_form.cleaned_data['name']
+                chartset.saved = True
+                chartset.save()
+            else:
+                request.session['name_taken_flag'] = True
+            return HttpResponseRedirect('/data-visualizer/dashboard')
+        else:
+            save_template_form = SaveTemplateForm()
+    return HttpResponseRedirect('/data-visualizer/dashboard')
 
 
 #Chart Creation View -----------------------------------
@@ -77,6 +89,10 @@ def chartcreation(request):
     graph_count = range(len(Graph.objects.filter(chart_id=request.session.get('current_chart'))))
     return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 
     'graphs':graphs_json})
+
+def deletechart(request):
+    Chart.objects.get(id=request.session.get('current_chart')).delete()
+    return HttpResponseRedirect('/data-visualizer/dashboard')
 
 #Data Selection View -----------------------------------
 def dataselection(request):

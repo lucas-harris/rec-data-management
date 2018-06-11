@@ -11,8 +11,8 @@
         var datasetValue = [];
         var chartData = charts{{x}}.charts;
         var labels = []
-        var chartType = charts{{x}}.type;
-        if(chartType=='line' | chartType=='bar') {
+        var chartType{{x}} = charts{{x}}.type;
+        if(chartType{{x}}=='line' | chartType{{x}}=='bar') {
             for (var j = 0; j < charts{{x}}.charts.length; j++) { 
                 var dataValues = []
                 labels[j] = []
@@ -33,7 +33,7 @@
                 }
             }
         }
-        else if(chartType=='pie') {
+        else if(chartType{{x}}=='pie') {
             if(charts{{x}}.charts.length==1) {
                 labels[0] = [];
                 var colors = [];
@@ -74,7 +74,7 @@
                 }
             }    
         }
-        else if(chartType=='scatter') {
+        else if(chartType{{x}}=='scatter') {
             if(charts{{x}}.charts.length >= 2) {
                 labels[0] = [];
                 var colors = [charts{{x}}.charts[0].color, charts{{x}}.charts[1].color];
@@ -105,8 +105,8 @@
             }
         }
         var title = charts{{x}}.title;
-        var chart = new Chart(ctx, {
-            type: chartType,
+        var chart{{x}} = new Chart(ctx, {
+            type: chartType{{x}},
                 data: { 
                     labels: labels[0],
                     datasets: datasetValue,
@@ -116,16 +116,17 @@
                     tooltips: {
                         callbacks: {
                             label: function(tooltipItem, data) {
-                                if(tooltipItem.xLabel>0 & tooltipItem.yLabel>0) {
+                                // if(tooltipItem.xLabel>0 & tooltipItem.yLabel>0) {
+                                if(chartType{{x}}=='scatter') {
                                     return data.labels[tooltipItem.index] + ': (' + tooltipItem.xLabel + ', ' + tooltipItem.yLabel + ')';
                                 }
+                                else if(chartType{{x}}=='pie') {
+                                    return chart{{x}}.data.datasets[0].data[tooltipItem.index] + ' patrons';
+                                }
                                 else {
-                                    return data.labels[tooltipItem.index];
+                                    return tooltipItem.yLabel + ' patrons';
                                 }
                             },
-                            // labelColor: function(tooltipItem, data) {
-                            //     return data.datasets[0].backgroundColor;
-                            // }
                         }
                     },
                     scales: {

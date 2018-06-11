@@ -50,9 +50,14 @@ class DatasetForm(forms.Form):
                                             ('1030', '10:30'), ('1130', '11:30'), ('1230', '12:30'), ('1330', '13:30'), ('1430', '14:30'),
                                             ('1530', '15:30'), ('1630', '16:30'), ('1730', '17:30'), ('1830', '18:30'), ('1930', '19:30'),
                                             ('2030', '20:30'), ('2130', '21:30'), ('2230', '22:30')))
-    color = forms.ChoiceField(choices=(('rgb(0, 0, 0, .3)', 'Black'), ('rgb(255, 0, 0, .3)', 'Red'), ('rgb(0, 255, 0, .3)', 'Green'), 
-                                        ('rgb(0, 0, 255, .3)', 'Blue'), ))
+    color = forms.ChoiceField(choices=(('rgb(0, 0, 0, .5)', 'Black'), ('rgb(255, 0, 0, .5)', 'Red'), ('rgb(255, 127, 0, .5)', 'Orange'), ('rgb(255, 255, 0, .5)', 'Yellow'), 
+                                        ('rgb(127, 255, 0, .5)', 'Light Green'), ('rgb(0, 255, 0, .5)', 'Green'), ('rgb(0, 255, 127, .5)', 'Blue Green'),
+                                        ('rgb(0, 255, 255, .5)', 'Cyan'), ('rgb(0, 0, 255, .5)', 'Blue'), ('rgb(127, 0, 255, .5)', 'Violet'), 
+                                        ('rgb(255, 0, 255, .5)', 'Magenta')))
 
 class ChartForm(forms.Form):
     type = forms.ChoiceField(initial=('line', 'Line Chart'), required=True, widget=forms.RadioSelect(), choices=(('line', 'Line Chart'), ('bar', 'Bar Chart'), ('pie', 'Pie Chart'),
                                                   ('scatter', 'Scatter Plot')))
+
+class SaveTemplateForm(forms.Form):
+    name = forms.CharField()

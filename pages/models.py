@@ -31,6 +31,8 @@ class Data(models.Model):
 
 class ChartSet(models.Model):
     id = models.IntegerField(primary_key=True)
+    saved = models.BooleanField(default=False)
+    name = models.CharField(max_length=60)
 
 class Chart(models.Model):
     id = models.IntegerField(primary_key=True)

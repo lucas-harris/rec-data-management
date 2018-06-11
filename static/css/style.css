@@ -3,10 +3,6 @@
     margin-bottom: 30px;
 }
 
-#myChart {
-    border: 1px black solid;
-}
-
 .top-bar {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -52,3 +48,6 @@ label {
     font-size: .6rem;
 }
 
+#save-template-row {
+    display: none;
+}

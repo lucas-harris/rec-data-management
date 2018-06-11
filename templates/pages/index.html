@@ -2,51 +2,89 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="icon" href="{% static 'img/logo.png' %}">
-  </head>
-  <body>
-    <div class="container body entire-body">
+    <head>
+        <meta charset="UTF-8">
+        <title>Dashboard</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        <link rel="icon" href="{% static 'img/logo.png' %}">
+        <!-- <script src="{% static 'js/script.js' %}" type="module"></script> -->
+    </head>
+    <body>
+        <div class="container body entire-body">
+        {{text}}
+        <!-- Top Bar-->
+            <div class="row justify-content-start top-bar">
+                <div class="col-2">
+                    <button type="button" class="btn btn-outline-primary" id="view-template-button">View Templates</button>
+                </div>
+                <div class="col-2">
+                <button type="button" class="btn btn-outline-primary" id="save-template-button">Save Template</button>
+                </div>
+            </div>
+        
+        <!-- Save Template Bar -->
+            <div class="row justify-content-center align-items-center" id='save-template-row'>
+                <div class="col-0">  
+                    <form action="/data-visualizer/save-chartset-redirect/" method="POST" class="form-group">
+                        {% csrf_token %}
+                        {{ save_template_form }}
+                        <input type="submit" value="Select" class="btn btn-outline-primary facility-button" id="save-template-confirm">
+                    </form>
+                </div>
+            </div>
 
-      <!-- Top Bar-->
-      <div class="row justify-content-start top-bar">
-        <div class="col-2">
-            <button type="button" class="btn btn-outline-primary" id="view-template-button">View Templates</button>
-        </div>
-        <div class="col-2">
-            <button type="button" class="btn btn-outline-primary" id="save-template-button">Save Template</button>
-        </div>
-      </div>
-      <button type="button" class="btn btn-outline-primary" id="new-chartset-button"><a href="{% url 'redirect' %}">Create Chartset</a></button>
-      
-      {% for x in chart_number %}
-      {% include 'pages/dashboard-chart-template.html' %}
-      {% endfor %}
-      
-      <!--Bottom Bar-->
-      <div class="row justify-content-end bottom-bar">
-        <div class="col-1">
-            <button type="button" class="btn btn-outline-primary" id="new-chart-button"><a href="{% url 'chart-creation' %}">+New</a></button>
-        </div>
-        <div class="col-1">
-            <button type="button" class="btn btn-outline-primary" id="edit-chart-button" disabled>Edit</button>
-        </div>
-        <div class="col-1">
-            <button type="button" class="btn btn-outline-primary" id="delete-chart-button" disabled>Delete</button>
-        </div>
-        <div class="col-1">
-            <button type="button" class="btn btn-outline-primary" id="swap-chart-button" disabled>Swap</button>
-        </div>
-      </div>
-    </div>
-  </body>
 
-  <script src="{% static 'js/script.js' %}" type="module"></script>
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+            <button type="button" class="btn btn-outline-primary" id="new-chartset-button"><a href="{% url 'create-chartset-redirect' %}">Create Chartset</a></button>
+
+            <div class="container">
+                <div class="row">
+                    {% for x in chart_number %}
+                    <div class="col-6">
+                        {% include 'pages/dashboard-chart-template.html' %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        
+        <!--Bottom Bar-->
+            <div class="row justify-content-end bottom-bar">
+                <div class="col-1">
+                    <button type="button" class="btn btn-outline-primary" id="new-chart-button"><a href="{% url 'chart-creation' %}">+New</a></button>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-outline-primary" id="edit-chart-button" disabled>Edit</button>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-outline-primary" id="delete-chart-button" disabled>Delete</button>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-outline-primary" id="swap-chart-button" disabled>Swap</button>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script>
+        {% if name_taken_flag == None %}
+            var name_taken = false;
+        {% else %}
+            var name_taken = true;
+        {% endif %}
+
+        window.onload = function() {
+            if(name_taken) {
+                alert('Chart Set Name Taken');
+            }
+        }
+        
+        document.getElementById('save-template-button').onclick = function() {
+            document.getElementById('save-template-row').style.display = 'block';
+        }
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </html>
