@@ -8,7 +8,6 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         <link rel="icon" href="{% static 'img/logo.png' %}">
-        <!-- <script src="{% static 'js/script.js' %}" type="module"></script> -->
     </head>
     <body>
         <div class="container body entire-body">
@@ -16,10 +15,10 @@
         <!-- Top Bar-->
             <div class="row justify-content-start top-bar">
                 <div class="col-2">
-                    <button type="button" class="btn btn-outline-primary" id="view-template-button">View Templates</button>
+                    <button type="button" class="btn btn-outline-primary" id="save-template-button">Save Template</button>
                 </div>
                 <div class="col-2">
-                <button type="button" class="btn btn-outline-primary" id="save-template-button">Save Template</button>
+                    <button type="button" class="btn btn-outline-primary" id="view-template-button">View Templates</button>
                 </div>
             </div>
         
@@ -29,11 +28,22 @@
                     <form action="/data-visualizer/save-chartset-redirect/" method="POST" class="form-group">
                         {% csrf_token %}
                         {{ save_template_form }}
-                        <input type="submit" value="Select" class="btn btn-outline-primary facility-button" id="save-template-confirm">
+                        <input type="submit" value="Save" class="btn btn-outline-primary facility-button" id="save-template-confirm">
                     </form>
                 </div>
             </div>
 
+        <!-- Select Template Bar -->
+            <div class="row justify-content-center align-items-center" id='select-template-row'>
+                <div class="col-0">  
+                    <form action="/data-visualizer/change-chartset-redirect/" method="POST" class="form-group">
+                        {% csrf_token %}
+                        {{ select_template_form }}
+                        <input type="submit" name = 'change' value="Select" class="btn btn-outline-primary facility-button" id="select-template-confirm">
+                        <input type="submit" name = 'delete' value="Delete" class="btn btn-outline-primary facility-button" id="delete-template-confirm">
+                    </form>
+                </div>
+            </div>
 
             <button type="button" class="btn btn-outline-primary" id="new-chartset-button"><a href="{% url 'create-chartset-redirect' %}">Create Chartset</a></button>
 
@@ -70,7 +80,7 @@
         {% if name_taken_flag == None %}
             var name_taken = false;
         {% else %}
-            var name_taken = true;
+            var name_taken = {{name_taken_flag}};
         {% endif %}
 
         window.onload = function() {
@@ -78,12 +88,8 @@
                 alert('Chart Set Name Taken');
             }
         }
-        
-        document.getElementById('save-template-button').onclick = function() {
-            document.getElementById('save-template-row').style.display = 'block';
-        }
-
     </script>
+    <script src="{% static 'js/script.js' %}" type="module"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>

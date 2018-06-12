@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import ModelForm
+from django.forms import ModelChoiceField
 from django.forms.widgets import *
 from pages.models import *
 import datetime
@@ -61,3 +62,13 @@ class ChartForm(forms.Form):
 
 class SaveTemplateForm(forms.Form):
     name = forms.CharField()
+
+class SelectTemplateChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return str(obj.name)
+
+class SelectTemplateForm(forms.Form):
+    name = SelectTemplateChoiceField(queryset = ChartSet.objects.filter(saved=1), widget=forms.RadioSelect(), empty_label=None)
+
+
+    

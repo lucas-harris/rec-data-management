@@ -12,6 +12,7 @@ from django.db.models import Max
 #Index View -----------------------------------
 def index(request):
     save_template_form = SaveTemplateForm()
+    select_template_form = SelectTemplateForm()
     if request.method == "POST":
         chart_form = ChartForm(request.POST)
         if chart_form.is_valid():
@@ -22,23 +23,28 @@ def index(request):
         else:
             chart_form = ChartForm()
     request.session['current_page'] = 'dashboard'
-    request.session['current_chartset'] = ChartSet.objects.latest('id').id
-    chart_number = len(Chart.objects.filter(chart_set_id=request.session.get('current_chartset')))
-    chartset_dict = chartset_to_json(ChartSet.objects.latest('id'))
+    # request.session['current_chartset'] = 13  
+    if 'current_chartset' not in request.session:
+        chartset = ChartSet()
+        request.session['current_chartset'] = chartset.id
+    chart_number = len(Chart.objects.filter(chart_set_id=request.session['current_chartset']))
+    chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
     text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
     name_taken_flag = request.session.get('name_taken_flag')
-    return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number), 'save_template_form': save_template_form, 'text':text, 
-    'name_taken_flag':name_taken_flag})
+    request.session['name_taken_flag'] = 'false'
+    return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number), 'save_template_form': save_template_form, 
+    'text':text, 'name_taken_flag':name_taken_flag, 'select_template_form':select_template_form})
 
 def createchartset(request):
     new_chart_set = ChartSet()
     new_chart_set.save()
     request.session['current_chartset'] = ChartSet.objects.latest('id').id
+    request.session['current_page'] = 'create-chartset-redirect'
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
 def savechartset(request):
-    request.session['name_taken_flag'] = False
+    request.session['name_taken_flag'] = 'false'
     if request.method == "POST":
         save_template_form = SaveTemplateForm(request.POST)
         if save_template_form.is_valid():
@@ -47,13 +53,30 @@ def savechartset(request):
                 chartset.name = save_template_form.cleaned_data['name']
                 chartset.saved = True
                 chartset.save()
+                request.session['current_chartset'] = chartset.id
             else:
-                request.session['name_taken_flag'] = True
+                request.session['name_taken_flag'] = 'true'
             return HttpResponseRedirect('/data-visualizer/dashboard')
         else:
             save_template_form = SaveTemplateForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
+def changechartset(request):
+    if request.method == "POST":
+        select_template_form = SelectTemplateForm(request.POST)
+        if 'change' in request.POST:
+            if select_template_form.is_valid():
+                request.session['current_chartset'] = select_template_form.cleaned_data['name'].id
+        elif 'delete' in request.POST:
+            if select_template_form.is_valid():
+                select_template_form.cleaned_data['name'].delete()
+                chartset = ChartSet()
+                chartset.save()
+                request.session['current_chartset'] = ChartSet.objects.latest('id').id
+        return HttpResponseRedirect('/data-visualizer/dashboard')
+    else:
+        select_template_form = SelectTemplateForm()
+    return HttpResponseRedirect('/data-visualizer/dashboard')
 
 #Chart Creation View -----------------------------------
 def chartcreation(request):
@@ -69,7 +92,12 @@ def chartcreation(request):
         if request.method == "POST":
             dataset_form = DatasetForm(request.POST)
             if dataset_form.is_valid():
-                graph = Graph(id=Graph.objects.latest('id').id + 1, chart_id=Chart.objects.latest('id').id, unit=dataset_form.cleaned_data['units'], 
+                graph_id = -1
+                if len(Graph.objects.all()) == 0:
+                    graph_id = 0
+                else:
+                    graph_id = Graph.objects.latest('id').id 
+                graph = Graph(id=graph_id + 1, chart_id=request.session.get('current_chart'), unit=dataset_form.cleaned_data['units'], 
                     facility=dataset_form.cleaned_data['facility'], area=dataset_form.cleaned_data['area'], start_date=dataset_form.cleaned_data['start_date'], 
                     end_date=dataset_form.cleaned_data['end_date'], gender=dataset_form.cleaned_data['gender'], year=dataset_form.cleaned_data['year'], 
                     month=dataset_form.cleaned_data['month'], week=dataset_form.cleaned_data['week'], day_of_month=dataset_form.cleaned_data['day_of_month'], 
