@@ -34,7 +34,8 @@
     background-color: white !important;
 }
 
-.checkbox {
+.chart-div {
+    border: 1px solid white;
 }
 #data-select-confirm {
     margin-top: 25px;

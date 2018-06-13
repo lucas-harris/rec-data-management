@@ -8,5 +8,5 @@ urlpatterns = [
     url(r'delete-chart-redirect/', views.deletechart, name='delete-chart-redirect'),
     url(r'save-chartset-redirect/', views.savechartset, name='save-chartset-redirect'),
     url(r'change-chartset-redirect/', views.changechartset, name='change-chartset-redirect'),
-    # url(r'delete-chartset-redirect/', views.deletechartset, name='delete-chartset-redirect'),
+    url(r'delete-selected-chart-redirect/', views.deleteselectedchart, name='delete-selected-chart-redirect'),
 ]

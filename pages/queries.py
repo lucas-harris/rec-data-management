@@ -7,6 +7,7 @@ from .models import *
 from datetime import *
 
 class Query():
+# """Order of operations: Query by Date and Areas, Combine 
 
 #Return Methods
     def return_keys(self, dictionary):
@@ -32,15 +33,19 @@ class Query():
         if inc=='day':
             for key in sorted(dictionary, key=cmp_to_key(self.compare_day)):
                 return_dictionary[key] = dictionary[key]
+            return_dictionary = self.eliminate_duplicates_day(return_dictionary)
         elif inc=='hour':
             for key in sorted(dictionary, key=cmp_to_key(self.compare_hour)):
                 return_dictionary[key] = dictionary[key]
+            return_dictionary = self.eliminate_duplicates_hour(return_dictionary)
         elif inc=='week':
             for key in sorted(dictionary, key=cmp_to_key(self.compare_week)):
                 return_dictionary[key] = dictionary[key]
+            return_dictionary = self.eliminate_duplicates_week(return_dictionary)
         elif inc=='month':
             for key in sorted(dictionary, key=cmp_to_key(self.compare_month)):
                 return_dictionary[key] = dictionary[key]
+            return_dictionary = self.eliminate_duplicates_month(return_dictionary)
         elif inc=='year':
             for key in sorted(dictionary):
                 return_dictionary[key] = dictionary[key]
@@ -48,6 +53,54 @@ class Query():
             return_dictionary = dictionary
         return return_dictionary
 
+    def eliminate_duplicates_hour(self, dictionary):
+        year_dictionary = dict()
+        return_dictionary = OrderedDict()
+        for key in dictionary:
+            year_dictionary[key.split(',')[1]] = True
+        if len(year_dictionary) == 1:
+            for key in dictionary:
+                return_dictionary[key.split(',')[0]] = dictionary[key]
+            return return_dictionary
+        else:
+            return dictionary
+
+    def eliminate_duplicates_day(self, dictionary):
+        year_dictionary = dict()
+        return_dictionary = OrderedDict()
+        for key in dictionary:
+            year_dictionary[key.split('/')[2]] = True
+        if len(year_dictionary) == 1:
+            for key in dictionary:
+                date_string = calendar.month_name[int(key[0:2])] + ' ' + key[3:5]
+                return_dictionary[date_string] = dictionary[key]
+            return return_dictionary
+        else:
+            return dictionary
+
+    def eliminate_duplicates_month(self, dictionary):
+        year_dictionary = dict()
+        return_dictionary = OrderedDict()
+        for key in dictionary:
+            year_dictionary[key.split(' ')[1]] = True
+        if len(year_dictionary) == 1:
+            for key in dictionary:
+                return_dictionary[key.split(' ')[0]] = dictionary[key]
+            return return_dictionary
+        else:
+            return dictionary
+
+    def eliminate_duplicates_week(self, dictionary):
+        year_dictionary = dict()
+        return_dictionary = OrderedDict()
+        for key in dictionary:
+            year_dictionary[key[8:]] = True
+        if len(year_dictionary) == 1:
+            for key in dictionary:
+                return_dictionary[key[0:7]] = dictionary[key]
+            return return_dictionary
+        else:
+            return dictionary
 
     def compare_month(self, month1, month2):
         """Sorts a dictionary by the month"""
@@ -104,7 +157,142 @@ class Query():
         else:
             return 1
 
+#Increment Grouping
 
+    def group_queries(self, graph):
+        """Returns a dictionary containing the values of the Data selected in the Dataset form"""
+        """grouped by the increment unit selected in the form"""
+        inc = graph.unit
+        if inc=='year':
+            return self.group_by_year(self.query_every_day(graph))
+        elif inc=='month':
+            return self.group_by_month(self.query_every_day(graph))
+        elif inc=='week':
+            return self.group_by_week(self.query_every_day(graph))
+        elif inc=='day':
+            return self.group_by_day(self.query_every_day(graph))
+        elif inc=='hour':
+            return self.group_by_hour(self.query_every_day(graph))
+        elif inc=='all':
+            return self.group_by_all(self.query_every_day(graph))
+
+    def group_by_all(self, dictionary):
+        """Returns a dictionary with one value that is equal to the sum of all values selected"""
+        value = 0
+        for key in dictionary:
+            for x in dictionary[key]:
+                value += x.value
+        return {'all':value}
+
+
+    def group_by_year(self, dictionary):
+        """Returns a dictionary with values grouped by the year they took place in"""
+        year_dict = OrderedDict()
+        for key in dictionary:
+            for x in dictionary[key]:
+                if self.make_year_key(x) in year_dict:
+                    value = year_dict[self.make_year_key(x)] + x.value
+                else:
+                    year_dict[self.make_year_key(x)] = 0
+                    value = x.value
+                year_dict[self.make_year_key(x)] =  value
+        return year_dict
+
+    def make_year_key(self, data):
+        """Returns a string that represents a year group"""
+        return str(data.date.year)
+
+    def group_by_month(self, dictionary):
+        """Returns a dictionary with values grouped by the month they took place in"""
+        month_dict = OrderedDict()
+        for key in dictionary:
+            for data in dictionary[key]:
+                if self.make_month_key(data) in month_dict:
+                    value = month_dict[self.make_month_key(data)] + data.value
+                else:
+                    month_dict[self.make_month_key(data)] = 0
+                    value = data.value
+                month_dict[self.make_month_key(data)] =  value
+        return month_dict
+
+    #Year included if more than one year is represented in the group
+    def make_month_key(self, data):
+        """Returns a string that represents a month group with year included"""
+        return calendar.month_name[int(data.date.month)] + ' ' + str(data.date.year)
+
+    def group_by_week(self, dictionary):
+        """Returns a dictionary with values grouped by the week they took place in"""
+        week_dict = OrderedDict()
+        for key in dictionary:
+            for x in dictionary[key]:
+                if self.make_week_key(x) in week_dict:
+                    value = week_dict[self.make_week_key(x)] + x.value
+                else:
+                    week_dict[self.make_week_key(x)] = 0
+                    value = x.value
+                week_dict[self.make_week_key(x)] =  value
+        return week_dict
+
+    def make_week_key(self, data):
+        """Returns a string that represents a week group"""
+        return 'Week ' + data.date.week + ', ' + str(data.date.year)
+
+    def group_by_day(self, dictionary):
+        """Returns a dictionary with values grouped by the day they took place in"""
+        day_dict = OrderedDict()
+        for key in dictionary:
+            for x in dictionary[key]:
+                if self.make_day_key(x) in day_dict:
+                    value = day_dict[self.make_day_key(x)] + x.value
+                else:
+                    day_dict[self.make_day_key(x)] = 0
+                    value = x.value
+                day_dict[self.make_day_key(x)] =  value
+        return day_dict
+
+    def make_day_key(self, data):
+        """Returns a string that represents a day group"""
+        month = ''
+        day = ''
+        if int(data.date.month)<10:
+            month = '0' + data.date.month
+        else:
+            month = data.date.month
+        if int(data.date.day_of_month)<10:
+            day = '0' + data.date.day_of_month
+        else:
+            day = data.date.day_of_month
+
+        return month + '/' + day + '/' + str(data.date.year)
+
+    def group_by_hour(self, dictionary):
+        """Returns a dictionary with values grouped by the hour they took place in"""
+        hour_dict = OrderedDict()
+        for key in dictionary:
+            for x in dictionary[key]:
+                if self.make_hour_key(x) in hour_dict:
+                    value = hour_dict[self.make_hour_key(x)] + x.value
+                else:
+                    hour_dict[self.make_hour_key(x)] = 0
+                    value = x.value
+                hour_dict[self.make_hour_key(x)] = value
+        return hour_dict
+
+    def make_hour_key(self, data):
+        """Returns a string that represents a hour group"""
+        month = ''
+        day = ''
+        if int(data.date.month)<10:
+            month = '0' + data.date.month
+        else:
+            month = data.date.month
+        if int(data.date.day_of_month)<10:
+            day = '0' + data.date.day_of_month
+        else:
+            day = data.date.day_of_month
+        hour = data.time[0:2]
+        minute = data.time[2:5]
+        return hour + ':' + minute + ', ' + month + '/' + day + '/' + str(data.date.year)
 
 #Combination of Queries-------------------------
     #Creates a dictionary of dictionaries. The upper level dicts contain 100 or less dicts that contain query results
@@ -246,143 +434,6 @@ class Query():
             ret = ret | Date.objects.get(date=date).data_set.filter(time=x)
         return ret
 
-
-#Increment Grouping
-
-    def group_queries(self, graph):
-        """Returns a dictionary containing the values of the Data selected in the Dataset form"""
-        """grouped by the increment unit selected in the form"""
-        inc = graph.unit
-        if inc=='year':
-            return self.group_by_year(self.query_every_day(graph))
-        elif inc=='month':
-            return self.group_by_month(self.query_every_day(graph))
-        elif inc=='week':
-            return self.group_by_week(self.query_every_day(graph))
-        elif inc=='day':
-            return self.group_by_day(self.query_every_day(graph))
-        elif inc=='hour':
-            return self.group_by_hour(self.query_every_day(graph))
-        elif inc=='all':
-            return self.group_by_all(self.query_every_day(graph))
-
-    def group_by_all(self, dictionary):
-        """Returns a dictionary with one value that is equal to the sum of all values selected"""
-        value = 0
-        for key in dictionary:
-            for x in dictionary[key]:
-                value += x.value
-        return {'all':value}
-
-
-    def group_by_year(self, dictionary):
-        """Returns a dictionary with values grouped by the year they took place in"""
-        year_dict = OrderedDict()
-        for key in dictionary:
-            for x in dictionary[key]:
-                if self.make_year_key(x) in year_dict:
-                    value = year_dict[self.make_year_key(x)] + x.value
-                else:
-                    year_dict[self.make_year_key(x)] = 0
-                    value = x.value
-                year_dict[self.make_year_key(x)] =  value
-        return year_dict
-
-    def make_year_key(self, data):
-        """Returns a string that represents a year group"""
-        return str(data.date.year)
-
-    def group_by_month(self, dictionary):
-        """Returns a dictionary with values grouped by the month they took place in"""
-        month_dict = OrderedDict()
-        for key in dictionary:
-            for x in dictionary[key]:
-                if self.make_month_key(x) in month_dict:
-                    value = month_dict[self.make_month_key(x)] + x.value
-                else:
-                    month_dict[self.make_month_key(x)] = 0
-                    value = x.value
-                month_dict[self.make_month_key(x)] =  value
-        return month_dict
-
-    def make_month_key(self, data):
-        """Returns a string that represents a month group"""
-        return calendar.month_name[int(data.date.month)] + ' ' + str(data.date.year)
-
-    def group_by_week(self, dictionary):
-        """Returns a dictionary with values grouped by the week they took place in"""
-        week_dict = OrderedDict()
-        for key in dictionary:
-            for x in dictionary[key]:
-                if self.make_week_key(x) in week_dict:
-                    value = week_dict[self.make_week_key(x)] + x.value
-                else:
-                    week_dict[self.make_week_key(x)] = 0
-                    value = x.value
-                week_dict[self.make_week_key(x)] =  value
-        return week_dict
-
-    def make_week_key(self, data):
-        """Returns a string that represents a week group"""
-        return 'Week ' + data.date.week + ', ' + str(data.date.year)
-
-    def group_by_day(self, dictionary):
-        """Returns a dictionary with values grouped by the day they took place in"""
-        day_dict = OrderedDict()
-        for key in dictionary:
-            for x in dictionary[key]:
-                if self.make_day_key(x) in day_dict:
-                    value = day_dict[self.make_day_key(x)] + x.value
-                else:
-                    day_dict[self.make_day_key(x)] = 0
-                    value = x.value
-                day_dict[self.make_day_key(x)] =  value
-        return day_dict
-
-    def make_day_key(self, data):
-        """Returns a string that represents a day group"""
-        month = ''
-        day = ''
-        if int(data.date.month)<10:
-            month = '0' + data.date.month
-        else:
-            month = data.date.month
-        if int(data.date.day_of_month)<10:
-            day = '0' + data.date.day_of_month
-        else:
-            day = data.date.day_of_month
-
-        return month + '/' + day + '/' + str(data.date.year)
-
-    def group_by_hour(self, dictionary):
-        """Returns a dictionary with values grouped by the hour they took place in"""
-        hour_dict = OrderedDict()
-        for key in dictionary:
-            for x in dictionary[key]:
-                if self.make_hour_key(x) in hour_dict:
-                    value = hour_dict[self.make_hour_key(x)] + x.value
-                else:
-                    hour_dict[self.make_hour_key(x)] = 0
-                    value = x.value
-                hour_dict[self.make_hour_key(x)] = value
-        return hour_dict
-
-    def make_hour_key(self, data):
-        """Returns a string that represents a hour group"""
-        month = ''
-        day = ''
-        if int(data.date.month)<10:
-            month = '0' + data.date.month
-        else:
-            month = data.date.month
-        if int(data.date.day_of_month)<10:
-            day = '0' + data.date.day_of_month
-        else:
-            day = data.date.day_of_month
-        hour = data.time[0:2]
-        minute = data.time[2:5]
-        return hour + ':' + minute + ', ' + month + '/' + day + '/' + str(data.date.year)
-
     #Replace Characters
     def replace_characters(self, attributes):
         """Replaces characters and splits a attributes to return a list of strings"""
@@ -395,3 +446,4 @@ class Query():
             attributes = attributes.replace(",",'')
             attributes = attributes.split()
             return attributes
+

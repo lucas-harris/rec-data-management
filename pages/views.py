@@ -23,14 +23,14 @@ def index(request):
         else:
             chart_form = ChartForm()
     request.session['current_page'] = 'dashboard'
-    # request.session['current_chartset'] = 13  
     if 'current_chartset' not in request.session:
         chartset = ChartSet()
-        request.session['current_chartset'] = chartset.id
+        request.session['current_chartset'] = ChartSet.objects.latest('id').id
     chart_number = len(Chart.objects.filter(chart_set_id=request.session['current_chartset']))
     chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
     text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
+    # text = create_label(Chart.objects.get(id=44))
     name_taken_flag = request.session.get('name_taken_flag')
     request.session['name_taken_flag'] = 'false'
     return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number), 'save_template_form': save_template_form, 
@@ -78,13 +78,17 @@ def changechartset(request):
         select_template_form = SelectTemplateForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
+def deleteselectedchart(request):
+    
+    return HttpResponseRedirect('/data-visualizer/dashboard')
+
 #Chart Creation View -----------------------------------
 def chartcreation(request):
     query = ''
     chart_form = ChartForm()
     if request.session.get('current_page') == 'dashboard':
         request.session['current_page'] = 'chart-creation'
-        chart = Chart(chart_set_id=ChartSet.objects.latest('id').id)
+        chart = Chart(chart_set_id=ChartSet.objects.get(id=request.session.get('current_chartset')).id)
         chart.save()
         request.session['current_chart'] = Chart.objects.latest('id').id
     elif request.session.get('current_page') == 'data-selection':
@@ -101,7 +105,7 @@ def chartcreation(request):
                     facility=dataset_form.cleaned_data['facility'], area=dataset_form.cleaned_data['area'], start_date=dataset_form.cleaned_data['start_date'], 
                     end_date=dataset_form.cleaned_data['end_date'], gender=dataset_form.cleaned_data['gender'], year=dataset_form.cleaned_data['year'], 
                     month=dataset_form.cleaned_data['month'], week=dataset_form.cleaned_data['week'], day_of_month=dataset_form.cleaned_data['day_of_month'], 
-                    day_of_week=dataset_form.cleaned_data['day_of_week'], time=dataset_form.cleaned_data['time'], label=dataset_form.cleaned_data['label'],
+                    day_of_week=dataset_form.cleaned_data['day_of_week'], time=dataset_form.cleaned_data['time'],
                     color=dataset_form.cleaned_data['color'])
                 graph.save()
                 query_dicts = Query().query_every_day(graph)
@@ -144,18 +148,76 @@ def date_creation_loop(start, end):
         date.create_date()
         start += timedelta(days=1)
 
-def create_label(graph):
-    dates =  str(graph.start_date.month) + '/' + str(graph.start_date.day) + '/' + str(graph.start_date.year) + '-'
-    dates =  dates + str(graph.end_date.month) + '/' + str(graph.end_date.day) + '/' + str(graph.end_date.year)
-    facility = ''
-    facility_list = Query().replace_characters(graph.facility)
-    for x in facility_list:
-        facility += x + ':'
-    area = ''
-    area_list = Query().replace_characters(graph.area)
-    for x in area_list:
-        area += x + ':'
-    return dates + ', ' + facility + ', ' + area
+def create_label(chart):
+    queryset = Graph.objects.filter(chart_id = chart.id)
+    label = ''
+    facility_dict = dict()
+    area_dict = dict()
+    gender_dict = dict()
+    month_dict = dict()
+    week_dict = dict()
+    year_dict = dict()
+    dom_dict = dict()
+    dow_dict = dict()
+    time_dict = dict()
+    start_date_dict = dict()
+    end_date_dict = dict()
+    for graph in queryset:
+        facility_dict[graph.facility] = True
+        area_dict[graph.area] = True
+        gender_dict[graph.gender] = True
+        month_dict[graph.month] = True
+        week_dict[graph.week] = True
+        year_dict[graph.year] = True
+        dom_dict[graph.day_of_month] = True
+        dow_dict[graph.day_of_week] = True
+        time_dict[graph.time] = True
+        start_date_dict[graph.start_date] = True
+        end_date_dict[graph.end_date] = True
+    if len(facility_dict) == 1:
+        for key in facility_dict:
+            if key != "['all']":
+                label += 'Facilities: ' + key + ', '
+    if len(area_dict) == 1:
+        for key in area_dict:
+            if key != "['all']":
+                label += 'Areas: ' + key + ', '
+    if len(start_date_dict) == 1 and len(start_date_dict)==1:
+        for key in start_date_dict:
+            label += 'Dates: (' + str(key)[0:10] + ' - '
+        for key in end_date_dict:
+            label += str(key)[0:10] + '), '
+    if len(gender_dict) == 1:
+        for key in gender_dict:
+            if key != "['all']":
+                label += 'Gender: ' + key + ', '
+    if len(month_dict) == 1:
+        for key in month_dict:
+            if key != "['all']":
+                label += 'Months: ' + key + ', '
+    if len(year_dict) == 1:
+        for key in year_dict:
+            if key != "['all']":
+                label += 'Years: ' + key + ', '
+    if len(week_dict) == 1:
+        for key in week_dict:
+            if key != "['all']":
+                label += 'Weeks: ' + key + ', '
+    if len(time_dict) == 1:
+        for key in time_dict:
+            if key != "['all']":
+                label += 'Times: ' + key + ', '
+    if len(dom_dict) == 1:
+        for key in dom_dict:
+            if key != "['all']":
+                label += 'Days: ' + key + ', '
+    if len(dow_dict) == 1:
+        for key in dow_dict:
+            if key != "['all']":
+                label += 'Week Days: ' + key + ', '
+    chart.title = label
+    chart.save()
+    return label
 
 def chartset_to_json(chartset):
     query = Chart.objects.filter(chart_set_id=chartset.id)
@@ -164,7 +226,7 @@ def chartset_to_json(chartset):
     for chart in query:
         chart_list.append(chart_to_json(chart, index))
         index+=1
-    return {'chartset':chart_list}
+    return {'chartset':chart_list, 'id':chartset.id}
 
 def chart_to_json(chart, passed_index):
     query = Graph.objects.filter(chart_id=chart.id)
@@ -173,7 +235,7 @@ def chart_to_json(chart, passed_index):
     for graph in query:
         graph_list.append(graph_to_json(graph, index))
         index+=1
-    return {'charts':graph_list, 'title':chart.title, 'type':chart.type}
+    return {'charts':graph_list, 'title':chart.title, 'type':chart.type, 'id':chart.id}
 
 def graph_to_json(graph, passed_index):
     graph_values = Query().sort_results(graph)

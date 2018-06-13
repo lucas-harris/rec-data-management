@@ -3,9 +3,11 @@
 {% block chart %}
     <canvas id="template-chart{{x}}" width="500" height="300"></canvas>
     <script src="{% static 'js/chartjs/dist/Chart.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/Chart.PieceLabel.js' %}" type="text/javascript"></script>
     <script>
         var json = {{json|safe}};
         var chartset = json['chartset'];
+        var chartID{{x}} = json['chartset'][{{x}}].id;
         var charts{{x}} = chartset[{{x}}];
         var ctx = document.getElementById("template-chart{{x}}");
         var datasetValue = [];
@@ -17,7 +19,7 @@
                 var dataValues = []
                 labels[j] = []
                 for(var i in charts{{x}}.charts[j].graph) {
-                    labels[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data));
+                    labels[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0]);
                     dataValues.push(Object.values(charts{{x}}.charts[j].graph[i].data));
                 } 
                 datasetValue[j] = {
@@ -39,7 +41,7 @@
                 var colors = [];
                 var dataValues = [];
                 for(var i in charts{{x}}.charts[0].graph) {
-                    labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data));
+                    labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data)[0]);
                     dataValues.push(Object.values(charts{{x}}.charts[0].graph[i].data));
                     colors.push(createRandomColor());
                 } 
@@ -85,7 +87,7 @@
                             x: Object.values(charts{{x}}.charts[0].graph[i].data),
                             y: Object.values(charts{{x}}.charts[1].graph[i].data)
                         }
-                        labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data));
+                        labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data)[0]);
                     } 
                     datasetValue[0] = {
                         backgroundColor: charts{{x}}.charts[0].color,
@@ -105,6 +107,7 @@
             }
         }
         var title = charts{{x}}.title;
+        var displayLabels = !(chartType{{x}} == 'pie');
         var chart{{x}} = new Chart(ctx, {
             type: chartType{{x}},
                 data: { 
@@ -113,6 +116,14 @@
                     lineTension: 1,
                 },
                 options: {
+                    pieceLabel: {
+                        mode: 'label', 
+                        precision: 2,
+                        position: 'outside',
+                        overlap: true,
+                        fontStyle: 'bold',
+                        fontColor: 'black',  
+                    },
                     tooltips: {
                         callbacks: {
                             label: function(tooltipItem, data) {
@@ -126,7 +137,7 @@
                                 else {
                                     return tooltipItem.yLabel + ' patrons';
                                 }
-                            },
+                            }
                         }
                     },
                     scales: {
@@ -135,6 +146,13 @@
                                 beginAtZero: true
                             }
                         }]
+                    },
+                    legend: {
+                        display: displayLabels
+                        // labels: {
+                        //     fontStyle: 'bold',
+                        //     fontSize: 16,
+                        // }
                     }
                 }
             });
