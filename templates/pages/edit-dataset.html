@@ -43,95 +43,80 @@
         </div>
     </body> 
     <script>
-        function splitElements(string) {
-            string = string.replace('[', '');
-            string = string.replace(']', '');
-            string = string.replace(/'/g, "");
-            string = string.replace(/ /g, "");
-            string = string.split(",");
-            return string;
+        if('{{use_json}}'=='True') {
+            function splitElements(string) {
+                string = string.replace('[', '');
+                string = string.replace(']', '');
+                string = string.replace(/'/g, "");
+                string = string.replace(/ /g, "");
+                string = string.split(",");
+                return string;
+            }
+
+            var graph_json = {{graph_json|safe}};
+            document.getElementById('id_label').value = graph_json.label;
+            for(facility in splitElements(graph_json.facility)) {
+                for(var f = 0; f<4; f++) { //4 is the number of areas in DatasetForm
+                    if(splitElements(graph_json.facility)[facility]==document.getElementById('id_facility_'+f).value) {
+                        document.getElementById('id_facility_'+f).checked = true;
+                    }
+                }
+            }   
+            for(area in splitElements(graph_json.area)) {
+                for(var a = 0; a<6; a++) { //6 is the number of areas in DatasetForm
+                    if(splitElements(graph_json.area)[area]==document.getElementById('id_area_'+a).value) {
+                        document.getElementById('id_area_'+a).checked = true;
+                    }
+                }
+            }   
+            document.getElementById('id_start_date').value = graph_json.start_date;
+            document.getElementById('id_end_date').value = graph_json.end_date;
+            document.getElementById('id_units').value = graph_json.unit;
+            document.getElementById('id_gender').value = graph_json.gender;
+            for(year in splitElements(graph_json.year)) {
+                for(var y = 0; y<14; y++) { //14 is the number of years in DatasetForm
+                    if(splitElements(graph_json.year)[year]==document.getElementById('id_year')[y].value) {
+                        document.getElementById('id_year')[y].selected = true;
+                    }
+                }
+            }   
+            for(month in splitElements(graph_json.month)) {
+                for(var m = 0; m<13; m++) { //13 is the number of months in DatasetForm
+                    if(splitElements(graph_json.month)[month]==document.getElementById('id_month')[m].value) {
+                        document.getElementById('id_month')[m].selected = true;
+                    }
+                }
+            }   
+            for(week in splitElements(graph_json.week)) {
+                for(var w = 0; w<54; w++) { //54 is the number of weeks in DatasetForm
+                    if(splitElements(graph_json.week)[week]==document.getElementById('id_week')[w].value) {
+                        document.getElementById('id_week')[w].selected = true;
+                    }
+                }
+            } 
+            for(day_of_month in splitElements(graph_json.day_of_month)) {
+                for(var dom = 0; dom<32; dom++) { //32 is the number of days in DatasetForm
+                    if(splitElements(graph_json.day_of_month)[day_of_month]==document.getElementById('id_day_of_month')[dom].value) {
+                        document.getElementById('id_day_of_month')[dom].selected = true;
+                    }
+                }
+            }   
+            for(day_of_week in splitElements(graph_json.day_of_week)) {
+                for(var dow = 0; dow<8; dow++) { //8 is the number of weeks in DatasetForm
+                    if(splitElements(graph_json.day_of_week)[day_of_week]==document.getElementById('id_day_of_week')[dow].value) {
+                        document.getElementById('id_day_of_week')[dow].selected = true;
+                    }
+                }
+            }   
+            for(time in splitElements(graph_json.time)) {
+                for(var t = 0; t<8; t++) { //8 is the number of weeks in DatasetForm
+                    if(splitElements(graph_json.time)[time]==document.getElementById('id_time')[t].value) {
+                        document.getElementById('id_time')[t].selected = true;
+                    }
+                }
+            }           
+            document.getElementById('id_color').value = graph_json.color;
         }
-
-        var graph_json = {{graph_json|safe}};
-        document.getElementById('id_label').value = graph_json.label;
-        for(facility in splitElements(graph_json.facility)) {
-            for(var f = 0; f<4; f++) { //4 is the number of areas in DatasetForm
-                if(splitElements(graph_json.facility)[facility]==document.getElementById('id_facility_'+f).value) {
-                    document.getElementById('id_facility_'+f).checked = true;
-                }
-            }
-        }   
-        for(area in splitElements(graph_json.area)) {
-            for(var a = 0; a<6; a++) { //6 is the number of areas in DatasetForm
-                if(splitElements(graph_json.area)[area]==document.getElementById('id_area_'+a).value) {
-                    document.getElementById('id_area_'+a).checked = true;
-                }
-            }
-        }   
-        document.getElementById('id_start_date').value = graph_json.start_date;
-        document.getElementById('id_end_date').value = graph_json.end_date;
-        document.getElementById('id_units').value = graph_json.unit;
-        document.getElementById('id_gender').value = graph_json.gender;
-        for(year in splitElements(graph_json.year)) {
-            for(var y = 0; y<14; y++) { //14 is the number of years in DatasetForm
-                if(splitElements(graph_json.year)[year]==document.getElementById('id_year')[y].value) {
-                    document.getElementById('id_year')[y].selected = true;
-                }
-            }
-        }   
-        for(month in splitElements(graph_json.month)) {
-            for(var m = 0; m<13; m++) { //13 is the number of months in DatasetForm
-                if(splitElements(graph_json.month)[month]==document.getElementById('id_month')[m].value) {
-                    document.getElementById('id_month')[m].selected = true;
-                }
-            }
-        }   
-        for(week in splitElements(graph_json.week)) {
-            for(var w = 0; w<54; w++) { //54 is the number of weeks in DatasetForm
-                if(splitElements(graph_json.week)[week]==document.getElementById('id_week')[w].value) {
-                    document.getElementById('id_week')[w].selected = true;
-                }
-            }
-        } 
-        for(day_of_month in splitElements(graph_json.day_of_month)) {
-            for(var dom = 0; dom<32; dom++) { //32 is the number of days in DatasetForm
-                if(splitElements(graph_json.day_of_month)[day_of_month]==document.getElementById('id_day_of_month')[dom].value) {
-                    document.getElementById('id_day_of_month')[dom].selected = true;
-                }
-            }
-        }   
-        for(day_of_week in splitElements(graph_json.day_of_week)) {
-            for(var dow = 0; dow<8; dow++) { //8 is the number of weeks in DatasetForm
-                if(splitElements(graph_json.day_of_week)[day_of_week]==document.getElementById('id_day_of_week')[dow].value) {
-                    document.getElementById('id_day_of_week')[dow].selected = true;
-                }
-            }
-        }   
-        for(time in splitElements(graph_json.time)) {
-            for(var t = 0; t<8; t++) { //8 is the number of weeks in DatasetForm
-                if(splitElements(graph_json.time)[time]==document.getElementById('id_time')[t].value) {
-                    document.getElementById('id_time')[t].selected = true;
-                }
-            }
-        }           
-        document.getElementById('id_color').value = graph_json.color;
-
-        // if(splitElements(graph_json.area)[2]=='cardio') {
-        //     document.getElementById('id_area_2').checked = true;
-        // }
-        // if(splitElements(graph_json.area)[3]=='room-x') {
-        //     document.getElementById('id_area_3').checked = true;
-        // }
-        // if(splitElements(graph_json.area)[4]=='room-a') {
-        //     document.getElementById('id_area_4').checked = true;
-        // }
-        // if(splitElements(graph_json.area)[5]=='room-b') {
-        //     document.getElementById('id_area_5').checked = true;
-        // }
-        // document.getElementById('id_facility_0').value = splitElements(graph_json.facility)[0];
-        // document.getElementById('id_facility_1').value = splitElements(graph_json.facility)[1];
-
-    
     </script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>

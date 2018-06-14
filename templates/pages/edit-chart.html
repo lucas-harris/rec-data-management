@@ -21,7 +21,10 @@
             </div>
             <div class="row justify-content-center">
                 <div class="col-0">
-                    <button type="button" class="btn btn-outline-primary" id="choose-dataset-button"><a href="{% url 'edit-dataset' %}">Choose Dataset</a></button>
+                    <form name="select-dataset-form" action="/data-visualizer/edit-dataset-redirect/" method="POST">
+                        {% csrf_token %}
+                        <input type="submit" name='choose' value="Choose Dataset" class="btn btn-outline-primary" id="choose-dataset-button">
+                    </form>
                 </div>
             </div>
             <!--Data Selected-->
@@ -58,18 +61,18 @@
                 {{ chart_form }}
                 <div class="row justify-content-center">
                     <div class="col-0">
-                        <input type="submit" value="Select" class="btn btn-outline-primary facility-button" id="data-select-confirm">
+                        <input type="submit" value="Select" name='edit-chart' class="btn btn-outline-primary facility-button" id="data-select-confirm">
                     </div>
                 </div>
             </form>
         </div>
     </body> 
     <script>
-        // {% for index in graph_count %}
-        // document.getElementById('delete-button-{{index}}').onclick = function() {
-        //     document.getElementById('label-row-{{index}}').remove();
-        // }
-        // {% endfor %}
+        for(var t = 0; t<4; t++) { //4 is the number of areas in DatasetForm
+            if('{{chart_type}}'==document.getElementById('id_type_'+t).value) {
+                document.getElementById('id_type_'+t).checked = true;
+            }
+        }
     </script>
     <!-- <script src="{% static 'js/chart-creation.js' %}" type="module"></script> -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
