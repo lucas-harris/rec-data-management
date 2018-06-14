@@ -13,6 +13,7 @@ from django.db.models import Max
 def index(request):
     save_template_form = SaveTemplateForm()
     select_template_form = SelectTemplateForm()
+    select_chart_form = SelectChartForm()
     if request.method == "POST":
         chart_form = ChartForm(request.POST)
         if chart_form.is_valid():
@@ -34,7 +35,7 @@ def index(request):
     name_taken_flag = request.session.get('name_taken_flag')
     request.session['name_taken_flag'] = 'false'
     return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number), 'save_template_form': save_template_form, 
-    'text':text, 'name_taken_flag':name_taken_flag, 'select_template_form':select_template_form})
+    'text':text, 'name_taken_flag':name_taken_flag, 'select_template_form':select_template_form, 'select_chart_form':select_chart_form})
 
 def createchartset(request):
     new_chart_set = ChartSet()
@@ -78,8 +79,20 @@ def changechartset(request):
         select_template_form = SelectTemplateForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
-def deleteselectedchart(request):
-    
+
+def changeselectedchart(request):
+    if request.method == "POST":
+        select_chart_form = SelectChartForm(request.POST)
+        if 'delete' in request.POST:
+            if select_chart_form.is_valid():
+                Chart.objects.get(id=select_chart_form.cleaned_data['selected_chart_id']).delete()
+        elif 'edit' in request.POST:
+            if select_chart_form.is_valid():
+                request.session['current_edit'] = select_chart_form.cleaned_data['selected_chart_id']
+                return HttpResponseRedirect('/data-visualizer/edit-chart')
+        return HttpResponseRedirect('/data-visualizer/dashboard')
+    else:
+        select_chart_form = SelectChartForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
 #Chart Creation View -----------------------------------
@@ -132,6 +145,41 @@ def dataselection(request):
     dataset_form = DatasetForm()
     return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form})
 
+
+#Edit Chart View --------------------------------- 
+def editchart(request):
+    chart_form = ChartForm()
+    select_graph_form = SelectGraphForm()
+    current_chart = request.session.get('current_edit')
+    chart_type = Chart.objects.get(id=current_chart)
+    labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=request.session.get('current_edit')))
+    graphs_json = json.dumps(labels_and_colors) 
+    graph_count = range(len(Graph.objects.filter(chart_id=request.session.get('current_edit'))))
+    return render(request, 'pages/edit-chart.html', {'graph_count':graph_count, 'chart_form':chart_form, 
+    'graphs':graphs_json, 'select_graph_form':select_graph_form})
+
+def editdataset(request):
+    request.session['current_page'] = 'data-selection'
+    graph_dictionary = graph_to_json_all_fields(Graph.objects.get(id=request.session.get('current_graph_edit')))
+    graph_json = json.dumps(graph_dictionary) 
+    dataset_form = DatasetForm()
+    return render(request, 'pages/edit-dataset.html', {'dataset_form':dataset_form, 'graph_json':graph_json})
+
+def editdatasetredirect(request):
+    if request.method == "POST":
+        select_graph_form = SelectGraphForm(request.POST)
+        if 'delete' in request.POST:
+            if select_graph_form.is_valid():
+                Graph.objects.get(id=select_graph_form.cleaned_data['selected_graph_id']).delete()
+                return HttpResponseRedirect('/data-visualizer/edit-chart')
+        elif 'edit' in request.POST:
+            if select_graph_form.is_valid():
+                request.session['current_graph_edit'] = select_graph_form.cleaned_data['selected_graph_id']
+                return HttpResponseRedirect('/data-visualizer/edit-dataset')
+        return HttpResponseRedirect('/data-visualizer/edit-chart')
+    else:
+        select_graph_form = SelectGraphForm()
+    return HttpResponseRedirect('/data-visualizer/dashboard')    
 
 #Additional Methods -----------------------------------
 def create_dates():
@@ -254,3 +302,8 @@ def graph_to_json_no_data(graph_list):
     for graph in graph_list:
         return_list.append({'label':graph.label, 'color':graph.color, 'id':graph.id})
     return return_list
+
+def graph_to_json_all_fields(graph):
+    return {'label':graph.label, 'facility':graph.facility, 'area':graph.area, 'start_date':str(graph.start_date)[0:10], 'end_date':str(graph.end_date)[0:10],
+    'unit':graph.unit, 'gender':graph.gender, 'year':graph.year, 'month':graph.month, 'week':graph.week, 
+    'day_of_month':graph.day_of_month, 'day_of_week':graph.day_of_week, 'time':graph.time, 'color':graph.color}

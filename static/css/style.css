@@ -53,3 +53,7 @@ label {
     display: none;
     border-bottom: 1px solid black;
 }
+
+.hidden {
+    display: none;
+}

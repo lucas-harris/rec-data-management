@@ -56,6 +56,9 @@ class DatasetForm(forms.Form):
                                         ('rgb(0, 255, 255, .5)', 'Cyan'), ('rgb(0, 0, 255, .5)', 'Blue'), ('rgb(127, 0, 255, .5)', 'Violet'), 
                                         ('rgb(255, 0, 255, .5)', 'Magenta')))
 
+# class EditDatasetForm(forms.Form):
+    # label = EditChartLabel(queryset = Graph)
+
 class ChartForm(forms.Form):
     type = forms.ChoiceField(initial=('line', 'Line Chart'), required=True, widget=forms.RadioSelect(), choices=(('line', 'Line Chart'), ('bar', 'Bar Chart'), ('pie', 'Pie Chart'),
                                                   ('scatter', 'Scatter Plot')))
@@ -70,5 +73,12 @@ class SelectTemplateChoiceField(ModelChoiceField):
 class SelectTemplateForm(forms.Form):
     name = SelectTemplateChoiceField(queryset = ChartSet.objects.filter(saved=1), widget=forms.RadioSelect(), empty_label=None)
 
+class SelectChartForm(forms.Form):
+    selected_chart_id = forms.CharField()
 
-    
+class SelectGraphForm(forms.Form):
+    selected_graph_id = forms.CharField()
+
+class EditChartLabel(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return str(obj.name)

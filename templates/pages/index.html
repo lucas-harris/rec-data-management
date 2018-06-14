@@ -62,6 +62,7 @@
                                 document.getElementById('edit-chart-button').disabled = false;
                                 document.getElementById('delete-chart-button').disabled = false;
                                 selectedChart = chartID{{x}};
+                                document.getElementById('id_selected_chart_id').value = selectedChart;
                                 document.getElementById('chart{{x}}-div').style.border = '1px solid black';
                             }
                         </script>
@@ -76,20 +77,18 @@
                 <div class="col-1">
                     <button type="button" class="btn btn-outline-primary" id="new-chart-button"><a href="{% url 'chart-creation' %}">+New</a></button>
                 </div>
-                <div class="col-1">
-                    <form action="/data-visualizer/chart-creation/" method="POST" class="form-group">   
-                        {% csrf_token %}                 
-                        <input type="submit" name='edit' value="Edit" class="btn btn-outline-primary" id="edit-chart-button" disabled>
-                    </form>
+                <div class='col-1'>
+                <form action="/data-visualizer/change-selected-chart-redirect/" method="POST">   
+                    {% csrf_token %}       
+                    <div class='hidden'>
+                        {{select_chart_form}}
+                    </div>
+                    <input type="submit" name='edit' value="Edit" class="btn btn-outline-primary" id="edit-chart-button" disabled>
                 </div>
-                <div class="col-1">
-                    <form action="/data-visualizer/delete-selected-chart-redirect/" method="POST" class="form-group">   
-                        {% csrf_token %}       
-                        <input type="hidden" name="delete-chart" value='-1' id='delete-chart-form'>
-                        <script>document.getElementById('delete-chart-form').value = ''+selectedChart;</script>
-                        <input type="submit" name='delete' value="Delete" class="btn btn-outline-primary" id="delete-chart-button" disabled>
-                    </form>
+                <div class='col-1'>
+                    <input type="submit" name='delete' value="Delete" class="btn btn-outline-primary" id="delete-chart-button" disabled>
                 </div>
+                </form>
                 <div class="col-1">
                     <button type="button" class="btn btn-outline-primary" id="swap-chart-button" disabled>Swap</button>
                 </div>
