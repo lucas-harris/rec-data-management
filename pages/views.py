@@ -20,6 +20,7 @@ def index(request):
             if chart_form.is_valid():
                 chart = Chart.objects.get(id=request.session.get('current_chart'))
                 chart.type=chart_form.cleaned_data['type']
+                chart.saved = True
                 chart.save()
                 return HttpResponseRedirect('/data-visualizer/dashboard')
         elif 'edit-chart' in request.POST:
@@ -34,7 +35,9 @@ def index(request):
     if 'current_chartset' not in request.session:
         chartset = ChartSet()
         request.session['current_chartset'] = ChartSet.objects.latest('id').id
-    chart_number = len(Chart.objects.filter(chart_set_id=request.session['current_chartset']))
+    charts = Chart.objects.filter(chart_set_id=request.session['current_chartset'])
+    charts = charts & Chart.objects.filter(saved=True)
+    chart_number = len(charts)
     chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
     text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
@@ -87,7 +90,7 @@ def changechartset(request):
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
 
-def changeselectedchart(request):
+def changeselectedchartredirect(request):
     if request.method == "POST":
         select_chart_form = SelectChartForm(request.POST)
         if 'delete' in request.POST:
@@ -96,32 +99,57 @@ def changeselectedchart(request):
         elif 'edit' in request.POST:
             if select_chart_form.is_valid():
                 request.session['current_edit'] = select_chart_form.cleaned_data['selected_chart_id']
-                return HttpResponseRedirect('/data-visualizer/edit-chart')
+                request.session['current_chart_action'] = 'edit'
+                return HttpResponseRedirect('/data-visualizer/chart-creation')
+        elif 'new' in request.POST:
+            if select_chart_form.is_valid():
+                request.session['current_page'] = 'chart-creation'
+                chart = Chart(chart_set_id=ChartSet.objects.get(id=request.session.get('current_chartset')).id)
+                chart.save()
+                request.session['current_chart'] = Chart.objects.latest('id').id
+                request.session['current_chart_action'] = 'new'
+                return HttpResponseRedirect('/data-visualizer/chart-creation')
         return HttpResponseRedirect('/data-visualizer/dashboard')
     else:
         select_chart_form = SelectChartForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
 #Chart Creation View -----------------------------------
+
+def confirmchartredirect(request):
+    if request.session.get('current_chart_action') == 'new':
+        chart_id = request.session.get('current_chart')
+    elif request.session.get('current_chart_action') == 'edit':
+        chart_id = request.session.get('current_edit')
+    if request.method == "POST":
+        chart_form = ChartForm(request.POST)
+        if chart_form.is_valid():
+            chart = Chart.objects.get(id=chart_id)
+            chart.saved = True
+            chart.type = chart_form.cleaned_data['type']
+            chart.save()
+            return HttpResponseRedirect('/data-visualizer/dashboard') 
+        else:
+            chart_form = ChartForm()
+    return HttpResponseRedirect('/data-visualizer/dashboard')
+
 def chartcreation(request):
-    query = ''
     chart_form = ChartForm()
-    if request.session.get('current_page') == 'dashboard':
-        request.session['current_page'] = 'chart-creation'
-        chart = Chart(chart_set_id=ChartSet.objects.get(id=request.session.get('current_chartset')).id)
-        chart.save()
-        request.session['current_chart'] = Chart.objects.latest('id').id
-    elif request.session.get('current_page') == 'data-selection':
-        request.session['current_page'] = 'chart-creation'
-        if request.method == "POST":
-            dataset_form = DatasetForm(request.POST)
-            if dataset_form.is_valid():
+    select_graph_form = SelectGraphForm()
+    if request.method == "POST":
+        dataset_form = DatasetForm(request.POST)
+        if dataset_form.is_valid():
+            if request.session.get('current_chart_action') == 'new':
+                current_id = request.session.get('current_chart')
+            elif request.session.get('current_chart_action') == 'edit':
+                current_id = request.session.get('current_edit')
+            if request.session.get('current_graph_action') == 'new':
                 graph_id = -1
                 if len(Graph.objects.all()) == 0:
                     graph_id = 0
                 else:
                     graph_id = Graph.objects.latest('id').id 
-                graph = Graph(id=graph_id + 1, chart_id=request.session.get('current_chart'), unit=dataset_form.cleaned_data['units'], 
+                graph = Graph(id=graph_id + 1, chart_id=current_id, label=dataset_form.cleaned_data['label'], unit=dataset_form.cleaned_data['units'], 
                     facility=dataset_form.cleaned_data['facility'], area=dataset_form.cleaned_data['area'], start_date=dataset_form.cleaned_data['start_date'], 
                     end_date=dataset_form.cleaned_data['end_date'], gender=dataset_form.cleaned_data['gender'], year=dataset_form.cleaned_data['year'], 
                     month=dataset_form.cleaned_data['month'], week=dataset_form.cleaned_data['week'], day_of_month=dataset_form.cleaned_data['day_of_month'], 
@@ -133,46 +161,7 @@ def chartcreation(request):
                     for data_object in query_dicts[single_dictionary]:
                         graph.data.add(data_object)
                 graph.save()
-                return HttpResponseRedirect('/data-visualizer/chart-creation')
-            else:
-                dataset_form = DatasetForm()
-    labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=request.session.get('current_chart')))
-    graphs_json = json.dumps(labels_and_colors) 
-    graph_count = range(len(Graph.objects.filter(chart_id=request.session.get('current_chart'))))
-    return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 
-    'graphs':graphs_json})
-
-def deletechart(request):
-    Chart.objects.get(id=request.session.get('current_chart')).delete()
-    return HttpResponseRedirect('/data-visualizer/dashboard')
-
-#Data Selection View -----------------------------------
-def dataselection(request):
-    request.session['current_page'] = 'data-selection'
-    dataset_form = DatasetForm()
-    return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form})
-
-
-#Edit Chart View --------------------------------- 
-def editchart(request):
-    chart_form = ChartForm()
-    select_graph_form = SelectGraphForm()
-    if request.method == "POST":
-        dataset_form = DatasetForm(request.POST)
-        if dataset_form.is_valid():
-            if request.session.get('edit_chart_action') == 'choose':
-                graph_id = -1
-                if len(Graph.objects.all()) == 0:
-                    graph_id = 0
-                else:
-                    graph_id = Graph.objects.latest('id').id 
-                graph = Graph(id=graph_id + 1, chart_id=request.session.get('current_edit'), label=dataset_form.cleaned_data['label'], unit=dataset_form.cleaned_data['units'], 
-                    facility=dataset_form.cleaned_data['facility'], area=dataset_form.cleaned_data['area'], start_date=dataset_form.cleaned_data['start_date'], 
-                    end_date=dataset_form.cleaned_data['end_date'], gender=dataset_form.cleaned_data['gender'], year=dataset_form.cleaned_data['year'], 
-                    month=dataset_form.cleaned_data['month'], week=dataset_form.cleaned_data['week'], day_of_month=dataset_form.cleaned_data['day_of_month'], 
-                    day_of_week=dataset_form.cleaned_data['day_of_week'], time=dataset_form.cleaned_data['time'],
-                    color=dataset_form.cleaned_data['color'])
-            elif request.session.get('edit_chart_action') == 'edit':
+            elif request.session.get('current_graph_action') == 'edit':
                 graph = Graph.objects.get(id=request.session.get('current_graph_edit'))
                 graph.label=dataset_form.cleaned_data['label']
                 graph.unit=dataset_form.cleaned_data['units'] 
@@ -189,52 +178,75 @@ def editchart(request):
                 graph.time=dataset_form.cleaned_data['time']
                 graph.color=dataset_form.cleaned_data['color']
                 graph.save()
-            graph.save()
-            query_dicts = Query().query_every_day(graph)
-            for single_dictionary in query_dicts:
-                for data_object in query_dicts[single_dictionary]:
-                    graph.data.add(data_object)
-            graph.save()
-            return HttpResponseRedirect('/data-visualizer/edit-chart')
+                query_dicts = Query().query_every_day(graph)
+                for single_dictionary in query_dicts:
+                    for data_object in query_dicts[single_dictionary]:
+                        graph.data.add(data_object)
+                graph.save()
+            return HttpResponseRedirect('/data-visualizer/chart-creation')
         else:
             dataset_form = DatasetForm()
+    if request.session.get('current_chart_action') == 'new':
+        current_chart = request.session.get('current_chart')
+        chart_type = Chart.objects.get(id=current_chart).type
+        labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=current_chart))
+        graphs_json = json.dumps(labels_and_colors) 
+        graph_count = range(len(Graph.objects.filter(chart_id=current_chart)))
+    elif request.session.get('current_chart_action') == 'edit':
+        current_chart = request.session.get('current_edit')
+        chart_type = Chart.objects.get(id=current_chart).type
+        labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=current_chart))
+        graphs_json = json.dumps(labels_and_colors) 
+        graph_count = range(len(Graph.objects.filter(chart_id=current_chart)))
+    return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 'chart_type':chart_type,
+    'graphs':graphs_json, 'select_graph_form':select_graph_form, 'text':current_chart})
 
-    current_chart = request.session.get('current_edit')
-    chart_type = Chart.objects.get(id=current_chart).type
-    labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=request.session.get('current_edit')))
-    graphs_json = json.dumps(labels_and_colors) 
-    graph_count = range(len(Graph.objects.filter(chart_id=request.session.get('current_edit'))))
-    return render(request, 'pages/edit-chart.html', {'graph_count':graph_count, 'chart_form':chart_form, 'chart_type':chart_type,
-    'graphs':graphs_json, 'select_graph_form':select_graph_form})
+def deletechartredirect(request):
+    return HttpResponseRedirect('/data-visualizer/dashboard')
 
-def editdataset(request):
+#Data Selection View -----------------------------------
+def dataselection(request):
     dataset_form = DatasetForm()
-    if request.session.get('edit_chart_action') == 'edit':
+    if request.session.get('current_graph_action') == 'edit':
         request.session['current_page'] = 'data-selection'
         graph_dictionary = graph_to_json_all_fields(Graph.objects.get(id=request.session.get('current_graph_edit')))
         graph_json = json.dumps(graph_dictionary) 
         use_json = True
-    elif request.session.get('edit_chart_action') == 'choose':
+    elif request.session.get('current_graph_action') == 'new':
         graph_json = {}
         use_json = False
-    return render(request, 'pages/edit-dataset.html', {'dataset_form':dataset_form, 'graph_json':graph_json, 'use_json':use_json})
+    return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form, 'graph_json':graph_json, 'use_json':use_json})
 
-def editdatasetredirect(request):
+
+
+def editdataset(request):
+    dataset_form = DatasetForm()
+    if request.session.get('current_graph_action') == 'edit':
+        request.session['current_page'] = 'data-selection'
+        graph_dictionary = graph_to_json_all_fields(Graph.objects.get(id=request.session.get('current_graph_edit')))
+        graph_json = json.dumps(graph_dictionary) 
+        use_json = True
+    elif request.session.get('current_graph_action') == 'new':
+        graph_json = {}
+        use_json = False
+    return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form, 'graph_json':graph_json, 'use_json':use_json})
+
+def selectdatasetredirect(request):
     if request.method == "POST":
         select_graph_form = SelectGraphForm(request.POST)
         if 'delete' in request.POST:
             if select_graph_form.is_valid():
                 Graph.objects.get(id=select_graph_form.cleaned_data['selected_graph_id']).delete()
-                return HttpResponseRedirect('/data-visualizer/edit-chart')
+                return HttpResponseRedirect('/data-visualizer/chart-creation')
         elif 'edit' in request.POST:
             if select_graph_form.is_valid():
                 request.session['current_graph_edit'] = select_graph_form.cleaned_data['selected_graph_id']
-                request.session['edit_chart_action'] = 'edit'
-                return HttpResponseRedirect('/data-visualizer/edit-dataset')
-        elif 'choose' in request.POST:
-            request.session['edit_chart_action'] = 'choose'
-            return HttpResponseRedirect('/data-visualizer/edit-dataset')
-        return HttpResponseRedirect('/data-visualizer/edit-chart')
+                request.session['current_graph_action'] = 'edit'
+                return HttpResponseRedirect('/data-visualizer/data-selection')
+        elif 'new' in request.POST:
+            request.session['current_graph_action'] = 'new'
+            return HttpResponseRedirect('/data-visualizer/data-selection')
+        return HttpResponseRedirect('/data-visualizer/chart-creation')
     else:
         select_graph_form = SelectGraphForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')    
@@ -327,6 +339,7 @@ def create_label(chart):
 
 def chartset_to_json(chartset):
     query = Chart.objects.filter(chart_set_id=chartset.id)
+    query = query & Chart.objects.filter(saved=True)
     chart_list = []
     index = 0
     for chart in query:

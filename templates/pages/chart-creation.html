@@ -13,6 +13,7 @@
         </script>
     </head>
     <body>
+        {{text}}
         <div class="container entire-body">
             <div class="row justify-content-start">
                 <div class="col-0">
@@ -21,7 +22,10 @@
             </div>
             <div class="row justify-content-center">
                 <div class="col-0">
-                    <button type="button" class="btn btn-outline-primary" id="choose-dataset-button"><a href="{% url 'data-selection' %}">Choose Dataset</a></button>
+                    <form name="select-dataset-form" action="/data-visualizer/select-dataset-redirect/" method="POST">
+                        {% csrf_token %}
+                        <input type="submit" name='new' value="Choose Dataset" class="btn btn-outline-primary" id="choose-dataset-button">
+                    </form>
                 </div>
             </div>
             <!--Data Selected-->
@@ -29,45 +33,47 @@
                 <div class="container">
                     {% for index in graph_count %}
                     <div class="row justify-content-center" id='label-row-{{index}}'>
-                        <form name="form{{index}}" action="" method="get">
-                            <div class="col-2">
-                                <button type="button" class="btn btn-outline-primary" id='delete-button-{{index}}' onclick="myFunction{{index}}()">Delete</button>
+                        <div class="col-1">
+                        <form name="form{{index}}" action="/data-visualizer/select-dataset-redirect/" method="POST">
+                            {% csrf_token %}
+                            <div class="hidden">
+                                {{select_graph_form}}
                             </div>
-                            <input type="hidden" id="data{{index}}" name="data" value="">
-                            <script>
-                                function myFunction{{index}}() {
-                                    document.getElementById("data{{index}}").value = json[{{index}}].id;
-                                    console.log(document.getElementById('data{{index}}').value);
-                                }
-                            </script>
+                            <input type="submit" name='delete' value="Delete" class="btn btn-outline-primary" id="delete-button-{{index}}">
+                        </div>
+                        <div class="col-1">
+                            <input type="submit" name='edit' value="Edit" class="btn btn-outline-primary" id="edit-button-{{index}}">
+                        </div>
                         </form>
                         <div class="col-2"><p id='dataset-label-{{index}}'>''</p></div>
                         <div class="col-2"><canvas id="color-canvas-{{index}}" width="25%" height="25%"></canvas></div>
                     </div>
                     <script>
+                        document.getElementById('id_selected_graph_id').id = 'graph-form-{{index}}';
                         document.getElementById('dataset-label-{{index}}').innerHTML = json[{{index}}].label;
                         document.getElementById("color-canvas-{{index}}").style.backgroundColor = json[{{index}}].color;
+                        document.getElementById('graph-form-{{index}}').value = json[{{index}}].id;
                     </script>
                     {% endfor %}
                 </div>
             </div>
-            <form action="/data-visualizer/dashboard/" method="POST" class="form-group">
+            <form action="/data-visualizer/confirm-chart-redirect/" method="POST" class="form-group">
                 {% csrf_token %}
                 {{ chart_form }}
                 <div class="row justify-content-center">
                     <div class="col-0">
-                        <input type="submit" name='create-chart' value="Select" class="btn btn-outline-primary facility-button" id="data-select-confirm">
+                        <input type="submit" value="Select" name='edit-chart' class="btn btn-outline-primary facility-button" id="data-select-confirm">
                     </div>
                 </div>
             </form>
         </div>
     </body> 
     <script>
-        // {% for index in graph_count %}
-        // document.getElementById('delete-button-{{index}}').onclick = function() {
-        //     document.getElementById('label-row-{{index}}').remove();
-        // }
-        // {% endfor %}
+        for(var t = 0; t<4; t++) { //4 is the number of areas in DatasetForm
+            if('{{chart_type}}'==document.getElementById('id_type_'+t).value) {
+                document.getElementById('id_type_'+t).checked = true;
+            }
+        }
     </script>
     <!-- <script src="{% static 'js/chart-creation.js' %}" type="module"></script> -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

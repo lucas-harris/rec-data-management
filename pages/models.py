@@ -39,6 +39,7 @@ class Chart(models.Model):
     type = models.CharField(max_length=10, default='line')
     title = models.CharField(max_length=50)
     chart_set = models.ForeignKey(ChartSet, on_delete=models.CASCADE)
+    saved = models.BooleanField(default=False)
 
 class Graph(models.Model):
 

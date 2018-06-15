@@ -8,7 +8,10 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         <link rel="icon" href="{% static 'img/logo.png' %}">
-        <script>var selectedChart = null; var chartDivList = [];</script>
+        <script>
+            var selectedChart = null; 
+            var chartDivList = [];
+        </script>
     </head>
     <body>
         <div class="container body entire-body">
@@ -74,15 +77,14 @@
         
         <!--Bottom Bar-->
             <div class="row justify-content-end bottom-bar">
-                <div class="col-1">
-                    <button type="button" class="btn btn-outline-primary" id="new-chart-button"><a href="{% url 'chart-creation' %}">+New</a></button>
-                </div>
+
                 <div class='col-1'>
                 <form action="/data-visualizer/change-selected-chart-redirect/" method="POST">   
                     {% csrf_token %}       
                     <div class='hidden'>
                         {{select_chart_form}}
                     </div>
+                    <input type="submit" name='new' value="New+" class="btn btn-outline-primary" id="new-chart-button">
                     <input type="submit" name='edit' value="Edit" class="btn btn-outline-primary" id="edit-chart-button" disabled>
                 </div>
                 <div class='col-1'>
@@ -109,6 +111,7 @@
             }
         }
     </script>
+    <script>document.getElementById('id_selected_chart_id').value = -1;</script>
     <script src="{% static 'js/script.js' %}" type="module"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
