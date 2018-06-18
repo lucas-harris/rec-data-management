@@ -1,0 +1,195 @@
+{% load static %}
+
+{% block chart %}
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <canvas id="template-chart{{x}}" width="500" height="300"></canvas>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-0">
+                <p id='first-title{{x}}'>Rec Center - Fitness Center - Daily</p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-0">
+                <p id='second-title{{x}}'>(6/8/18-6/30/18)</p>
+            </div>
+        </div>
+        <div class="row justify-content-start">
+            <div class="col-0">
+                <p id='facilities'></p>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/chartjs/dist/Chart.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/Chart.PieceLabel.js' %}" type="text/javascript"></script>
+    <script>
+        var json = {{json|safe}};
+        var chartset = json['chartset'];
+        var chartID{{x}} = json['chartset'][{{x}}].id;
+        var charts{{x}} = chartset[{{x}}];
+        var ctx = document.getElementById("template-chart{{x}}");
+        var datasetValue = [];
+        var chartData = charts{{x}}.charts;
+        var labels = [];
+        var reportData = [];
+        var chartType{{x}} = charts{{x}}.type;
+        var firstTitle = 'yes';
+        document.getElementById('first-title{{x}}').innerHTML = charts{{x}}.type;
+        document.getElementById('title').innerHTML = json.title;
+        if(chartType{{x}}=='line' | chartType{{x}}=='bar') {
+            for (var j = 0; j < charts{{x}}.charts.length; j++) { 
+                var dataValues = [];
+                reportData[j] = [];
+                labels[j] = [];
+                for(var i in charts{{x}}.charts[j].graph) {
+                    labels[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0]);
+                    dataValues.push(Object.values(charts{{x}}.charts[j].graph[i].data));
+                    reportData[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data));
+
+                } 
+                datasetValue[j] = {
+                    backgroundColor: charts{{x}}.charts[j].color,
+                    hoverBackgroundColor: darkenColor(charts{{x}}.charts[j].color),
+                    pointBackgroundColor: darkenColor(charts{{x}}.charts[j].color),
+                    borderColor: darkenColor(charts{{x}}.charts[j].color),
+                    strokeColor : charts{{x}}.charts[j].color,
+                    title :'2013',
+                    data: dataValues,
+                    fill: false,
+                    label: charts{{x}}.charts[j].label,
+                }
+            }
+        }
+        else if(chartType{{x}}=='pie') {
+            if(charts{{x}}.charts.length==1) {
+                labels[0] = [];
+                var colors = [];
+                var dataValues = [];
+                for(var i in charts{{x}}.charts[0].graph) {
+                    labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data)[0]);
+                    dataValues.push(Object.values(charts{{x}}.charts[0].graph[i].data));
+                    colors.push(createRandomColor());
+                } 
+                datasetValue[0] = {
+                    backgroundColor: colors,
+                    title :'2013',
+                    data: dataValues,
+                    fill: false
+                }
+            }
+            else {
+                var dataValues = []
+                var colors = []
+                labels[0] = []
+                for (var j in charts{{x}}.charts) { 
+                    labels[0].push(charts{{x}}.charts[j].label);
+                    dataValues.push(0);
+                    colors.push(charts{{x}}.charts[j].color)
+                    for(var i in charts{{x}}.charts[j].graph) {
+                        dataValues[j] = parseInt(dataValues[j]) + parseInt(Object.values(charts{{x}}.charts[j].graph[i].data));
+                    } 
+                }
+                datasetValue[0] = {
+                    backgroundColor: colors,
+                    // hoverBackgroundColor: darkenArrayOfColors(colors),
+                    pointBackgroundColor: darkenArrayOfColors(colors),
+                    borderColor: 'white',
+                    // strokeColor : darkenArrayOfColors(colors),
+                    title :'2013',
+                    data: dataValues,
+                    fill: false
+                }
+            }    
+        }
+        else if(chartType{{x}}=='scatter') {
+            if(charts{{x}}.charts.length >= 2) {
+                labels[0] = [];
+                var colors = [charts{{x}}.charts[0].color, charts{{x}}.charts[1].color];
+                for (var j = 0; j < 2; j++) { 
+                    var dataValues = []
+                    for(var i in charts{{x}}.charts[j].graph) {
+                        dataValues[i] = {
+                            x: Object.values(charts{{x}}.charts[0].graph[i].data),
+                            y: Object.values(charts{{x}}.charts[1].graph[i].data)
+                        }
+                        labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data)[0]);
+                    } 
+                    datasetValue[0] = {
+                        backgroundColor: charts{{x}}.charts[0].color,
+                        pointBackgroundColor: charts{{x}}.charts[0].color,
+                        pointHoverBackgroundColor: charts{{x}}.charts[0].color,
+                        borderColor: charts{{x}}.charts[1].color,
+                        pointHoverBorderColor: charts{{x}}.charts[1].color,
+                        strokeColor : charts{{x}}.charts[0].color,
+                        title :'2013',
+                        data: dataValues,
+                        fill: false,
+                        label: 'x: ' + charts{{x}}.charts[0].label +  ' vs. y: ' + charts{{x}}.charts[1].label,
+                        pointRadius: 7,
+                        pointHoverRadius: 8
+                    }
+                }
+            }
+        }
+        var title = charts{{x}}.title;
+        var displayLabels = !(chartType{{x}} == 'pie');
+        var chart{{x}} = new Chart(ctx, {
+            type: chartType{{x}},
+                data: { 
+                    labels: labels[0],
+                    datasets: datasetValue,
+                    lineTension: 1,
+                },
+                options: {
+                    pieceLabel: {
+                        mode: 'label', 
+                        precision: 2,
+                        position: 'border',
+                        overlap: true,
+                        fontStyle: 'bold',
+                        fontColor: 'black',  
+                    },
+                    tooltips: {
+                        enabled: false,
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }, 
+                        }]
+                    },
+                    legend: {
+                        display: displayLabels
+                        // labels: {
+                        //     fontStyle: 'bold',
+                        //     fontSize: 16,
+                        // }
+                    }
+                }
+            });
+        
+        function createRandomColor() {
+            return 'rgb(' + Math.floor(Math.random()*255) + ', ' + Math.floor(Math.random()*255) + ', ' + Math.floor(Math.random()*255) + ', 0.5)'; 
+        }
+
+        function darkenColor(color) {
+            color = color.substring(4);
+            color = color.split(',')
+            return 'rgb(' + color[0].toString() + ',' +  color[1].toString() + ',' + color[2].toString() + ', ' + '0.5)'; 
+        }
+
+        function darkenArrayOfColors(colors) {
+
+            for(var color in colors) {
+                colors[color] = darkenColor(colors[color]);
+            }
+            return colors;
+        }
+
+    </script>
+{% endblock %}

@@ -8,7 +8,6 @@ from pages.entry_scripts.data_entry_script import *
 from pages.entry_scripts.date_entry_script import *
 from django.db.models import Max
 
-
 #Index View -----------------------------------
 def index(request):
     save_template_form = SaveTemplateForm()
@@ -251,6 +250,17 @@ def selectdatasetredirect(request):
         select_graph_form = SelectGraphForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')    
 
+
+#Report View --------------------------------------
+def reportview(request):
+    charts = Chart.objects.filter(chart_set_id=request.session['current_chartset'])
+    charts = charts & Chart.objects.filter(saved=True)
+    chart_number = len(charts)
+    chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
+    chartset_json = json.dumps(chartset_dict) 
+    text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
+    return render(request, 'pages/report.html', {'json': chartset_json, 'chart_number':range(chart_number)})
+
 #Additional Methods -----------------------------------
 def create_dates():
     start = datetime(2015, 1, 1)
@@ -345,7 +355,7 @@ def chartset_to_json(chartset):
     for chart in query:
         chart_list.append(chart_to_json(chart, index))
         index+=1
-    return {'chartset':chart_list, 'id':chartset.id}
+    return {'chartset':chart_list, 'id':chartset.id, 'title':chartset.name}
 
 def chart_to_json(chart, passed_index):
     query = Graph.objects.filter(chart_id=chart.id)

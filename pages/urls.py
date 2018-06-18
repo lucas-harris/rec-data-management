@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from . import views
+from wkhtmltopdf.views import PDFTemplateView
 urlpatterns = [
     url(r'dashboard/', views.index, name='dashboard'),
     url(r'chart-creation/', views.chartcreation, name='chart-creation'),
@@ -12,5 +13,6 @@ urlpatterns = [
     url(r'change-selected-chart-redirect/', views.changeselectedchartredirect, name='change-selected-chart-redirect'),
     # url(r'edit-chart/', views.editchart, name='edit-chart'),
     url(r'edit-dataset/', views.editdataset, name='edit-dataset'), 
-    url(r'select-dataset-redirect', views.selectdatasetredirect, name='select-dataset-redirect'),
+    url(r'select-dataset-redirect/', views.selectdatasetredirect, name='select-dataset-redirect'),
+    url(r'report', views.reportview, name='report'),
 ]
