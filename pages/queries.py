@@ -7,7 +7,6 @@ from .models import *
 from datetime import *
 
 class Query():
-# """Order of operations: Query by Date and Areas, Combine 
 
 #Return Methods
     def return_keys(self, dictionary):

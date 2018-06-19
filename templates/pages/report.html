@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
     <head>
         <meta charset="UTF-8">
         <title>Report</title>
@@ -9,10 +10,11 @@
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         <link rel="icon" href="{% static 'img/logo.png' %}">
         <link rel='stylesheet' href="{% static 'css/report-width.css' %}">
+        <script>var labelJson = {{label|safe}};</script>
     </head>
     <body>
         <div class="container">
-            <div class="row justify-content-start">
+            <div class="row justify-content-center">
                 <div class="col-0">
                     <p id="title" style='font-size: 1.5rem; '></p>
                 </div>
@@ -23,6 +25,61 @@
         </div>
         
     </body>
+    <script>
+        for(var chartIndex = 0; chartIndex<Object.keys(labelJson).length; chartIndex++) {
+            if(labelJson[chartIndex].common_label.facility.length>0) {
+                document.getElementById('common-facilities' + chartIndex).innerHTML = 'Facilities: ' + iterateLabel(labelJson[chartIndex].common_label.facility);
+            }
+            else {
+                // document.getElementById('common-facilities' + chartIndex).innerHTML = 'Facilities: Varied';
+            }
+            if(labelJson[chartIndex].common_label.area.length>0) {
+                document.getElementById('common-areas' + chartIndex).innerHTML = 'Areas: ' + iterateLabel(labelJson[chartIndex].common_label.area);                
+            }
+            else {
+                // document.getElementById('common-areas' + chartIndex).innerHTML = 'Areas: Varied';
+            }
+            if(labelJson[chartIndex].common_label.unit.length>0) {
+                document.getElementById('common-units' + chartIndex).innerHTML = 'Grouping: ' + iterateLabel(labelJson[chartIndex].common_label.unit);                
+            }
+            else {
+                // document.getElementById('common-units' + chartIndex).innerHTML = 'Grouping: Varied';
+            }
+            var chartVariables = '';
+            for(var graphIndex = 0; graphIndex<labelJson[chartIndex].count; graphIndex++) {
+                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="facilities' + chartIndex + '">' + 'Facilities: ' + labelJson[chartIndex].independent_label.facility[graphIndex] + '</p></div></div>';
+                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="areas' + chartIndex + '"">'+ 'Areas: ' + labelJson[chartIndex].independent_label.area[graphIndex] + '</p></div></div>';
+                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="genders' + chartIndex + '"">'+ 'Genders: ' + labelJson[chartIndex].varying_label.gender[graphIndex] + '</p></div></div>';
+                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="dates' + chartIndex + '"">'+ 'Dates: ' + labelJson[chartIndex].independent_label.date[graphIndex] + '</p></div></div>';
+                if(labelJson[chartIndex].varying_label.month.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="months' + chartIndex + '"">'+ '-Months: ' + labelJson[chartIndex].varying_label.month[graphIndex] + '</p></div></div>';
+                }
+                if(labelJson[chartIndex].varying_label.day_of_month.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="day_of_month' + chartIndex + '"">'+ '-Days: ' + labelJson[chartIndex].varying_label.day_of_month[graphIndex] + '</p></div></div>';
+                }
+                if(labelJson[chartIndex].varying_label.year.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="years' + chartIndex + '"">'+ '-Years: ' + labelJson[chartIndex].varying_label.year[graphIndex] + '</p></div></div>';
+                }
+                if(labelJson[chartIndex].varying_label.week.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="weeks' + chartIndex + '"">'+ '-Weeks: ' + labelJson[chartIndex].varying_label.week[graphIndex] + '</p></div></div>';
+                }
+                if(labelJson[chartIndex].varying_label.day_of_week.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="day_of_week' + chartIndex + '"">'+ '-Weekdays: ' + labelJson[chartIndex].varying_label.day_of_week[graphIndex] + '</p></div></div>';
+                }
+                if(labelJson[chartIndex].varying_label.time.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="time' + chartIndex + '"">'+ '-Times: ' + labelJson[chartIndex].varying_label.time[graphIndex] + '</p></div></div>';
+                }
+            }
+            document.getElementById('chart-variables' + chartIndex).innerHTML = chartVariables;
+        }
+        function iterateLabel(list) {
+            var returnString = '';
+            for(var i = 0; i<list.length; i++) {
+                returnString += list[i] + ', ';
+            }
+            return returnString.substring(0, returnString.length-2);
+        }
+    </script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>

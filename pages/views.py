@@ -259,7 +259,13 @@ def reportview(request):
     chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
     text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
-    return render(request, 'pages/report.html', {'json': chartset_json, 'chart_number':range(chart_number)})
+    label_json = {}
+    index = 0
+    for chart in charts:
+        label_json[index] = create_label(chart)
+        index += 1
+    label_json = json.dumps(label_json)
+    return render(request, 'pages/report.html', {'json': chartset_json, 'chart_number':range(chart_number), 'label':label_json})
 
 #Additional Methods -----------------------------------
 def create_dates():
@@ -278,16 +284,20 @@ def date_creation_loop(start, end):
 
 def create_label(chart):
     queryset = Graph.objects.filter(chart_id = chart.id)
-    label = ''
+    querier = Query()
+    common_label = dict()
+    varying_label = dict()
+    independent_label = dict()
     facility_dict = dict()
     area_dict = dict()
     gender_dict = dict()
     month_dict = dict()
     week_dict = dict()
     year_dict = dict()
-    dom_dict = dict()
-    dow_dict = dict()
+    day_of_month_dict = dict()
+    day_of_week_dict = dict()
     time_dict = dict()
+    unit_dict = dict()
     start_date_dict = dict()
     end_date_dict = dict()
     for graph in queryset:
@@ -297,55 +307,199 @@ def create_label(chart):
         month_dict[graph.month] = True
         week_dict[graph.week] = True
         year_dict[graph.year] = True
-        dom_dict[graph.day_of_month] = True
-        dow_dict[graph.day_of_week] = True
+        day_of_month_dict[graph.day_of_month] = True
+        day_of_week_dict[graph.day_of_week] = True
         time_dict[graph.time] = True
         start_date_dict[graph.start_date] = True
         end_date_dict[graph.end_date] = True
+        unit_dict[graph.unit] = True
+
     if len(facility_dict) == 1:
-        for key in facility_dict:
-            if key != "['all']":
-                label += 'Facilities: ' + key + ', '
+        independent_label['facility'] = []
+        facilitylabel = querier.replace_characters(graph.facility)
+        common_label['facility'] = facilitylabel
+        varying_label['facility'] = []
+        for x in queryset:
+            independent_label['facility'].append(facilitylabel)
+    else:
+        varying_label['facility'] = []
+        independent_label['facility'] = []
+        for graph in queryset:
+            facilitylabel = querier.replace_characters(graph.facility)
+            varying_label['facility'].append(facilitylabel)
+            independent_label['facility'].append(facilitylabel)
+        common_label['facility'] =  []
+
     if len(area_dict) == 1:
-        for key in area_dict:
-            if key != "['all']":
-                label += 'Areas: ' + key + ', '
-    if len(start_date_dict) == 1 and len(start_date_dict)==1:
+        independent_label['area'] = []
+        arealabel = querier.replace_characters(graph.area)
+        common_label['area'] = arealabel
+        varying_label['area'] = []
+        for x in queryset:
+            independent_label['area'].append(arealabel)
+    else:
+        varying_label['area'] = []
+        independent_label['area'] = []
+        for graph in queryset:
+            arealabel = querier.replace_characters(graph.area)
+            varying_label['area'].append(arealabel)
+            independent_label['area'].append(arealabel)
+        common_label['area'] = []
+
+    if len(start_date_dict) == 1 and len(end_date_dict)==1:
+        independent_label['date'] = []
+        datelabel = ''
         for key in start_date_dict:
-            label += 'Dates: (' + str(key)[0:10] + ' - '
+            datelabel += '(' + str(key)[0:10] + ' - '
         for key in end_date_dict:
-            label += str(key)[0:10] + '), '
+            datelabel += str(key)[0:10] + ')'
+        common_label['date'] = [datelabel]
+        varying_label['date'] = []
+        for x in queryset:
+            independent_label['date'].append([datelabel])
+    else:
+        varying_label['date'] = []
+        independent_label['date'] = []
+        for graph in queryset:
+            datelabel = str(graph.start_date)[0:10] + ' - ' + str(graph.end_date)[0:10] + ')'
+            varying_label['date'].append(datelabel)
+            independent_label['date'].append(datelabel)
+        common_label['date'] =  []
+
     if len(gender_dict) == 1:
-        for key in gender_dict:
-            if key != "['all']":
-                label += 'Gender: ' + key + ', '
+        independent_label['gender'] = []
+        genderlabel = querier.replace_characters(graph.gender)
+        common_label['gender'] = genderlabel
+        varying_label['gender'] = []
+        for x in queryset:
+            independent_label['gender'].append(genderlabel)
+    else:
+        varying_label['gender'] = []
+        independent_label['gender'] = []
+        for graph in queryset:
+            genderlabel = querier.replace_characters(graph.gender)
+            varying_label['gender'].append(genderlabel)
+            independent_label['gender'].append(genderlabel)
+        common_label['gender'] =  []
+
+    if len(unit_dict) == 1:
+        independent_label['unit'] = []
+        unitlabel = querier.replace_characters(graph.unit)
+        common_label['unit'] = unitlabel
+        varying_label['unit'] = []
+        for x in queryset:
+            independent_label['unit'].append(unitlabel)
+    else:
+        varying_label['unit'] = []
+        independent_label['unit'] = []
+        for graph in queryset:
+            unitlabel = querier.replace_characters(graph.unit)
+            varying_label['unit'].append(unitlabel)
+            independent_label['unit'].append(unitlabel)
+        common_label['unit'] =  []
+    
     if len(month_dict) == 1:
-        for key in month_dict:
-            if key != "['all']":
-                label += 'Months: ' + key + ', '
+        independent_label['month'] = []
+        monthlabel = querier.replace_characters(graph.month)
+        common_label['month'] = monthlabel
+        varying_label['month'] = []
+        for x in queryset:
+            independent_label['month'].append(monthlabel)
+    else:
+        varying_label['month'] = []
+        independent_label['month'] = []
+        for graph in queryset:
+            monthlabel = querier.replace_characters(graph.month)
+            varying_label['month'].append(monthlabel)
+            independent_label['month'].append(monthlabel)
+        common_label['month'] =  []
+
     if len(year_dict) == 1:
-        for key in year_dict:
-            if key != "['all']":
-                label += 'Years: ' + key + ', '
+        independent_label['year'] = []
+        yearlabel = querier.replace_characters(graph.year)
+        common_label['year'] = yearlabel
+        varying_label['year'] = []
+        for x in queryset:
+            independent_label['year'].append(yearlabel)
+    else:
+        varying_label['year'] = []
+        independent_label['year'] = []
+        for graph in queryset:
+            yearlabel = querier.replace_characters(graph.year)
+            varying_label['year'].append(yearlabel)
+            independent_label['year'].append(yearlabel)
+        common_label['year'] =  []
+
     if len(week_dict) == 1:
-        for key in week_dict:
-            if key != "['all']":
-                label += 'Weeks: ' + key + ', '
+        independent_label['week'] = []
+        weeklabel = querier.replace_characters(graph.week)
+        common_label['week'] = weeklabel
+        varying_label['week'] = []
+        for x in queryset:
+            independent_label['week'].append(weeklabel)
+    else:
+        varying_label['week'] = []
+        independent_label['week'] = []
+        for graph in queryset:
+            weeklabel = querier.replace_characters(graph.week)
+            varying_label['week'].append(weeklabel)
+            independent_label['week'].append(weeklabel)
+        common_label['week'] =  []
+
     if len(time_dict) == 1:
-        for key in time_dict:
-            if key != "['all']":
-                label += 'Times: ' + key + ', '
-    if len(dom_dict) == 1:
-        for key in dom_dict:
-            if key != "['all']":
-                label += 'Days: ' + key + ', '
-    if len(dow_dict) == 1:
-        for key in dow_dict:
-            if key != "['all']":
-                label += 'Week Days: ' + key + ', '
-    chart.title = label
-    chart.save()
-    return label
+        independent_label['time'] = []
+        timelabel = querier.replace_characters(graph.time)
+        common_label['time'] = timelabel
+        varying_label['time'] = []
+        for x in queryset:
+            independent_label['time'].append(timelabel)
+    else:
+        varying_label['time'] = []
+        independent_label['time'] = []
+        for graph in queryset:
+            timelabel = querier.replace_characters(graph.time)
+            varying_label['time'].append(timelabel)
+            independent_label['time'].append(timelabel)
+        common_label['time'] =  []
+
+    if len(day_of_month_dict) == 1:
+        independent_label['day_of_month'] = []
+        day_of_monthlabel = querier.replace_characters(graph.day_of_month)
+        common_label['day_of_month'] = day_of_monthlabel
+        varying_label['day_of_month'] = []
+        for x in queryset:
+            independent_label['day_of_month'].append(day_of_monthlabel)
+    else:
+        varying_label['day_of_month'] = []
+        independent_label['day_of_month'] = []
+        for graph in queryset:
+            day_of_monthlabel = querier.replace_characters(graph.day_of_month)
+            varying_label['day_of_month'].append(day_of_monthlabel)
+            independent_label['day_of_month'].append(day_of_monthlabel)
+        common_label['day_of_month'] =  []
+
+    if len(day_of_week_dict) == 1:
+        independent_label['day_of_week'] = []
+        day_of_weeklabel = querier.replace_characters(graph.day_of_week)
+        common_label['day_of_week'] = day_of_weeklabel
+        varying_label['day_of_week'] = []
+        for x in queryset:
+            independent_label['day_of_week'].append(day_of_weeklabel)
+    else:
+        varying_label['day_of_week'] = []
+        independent_label['day_of_week'] = []
+        for graph in queryset:
+            day_of_weeklabel = querier.replace_characters(graph.day_of_week)
+            varying_label['day_of_week'].append(day_of_weeklabel)
+            independent_label['day_of_week'].append(day_of_weeklabel)
+        common_label['day_of_week'] =  []
+
+    json = dict()
+    json['common_label'] = common_label
+    json['varying_label'] = varying_label
+    json['independent_label'] = independent_label
+    json['count'] = len(queryset)
+    return json
 
 def chartset_to_json(chartset):
     query = Chart.objects.filter(chart_set_id=chartset.id)
