@@ -18,7 +18,7 @@ class DatasetForm(forms.Form):
     facility = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(), initial=('all', 'All'), 
                                          choices=(('all', 'All'), ('rec', 'Rec Center'), ('clawson', 'Clawson'), ('nq', 'North Quad')))
     area = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(), initial=('all', 'All'), 
-                                         choices=(('all','All'), ('strength', 'Strength'), ('cardio', 'Cardio'), ('room-x', 'Room X'), ('room-a','Room A'), ('room-b', 'Room B')))
+                                         choices=(('all','All'), ('fc','Fitness Center'), ('gf', 'Group Fitness')))
     start_date = forms.DateTimeField(label="Start Date", initial=datetime.datetime.now().strftime("%Y-%m-%d"))
     end_date = forms.DateTimeField(label='End Date', initial=datetime.datetime.now().strftime("%Y-%m-%d"))
     units = forms.ChoiceField(choices = (('hour', 'Hour'), ('day', 'Day'), ('week', 'Week'), ('month', 'Month'), ('year', 'Year'), ('all', 'One Group')), label='Increment Units')

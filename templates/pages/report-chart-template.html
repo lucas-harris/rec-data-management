@@ -8,26 +8,36 @@
                 <canvas id="template-chart{{x}}" ></canvas>
             </div>
         </div>
-        <div class="row justify-content-center">
-            <div class="col-3">
+        <!-- <div class="row justify-content-center">
+            <div class="col-4">
                 <div class="centerBlock">
                     <p id='common-facilities{{x}}' class='chart-header'></p>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-4">
                 <div class="centerBlock">
                     <p id='common-areas{{x}}' class='chart-header'></p>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-4">
                 <div class="centerBlock">
                     <p id='common-units{{x}}' class='chart-header'></p>
                 </div>
             </div>
+        </div> -->
+        <div class="row">
+            <div class="col-4">
+                <div id="chart-variables{{x}}"></div>]
+            </div>
+            <div class="col-8">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <p>Yes</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="chart-variables{{x}}">
 
-        </div>
     </div>
     <script src="{% static 'js/chartjs/dist/Chart.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/Chart.PieceLabel.js' %}" type="text/javascript"></script>

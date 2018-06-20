@@ -27,58 +27,239 @@
     </body>
     <script>
         for(var chartIndex = 0; chartIndex<Object.keys(labelJson).length; chartIndex++) {
-            if(labelJson[chartIndex].common_label.facility.length>0) {
-                document.getElementById('common-facilities' + chartIndex).innerHTML = 'Facilities: ' + iterateLabel(labelJson[chartIndex].common_label.facility);
-            }
-            else {
-                // document.getElementById('common-facilities' + chartIndex).innerHTML = 'Facilities: Varied';
-            }
-            if(labelJson[chartIndex].common_label.area.length>0) {
-                document.getElementById('common-areas' + chartIndex).innerHTML = 'Areas: ' + iterateLabel(labelJson[chartIndex].common_label.area);                
-            }
-            else {
-                // document.getElementById('common-areas' + chartIndex).innerHTML = 'Areas: Varied';
-            }
-            if(labelJson[chartIndex].common_label.unit.length>0) {
-                document.getElementById('common-units' + chartIndex).innerHTML = 'Grouping: ' + iterateLabel(labelJson[chartIndex].common_label.unit);                
-            }
-            else {
-                // document.getElementById('common-units' + chartIndex).innerHTML = 'Grouping: Varied';
-            }
-            var chartVariables = '';
+            // document.getElementById('common-facilities' + chartIndex).innerHTML = 'Facilities: ' + iterateFacility(labelJson[chartIndex].independent_label.facility);   
+            // document.getElementById('common-areas' + chartIndex).innerHTML = 'Areas: ' + iterateArea(labelJson[chartIndex].independent_label.area);                
+            // document.getElementById('common-units' + chartIndex).innerHTML = 'Grouping: ' + iterateGrouping(labelJson[chartIndex].common_label.unit);                
+            var chartVariables = '<div class="container">';
             for(var graphIndex = 0; graphIndex<labelJson[chartIndex].count; graphIndex++) {
-                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="facilities' + chartIndex + '">' + 'Facilities: ' + labelJson[chartIndex].independent_label.facility[graphIndex] + '</p></div></div>';
-                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="areas' + chartIndex + '"">'+ 'Areas: ' + labelJson[chartIndex].independent_label.area[graphIndex] + '</p></div></div>';
-                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="genders' + chartIndex + '"">'+ 'Genders: ' + labelJson[chartIndex].varying_label.gender[graphIndex] + '</p></div></div>';
+                if(labelJson[chartIndex].varying_label.facility.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="facilities' + chartIndex + '">' + cleanFacility(labelJson[chartIndex].varying_label.facility[graphIndex]) + '</p></div></div>';
+                }
+                if(labelJson[chartIndex].varying_label.area.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="areas' + chartIndex + '"">'+ cleanArea(labelJson[chartIndex].varying_label.area[graphIndex]) + '</p></div></div>';
+                }
+                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="genders' + chartIndex + '"">'+ cleanGender(labelJson[chartIndex].independent_label.gender[graphIndex]) + '</p></div></div>';
                 chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="dates' + chartIndex + '"">'+ 'Dates: ' + labelJson[chartIndex].independent_label.date[graphIndex] + '</p></div></div>';
                 if(labelJson[chartIndex].varying_label.month.length>0) {
-                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="months' + chartIndex + '"">'+ '-Months: ' + labelJson[chartIndex].varying_label.month[graphIndex] + '</p></div></div>';
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="months' + chartIndex + '"">' + cleanMonth(labelJson[chartIndex].varying_label.month[graphIndex]) + '</p></div></div>';
                 }
                 if(labelJson[chartIndex].varying_label.day_of_month.length>0) {
-                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="day_of_month' + chartIndex + '"">'+ '-Days: ' + labelJson[chartIndex].varying_label.day_of_month[graphIndex] + '</p></div></div>';
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="day_of_month' + chartIndex + '"">'+ cleanDay(labelJson[chartIndex].varying_label.day_of_month[graphIndex]) + '</p></div></div>';
                 }
                 if(labelJson[chartIndex].varying_label.year.length>0) {
-                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="years' + chartIndex + '"">'+ '-Years: ' + labelJson[chartIndex].varying_label.year[graphIndex] + '</p></div></div>';
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="years' + chartIndex + '"">'+ cleanYear(labelJson[chartIndex].varying_label.year[graphIndex]) + '</p></div></div>';
                 }
                 if(labelJson[chartIndex].varying_label.week.length>0) {
-                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="weeks' + chartIndex + '"">'+ '-Weeks: ' + labelJson[chartIndex].varying_label.week[graphIndex] + '</p></div></div>';
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="weeks' + chartIndex + '"">'+ cleanWeek(labelJson[chartIndex].varying_label.week[graphIndex]) + '</p></div></div>';
                 }
                 if(labelJson[chartIndex].varying_label.day_of_week.length>0) {
-                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="day_of_week' + chartIndex + '"">'+ '-Weekdays: ' + labelJson[chartIndex].varying_label.day_of_week[graphIndex] + '</p></div></div>';
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="day_of_week' + chartIndex + '"">'+ cleanWeekday(labelJson[chartIndex].varying_label.day_of_week[graphIndex]) + '</p></div></div>';
                 }
                 if(labelJson[chartIndex].varying_label.time.length>0) {
-                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="time' + chartIndex + '"">'+ '-Times: ' + labelJson[chartIndex].varying_label.time[graphIndex] + '</p></div></div>';
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="time' + chartIndex + '"">'+ cleanTime(labelJson[chartIndex].varying_label.time[graphIndex]) + '</p></div></div>';
                 }
+                chartVariables += '<hr>'
             }
+            chartVariables += '</div>'
             document.getElementById('chart-variables' + chartIndex).innerHTML = chartVariables;
         }
-        function iterateLabel(list) {
+        function iterateFacility(list) {
+            var set = new Set();
+            var dict = {'all':'All Facilities', 'rec':'Rec Center', 'clawson':'Clawson', 'nq':'North Quad'};
             var returnString = '';
             for(var i = 0; i<list.length; i++) {
-                returnString += list[i] + ', ';
+                for(var j = 0; j<list[i].length; j++) {
+                    if(list[i][j]=='all') {
+                        return 'All Facilities';
+                    }
+                    set.add(dict[list[i][j]]);
+                }
+            }
+            if(set.size=='3') {
+                return 'All Facilities';
+            }
+            var values = set.values();
+            for(var i=0; i<set.size; i++) {
+                returnString += values.next().value + ', ';
             }
             return returnString.substring(0, returnString.length-2);
         }
+
+        function iterateArea(list) {
+            var set = new Set();
+            var dict = {'all':'All Areas', 'fc':'Fitness Center', 'gf':'Group Fitness'};
+            var returnString = '';
+            for(var i = 0; i<list.length; i++) {
+                for(var j = 0; j<list[i].length; j++) {
+                    if(list[i][j]=='all') {
+                        return 'All Areas';
+                    }
+                    set.add(dict[list[i][j]]);
+                }
+            }
+            if(set.size=='2') {
+                return 'All Areas';
+            }
+            var values = set.values();
+            for(var i=0; i<set.size; i++) {
+                returnString += values.next().value + ', ';
+            }
+            return returnString.substring(0, returnString.length-2);
+        }
+
+        function iterateGrouping(list) {
+            var dict = {'hour':'Hourly', 'day':'Daily', 'week':'Weekly', 'month':'Monthly', 'year':'Yearly'};
+            var returnString = '';
+            for(var i = 0; i<list.length; i++) {
+                returnString += dict[list[i]] + ', ';
+            }
+            return returnString.substring(0, returnString.length-2);
+        }
+
+        function cleanFacility(list) {
+            var returnString = 'Facilities: ';
+            facilityDict = {'all':'All Facilities', 'rec':'Rec Center', 'clawson':'Clawson', 'nq':'North Quad'};
+            for(var fac = 0; fac<list.length; fac++) {
+                returnString += facilityDict[list[fac]] + ', ';
+                if(list[fac]=='all') {
+                    returnString = 'Facilities: All Facilities, ';
+                    break;
+                }
+            }
+            return returnString.substring(0, returnString.length-2);    
+        }
+
+        function cleanArea(list) {
+            var returnString = 'Areas: ';
+            areaDict = {'all':'All Areas', 'fc': 'Fitness Center', 'gf':'Group Fitness'};
+            for(var area = 0; area<list.length; area++) {
+                returnString += areaDict[list[area]] + ', ';
+                if(list[area]=='all') {
+                    returnString = 'Areas: All Areas, ';
+                    break;
+                }
+            }
+            return returnString.substring(0, returnString.length-2);    
+        }
+
+        function cleanGender(list) {
+            var returnString = 'Gender: ';
+            genderDict = {'all':'M/F', 'm': 'Male', 'f':'Female'};
+            returnString += genderDict[list];
+            return returnString;    
+        }
+
+        function cleanMonth(list) {
+            var returnString = 'Months: ';
+            monthDict = {'all':'All Months', '1': 'January', '2':'February', '3':'March', '4':'April', '5':'May', '6':'June', '7':'July', '8':'August', '9':'September', '10':'October', '11':'November', '12':'December'};
+            for(var month = 0; month<list.length; month++) {
+                returnString += monthDict[list[month]] + ', ';
+                if(list[month]=='all') {
+                    returnString = 'Months: All Months, ';
+                    break;
+                }
+            }
+            return returnString.substring(0, returnString.length-2);    
+        }
+
+        // function cleanDay(list) {
+        //     var returnString = 'Days: ';
+        //     var currentNumber = -1;
+        //     var loopNumber = -5;
+        //     if(list[0]=='all' && list.length>1) {
+        //         currentNumber = parseInt(list[1]);
+        //     }
+        //     else if(list[0]!='all') {
+        //         currentNumber = parseInt(list[0]);
+        //     }
+        //     returnString += currentNumber;
+        //     for(var day = 0; day<list.length; day++) {
+        //         if(list[day]=='all') {
+        //             returnString = 'Days: All Days';
+        //             break;
+        //         }
+        //         else {
+        //             loopNumber = parseInt(list[day]);
+        //         }
+        //         if(loopNumber == currentNumber+1) {
+        //             returnString += '-';
+        //         }
+        //         else if(loopNumber!=currentNumber) {
+        //             returnString += loopNumber + ', '
+        //         }
+        //         currentnumber = loopNumber;
+        //     }
+        //     return returnString.substring(0, returnString.length);    
+        // }
+
+        function cleanDay(list) {
+            var returnString = 'Days: ';
+            dayDict = {'all':'All Days', '1': '1st', '2':'2nd', '3':'3rd', '4':'4th', '5':'5th', '6':'6th', '7':'7th', '8':'8th', '9':'9th', '10':'10th', '11':'11th', '12':'12th', '13': '13th', '14':'14th', '15':'15th', '16':'16th', '17':'17th', '18':'18th', '19':'19th', '20':'20th', '21':'21st', '22':'22nd', '23':'23rd', '24':'24th','25': '25st', '26':'26th', '27':'27th', '28':'28th', '29':'29th', '30':'30th', '31':'31st'};
+            for(var day = 0; day<list.length; day++) {
+                returnString += dayDict[list[day]] + ', ';
+                if(list[day]=='all') {
+                    returnString = 'Days: All Days, ';
+                    break;
+                }
+            }
+            return returnString.substring(0, returnString.length-2);    
+        }
+
+        function cleanYear(list) {
+            var returnString = 'Years: ';
+            for(var year = 0; year<list.length; year++) {
+                returnString += list[year] + ', ';
+                if(list[year]=='all') {
+                    returnString = 'Years: All Years, ';
+                    break;
+                }
+            }
+            return returnString.substring(0, returnString.length-2);    
+        }
+
+        function cleanWeek(list) {
+            var returnString = 'Weeks: ';
+            for(var week = 0; week<list.length; week++) {
+                if(parseInt(list[week])<10) {
+                    returnString += list[week].substring(1) + ', ';
+                }
+                else {
+                    returnString += list[week] + ', ';
+                }
+                if(list[week]=='all') {
+                    returnString = 'Weeks: All Weeks, ';
+                    break;
+                }
+            }
+            return returnString.substring(0, returnString.length-2);    
+        }
+
+        function cleanWeekday(list) {
+            var returnString = 'Weekday: ';
+            weekdayDict = {'all':'All Days', '0': 'Monday', '1':'Tuesday', '2':'Wednesday', '3':'Thursday', '4':'Friday', '5':'Saturday', '6':'Sunday'};
+            for(var weekday = 0; weekday<list.length; weekday++) {
+                returnString += weekdayDict[list[weekday]] + ', ';
+                if(list[weekday]=='all') {
+                    returnString = 'Weekdays: All Days, ';
+                    break;
+                }
+            }
+            return returnString.substring(0, returnString.length-2);    
+        }
+
+        function cleanTime(list) {
+            var returnString = 'Time: ';
+            timeDict = {'all':'All Times', '0630': '6:30 am', '0730': '7:30 am', '0830': '8:30 am', '0930': '9:30 am', '1030': '10:30 am', '1130': '11:30 am','1230': '12:30 pm', '1330': '1:30 pm', '1430': '2:30 pm', '1530': '3:30 pm', '1630': '4:30 pm', '1730': '5:30 pm', '1830': '6:30 pm', '1930': '7:30 pm', '2030': '8:30 pm', '2130': '9:30 pm', '2230': '10:30 pm'};
+            for(var time = 0; time<list.length; time++) {
+                returnString += timeDict[list[time]] + ', ';
+                if(list[time]=='all') {
+                    returnString = 'Times: All Times, ';
+                    break;
+                }
+            }
+            return returnString.substring(0, returnString.length-2);    
+        }
+        
     </script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
