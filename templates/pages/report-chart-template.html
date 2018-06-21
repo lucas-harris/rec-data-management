@@ -2,43 +2,24 @@
 
 {% block chart %}
     
-    <div class="container">
+    <!-- <div class="container"> -->
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div id="chart-title{{x}}" ></div>
+            </div>
+        </div>
         <div class="row justify-content-center">
             <div class="col-10">
                 <canvas id="template-chart{{x}}" ></canvas>
             </div>
         </div>
-        <!-- <div class="row justify-content-center">
-            <div class="col-4">
-                <div class="centerBlock">
-                    <p id='common-facilities{{x}}' class='chart-header'></p>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="centerBlock">
-                    <p id='common-areas{{x}}' class='chart-header'></p>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="centerBlock">
-                    <p id='common-units{{x}}' class='chart-header'></p>
-                </div>
-            </div>
-        </div> -->
         <div class="row">
-            <div class="col-4">
-                <div id="chart-variables{{x}}"></div>]
-            </div>
-            <div class="col-8">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <p>Yes</p>
-                    </div>
-                </div>
+            <div class="col-12">
+                <div id="chart-variables{{x}}"></div>
             </div>
         </div>
 
-    </div>
+    <!-- </div> -->
     <script src="{% static 'js/chartjs/dist/Chart.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/Chart.PieceLabel.js' %}" type="text/javascript"></script>
     <script>
@@ -50,22 +31,23 @@
         var datasetValue = [];
         var chartData = charts{{x}}.charts;
         var labels = [];
-        var reportData = [];
+        var reportData = '';
         var chartType{{x}} = charts{{x}}.type;
         var firstTitle = 'yes';
+        chartDataHtml[{{x}}] = [];
         // document.getElementById('first-title{{x}}').innerHTML = charts{{x}}.type;
         document.getElementById('title').innerHTML = json.title;
         if(chartType{{x}}=='line' | chartType{{x}}=='bar') {
             for (var j = 0; j < charts{{x}}.charts.length; j++) { 
                 var dataValues = [];
-                reportData[j] = [];
                 labels[j] = [];
                 for(var i in charts{{x}}.charts[j].graph) {
                     labels[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0]);
                     dataValues.push(Object.values(charts{{x}}.charts[j].graph[i].data));
-                    reportData[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data));
-
+                    reportData += (Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data) + ' - ');
                 } 
+                chartDataHtml[{{x}}][j] = '<p style="text-align: center;">' + reportData.substring(0, reportData.length-3) + '</p>';
+                reportData = '';
                 datasetValue[j] = {
                     backgroundColor: charts{{x}}.charts[j].color,
                     hoverBackgroundColor: darkenColor(charts{{x}}.charts[j].color),
@@ -88,7 +70,10 @@
                     labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data)[0]);
                     dataValues.push(Object.values(charts{{x}}.charts[0].graph[i].data));
                     colors.push(createRandomColor());
+                    reportData.push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data));
                 } 
+                chartDataHtml += '<div>' + reportData + '</div>';
+                reportData = '';
                 datasetValue[0] = {
                     backgroundColor: colors,
                     title :'2013',
@@ -106,8 +91,11 @@
                     colors.push(charts{{x}}.charts[j].color)
                     for(var i in charts{{x}}.charts[j].graph) {
                         dataValues[j] = parseInt(dataValues[j]) + parseInt(Object.values(charts{{x}}.charts[j].graph[i].data));
-                    } 
-                }
+                        reportData.push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data));
+                    }
+                } 
+                chartDataHtml += '<div>' + reportData + '</div>';
+                reportData = '';
                 datasetValue[0] = {
                     backgroundColor: colors,
                     // hoverBackgroundColor: darkenArrayOfColors(colors),
@@ -129,7 +117,7 @@
                     for(var i in charts{{x}}.charts[j].graph) {
                         dataValues[i] = {
                             x: Object.values(charts{{x}}.charts[0].graph[i].data),
-                            y: Object.values(charts{{x}}.charts[1].graph[i].data)
+                            y: Object.values(charts{{x}}.charts[1].graph[i].data),
                         }
                         labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data)[0]);
                     } 
@@ -187,6 +175,7 @@
                     }
                 }
             });
+        
         
         function createRandomColor() {
             return 'rgb(' + Math.floor(Math.random()*255) + ', ' + Math.floor(Math.random()*255) + ', ' + Math.floor(Math.random()*255) + ', 0.5)'; 

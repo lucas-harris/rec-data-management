@@ -1,4 +1,12 @@
+.report-body {
+    /* margin-left: 75px; */
+}
+
 .centerBlock {
     display: table;
     margin: auto;
+}
+
+.endBlock {
+    text-align: right;
 }

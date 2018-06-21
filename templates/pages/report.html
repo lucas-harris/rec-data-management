@@ -2,7 +2,6 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
     <head>
         <meta charset="UTF-8">
         <title>Report</title>
@@ -10,10 +9,10 @@
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         <link rel="icon" href="{% static 'img/logo.png' %}">
         <link rel='stylesheet' href="{% static 'css/report-width.css' %}">
-        <script>var labelJson = {{label|safe}};</script>
+        <script>var labelJson = {{label|safe}}; var chartDataHtml = [];</script>
     </head>
     <body>
-        <div class="container">
+        <div class="container report-body">
             <div class="row justify-content-center">
                 <div class="col-0">
                     <p id="title" style='font-size: 1.5rem; '></p>
@@ -27,11 +26,26 @@
     </body>
     <script>
         for(var chartIndex = 0; chartIndex<Object.keys(labelJson).length; chartIndex++) {
-            // document.getElementById('common-facilities' + chartIndex).innerHTML = 'Facilities: ' + iterateFacility(labelJson[chartIndex].independent_label.facility);   
-            // document.getElementById('common-areas' + chartIndex).innerHTML = 'Areas: ' + iterateArea(labelJson[chartIndex].independent_label.area);                
-            // document.getElementById('common-units' + chartIndex).innerHTML = 'Grouping: ' + iterateGrouping(labelJson[chartIndex].common_label.unit);                
-            var chartVariables = '<div class="container">';
+            var chartTitle = '<div class="row justify-content-center">';
+            if(labelJson[chartIndex].common_label.facility.length>0) {
+                chartTitle += '<div class="col-2"><p class="centerBlock">' + cleanCommonFacility(labelJson[chartIndex].common_label.facility) + '</p></div>';
+                // chartTitle += '<div class="col-1"><p class="centerBlock"> - </p></div>';
+            }
+            if(labelJson[chartIndex].common_label.area.length>0) {
+                chartTitle += '<div class="col-2"><p class="centerBlock">' + cleanCommonArea(labelJson[chartIndex].common_label.area) + '</p></div>';
+            }
+            if(labelJson[chartIndex].common_label.unit.length>0) {
+                chartTitle += '<div class="col-2"><p class="centerBlock">' + cleanCommonGrouping(labelJson[chartIndex].common_label.unit) + '</p></div>';
+            }
+            chartTitle += '</div>';
+            var chartVariables = '<div class="container"><br>'; //Whole Graph Container
             for(var graphIndex = 0; graphIndex<labelJson[chartIndex].count; graphIndex++) {
+                chartVariables += '<div class="row justify-content-start">';
+                chartVariables += '<div class="col-2"><p class="endBlock">' + json.chartset[chartIndex].charts[graphIndex].label + '</p></div>';
+                chartVariables += '<div class="col-1"><canvas id="color-canvas-[' + chartIndex + '][' + graphIndex + ']" width="25%" height="25%"></canvas></div>';
+                chartVariables += '</div>';//Graph Label
+                chartVariables += '<br><div class="row"><div class="col-4"><div class="container">';//Variable Column
+
                 if(labelJson[chartIndex].varying_label.facility.length>0) {
                     chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="facilities' + chartIndex + '">' + cleanFacility(labelJson[chartIndex].varying_label.facility[graphIndex]) + '</p></div></div>';
                 }
@@ -58,58 +72,51 @@
                 if(labelJson[chartIndex].varying_label.time.length>0) {
                     chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="time' + chartIndex + '"">'+ cleanTime(labelJson[chartIndex].varying_label.time[graphIndex]) + '</p></div></div>';
                 }
+                
+                chartVariables += '</div></div>';//End Variable Column
+                chartVariables += '<div class="col-6"><div class="container">';//Data Column
+                // chartVariables += '<div class="row justify-content-center"><div class="col-0">Data</div></div>'; 
+                chartVariables += '<div class="col">' + chartDataHtml[chartIndex][graphIndex] + '</div></div></div>';//End Data column
+                chartVariables += '</div>';//End Whole Graph Container
                 chartVariables += '<hr>'
             }
-            chartVariables += '</div>'
+            //End Variable and Col
+            chartVariables += '</div>';
+            document.getElementById('chart-title' + chartIndex).innerHTML = chartTitle;
             document.getElementById('chart-variables' + chartIndex).innerHTML = chartVariables;
+            for(var graphIndex = 0; graphIndex<labelJson[chartIndex].count; graphIndex++) {
+                var canvas = document.getElementById('color-canvas-[' + chartIndex + '][' + graphIndex + ']');
+                var ctx = canvas.getContext("2d");
+                ctx.beginPath();
+                ctx.rect(0, 0, 150, 100);
+                ctx.fillStyle = json.chartset[chartIndex].charts[graphIndex].color;
+                ctx.fill();
+            }
         }
-        function iterateFacility(list) {
+        function cleanCommonFacility(list) {
             var set = new Set();
             var dict = {'all':'All Facilities', 'rec':'Rec Center', 'clawson':'Clawson', 'nq':'North Quad'};
-            var returnString = '';
+            var returnString = 'Facilities: ';
             for(var i = 0; i<list.length; i++) {
-                for(var j = 0; j<list[i].length; j++) {
-                    if(list[i][j]=='all') {
-                        return 'All Facilities';
-                    }
-                    set.add(dict[list[i][j]]);
-                }
-            }
-            if(set.size=='3') {
-                return 'All Facilities';
-            }
-            var values = set.values();
-            for(var i=0; i<set.size; i++) {
-                returnString += values.next().value + ', ';
+                returnString += dict[list[i]] + ', ';
             }
             return returnString.substring(0, returnString.length-2);
         }
 
-        function iterateArea(list) {
+        function cleanCommonArea(list) {
             var set = new Set();
             var dict = {'all':'All Areas', 'fc':'Fitness Center', 'gf':'Group Fitness'};
-            var returnString = '';
+            var returnString = 'Areas: ';
             for(var i = 0; i<list.length; i++) {
-                for(var j = 0; j<list[i].length; j++) {
-                    if(list[i][j]=='all') {
-                        return 'All Areas';
-                    }
-                    set.add(dict[list[i][j]]);
-                }
-            }
-            if(set.size=='2') {
-                return 'All Areas';
-            }
-            var values = set.values();
-            for(var i=0; i<set.size; i++) {
-                returnString += values.next().value + ', ';
+                returnString += dict[list[i]] + ', ';
             }
             return returnString.substring(0, returnString.length-2);
         }
 
-        function iterateGrouping(list) {
+        function cleanCommonGrouping(list) {
+            var set = new Set();
             var dict = {'hour':'Hourly', 'day':'Daily', 'week':'Weekly', 'month':'Monthly', 'year':'Yearly'};
-            var returnString = '';
+            var returnString = 'Grouped: ';
             for(var i = 0; i<list.length; i++) {
                 returnString += dict[list[i]] + ', ';
             }
