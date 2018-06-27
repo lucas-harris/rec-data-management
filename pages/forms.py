@@ -51,10 +51,10 @@ class DatasetForm(forms.Form):
                                             ('1030', '10:30'), ('1130', '11:30'), ('1230', '12:30'), ('1330', '13:30'), ('1430', '14:30'),
                                             ('1530', '15:30'), ('1630', '16:30'), ('1730', '17:30'), ('1830', '18:30'), ('1930', '19:30'),
                                             ('2030', '20:30'), ('2130', '21:30'), ('2230', '22:30')))
-    color = forms.ChoiceField(choices=(('rgb(0, 0, 0, .5)', 'Black'), ('rgb(255, 0, 0, .5)', 'Red'), ('rgb(255, 127, 0, .5)', 'Orange'), ('rgb(255, 255, 0, .5)', 'Yellow'), 
-                                        ('rgb(127, 255, 0, .5)', 'Light Green'), ('rgb(0, 255, 0, .5)', 'Green'), ('rgb(0, 255, 127, .5)', 'Blue Green'),
-                                        ('rgb(0, 255, 255, .5)', 'Cyan'), ('rgb(0, 0, 255, .5)', 'Blue'), ('rgb(127, 0, 255, .5)', 'Violet'), 
-                                        ('rgb(255, 0, 255, .5)', 'Magenta')))
+    color = forms.ChoiceField(choices=(('rgb(0, 0, 0, .6)', 'Black'), ('rgb(255, 0, 0, .6)', 'Red'), ('rgb(255, 127, 0, .6)', 'Orange'), ('rgb(255, 255, 0, .6)', 'Yellow'), 
+                                        ('rgb(127, 255, 0, .6)', 'Light Green'), ('rgb(0, 255, 0, .6)', 'Green'), ('rgb(0, 255, 127, .6)', 'Blue Green'),
+                                        ('rgb(0, 255, 255, .6)', 'Cyan'), ('rgb(0, 0, 255, .6)', 'Blue'), ('rgb(127, 0, 255, .6)', 'Violet'), 
+                                        ('rgb(255, 0, 255, .6)', 'Magenta')))
 
 # class EditDatasetForm(forms.Form):
     # label = EditChartLabel(queryset = Graph)

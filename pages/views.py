@@ -148,13 +148,16 @@ def chartcreation(request):
                     graph_id = 0
                 else:
                     graph_id = Graph.objects.latest('id').id 
-                graph = Graph(id=graph_id + 1, chart_id=current_id, label=dataset_form.cleaned_data['label'], unit=dataset_form.cleaned_data['units'], 
+                graph = Graph(id=graph_id + 1, chart_id=current_id, label=dataset_form.cleaned_data['label'], 
                     facility=dataset_form.cleaned_data['facility'], area=dataset_form.cleaned_data['area'], start_date=dataset_form.cleaned_data['start_date'], 
                     end_date=dataset_form.cleaned_data['end_date'], gender=dataset_form.cleaned_data['gender'], year=dataset_form.cleaned_data['year'], 
                     month=dataset_form.cleaned_data['month'], week=dataset_form.cleaned_data['week'], day_of_month=dataset_form.cleaned_data['day_of_month'], 
                     day_of_week=dataset_form.cleaned_data['day_of_week'], time=dataset_form.cleaned_data['time'],
-                    color=dataset_form.cleaned_data['color'])
+                    color=dataset_form.cleaned_data['color'], unit=dataset_form.cleaned_data['units'] )
                 graph.save()
+                for graph_loop in Graph.objects.filter(chart_id=current_id):
+                    graph_loop.unit = dataset_form.cleaned_data['units']
+                    graph_loop.save()
                 query_dicts = Query().query_every_day(graph)
                 for single_dictionary in query_dicts:
                     for data_object in query_dicts[single_dictionary]:
@@ -163,7 +166,6 @@ def chartcreation(request):
             elif request.session.get('current_graph_action') == 'edit':
                 graph = Graph.objects.get(id=request.session.get('current_graph_edit'))
                 graph.label=dataset_form.cleaned_data['label']
-                graph.unit=dataset_form.cleaned_data['units'] 
                 graph.facility=dataset_form.cleaned_data['facility']
                 graph.area=dataset_form.cleaned_data['area']
                 graph.start_date=dataset_form.cleaned_data['start_date']
@@ -176,7 +178,11 @@ def chartcreation(request):
                 graph.day_of_week=dataset_form.cleaned_data['day_of_week']
                 graph.time=dataset_form.cleaned_data['time']
                 graph.color=dataset_form.cleaned_data['color']
+                graph.unit=dataset_form.cleaned_data['units'] 
                 graph.save()
+                for graph_loop in Graph.objects.filter(chart_id=current_id):
+                    graph_loop.unit=dataset_form.cleaned_data['units'] 
+                    graph_loop.save()
                 query_dicts = Query().query_every_day(graph)
                 for single_dictionary in query_dicts:
                     for data_object in query_dicts[single_dictionary]:

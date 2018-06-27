@@ -26,22 +26,45 @@
     </body>
     <script>
         for(var chartIndex = 0; chartIndex<Object.keys(labelJson).length; chartIndex++) {
-            var chartTitle = '<div class="row justify-content-center">';
+            var chartTitle = '<div class="row justify-content-center" style="margin-top: 100px;">';
             if(labelJson[chartIndex].common_label.facility.length>0) {
-                chartTitle += '<div class="col-2"><p class="centerBlock">' + cleanCommonFacility(labelJson[chartIndex].common_label.facility) + '</p></div>';
-                // chartTitle += '<div class="col-1"><p class="centerBlock"> - </p></div>';
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonFacility(labelJson[chartIndex].common_label.facility) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.area.length>0) {
-                chartTitle += '<div class="col-2"><p class="centerBlock">' + cleanCommonArea(labelJson[chartIndex].common_label.area) + '</p></div>';
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonArea(labelJson[chartIndex].common_label.area) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.unit.length>0) {
-                chartTitle += '<div class="col-2"><p class="centerBlock">' + cleanCommonGrouping(labelJson[chartIndex].common_label.unit) + '</p></div>';
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonGrouping(labelJson[chartIndex].common_label.unit) + '</p></div>';
+            }
+            if(labelJson[chartIndex].common_label.gender.length>0) {
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonGender(labelJson[chartIndex].common_label.gender) + '</p></div>';
+            }
+            if(labelJson[chartIndex].common_label.date.length>0) {
+                chartTitle += '<div class="col-3"><p class="centerBlock">'+ '<b>Dates: </b>' + labelJson[chartIndex].common_label.date + '</p></div>';
+            }
+            if(labelJson[chartIndex].common_label.month.length>0 && labelJson[chartIndex].common_label.month[0]!='all') {
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonMonth(labelJson[chartIndex].common_label.month) + '</p></div>';
+            }
+            if(labelJson[chartIndex].common_label.day_of_month.length>0 && labelJson[chartIndex].common_label.day_of_month[0]!='all') {
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonDay(labelJson[chartIndex].common_label.day_of_month) + '</p></div>';
+            }
+            if(labelJson[chartIndex].common_label.year.length>0 && labelJson[chartIndex].common_label.year[0]!='all') {
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonYear(labelJson[chartIndex].common_label.year) + '</p></div>';
+            }
+            if(labelJson[chartIndex].common_label.week.length>0 && labelJson[chartIndex].common_label.week[0]!='all') {
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonWeek(labelJson[chartIndex].common_label.week) + '</p></div>';
+            }
+            if(labelJson[chartIndex].common_label.day_of_week.length>0 && labelJson[chartIndex].common_label.day_of_week[0]!='all') {
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonWeekday(labelJson[chartIndex].common_label.day_of_week) + '</p></div>';
+            }
+            if(labelJson[chartIndex].common_label.time.length>0 && labelJson[chartIndex].common_label.time[0]!='all') {
+                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonTime(labelJson[chartIndex].common_label.time) + '</p></div>';
             }
             chartTitle += '</div>';
             var chartVariables = '<div class="container"><br>'; //Whole Graph Container
             for(var graphIndex = 0; graphIndex<labelJson[chartIndex].count; graphIndex++) {
                 chartVariables += '<div class="row justify-content-start">';
-                chartVariables += '<div class="col-2"><p class="endBlock">' + json.chartset[chartIndex].charts[graphIndex].label + '</p></div>';
+                chartVariables += '<div class="col-2"><p>' + json.chartset[chartIndex].charts[graphIndex].label + '</p></div>';
                 chartVariables += '<div class="col-1"><canvas id="color-canvas-[' + chartIndex + '][' + graphIndex + ']" width="25%" height="25%"></canvas></div>';
                 chartVariables += '</div>';//Graph Label
                 chartVariables += '<br><div class="row"><div class="col-4"><div class="container">';//Variable Column
@@ -52,8 +75,12 @@
                 if(labelJson[chartIndex].varying_label.area.length>0) {
                     chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="areas' + chartIndex + '"">'+ cleanArea(labelJson[chartIndex].varying_label.area[graphIndex]) + '</p></div></div>';
                 }
-                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="genders' + chartIndex + '"">'+ cleanGender(labelJson[chartIndex].independent_label.gender[graphIndex]) + '</p></div></div>';
-                chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="dates' + chartIndex + '"">'+ 'Dates: ' + labelJson[chartIndex].independent_label.date[graphIndex] + '</p></div></div>';
+                if(labelJson[chartIndex].varying_label.gender.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="genders' + chartIndex + '"">'+ cleanGender(labelJson[chartIndex].varying_label.gender[graphIndex]) + '</p></div></div>';
+                }
+                if(labelJson[chartIndex].varying_label.date.length>0) {
+                    chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="dates' + chartIndex + '"">'+ 'Dates: ' + labelJson[chartIndex].varying_label.date[graphIndex] + '</p></div></div>';
+                }
                 if(labelJson[chartIndex].varying_label.month.length>0) {
                     chartVariables += '<div class="row justify-content-start"><div class="col-0"><p id="months' + chartIndex + '"">' + cleanMonth(labelJson[chartIndex].varying_label.month[graphIndex]) + '</p></div></div>';
                 }
@@ -74,9 +101,9 @@
                 }
                 
                 chartVariables += '</div></div>';//End Variable Column
-                chartVariables += '<div class="col-6"><div class="container">';//Data Column
+                chartVariables += '<div class="col-4"><div class="container">';//Data Column
                 // chartVariables += '<div class="row justify-content-center"><div class="col-0">Data</div></div>'; 
-                chartVariables += '<div class="col">' + chartDataHtml[chartIndex][graphIndex] + '</div></div></div>';//End Data column
+                chartVariables += '<div class="row"><div class="col">' + chartDataHtml[chartIndex][graphIndex] + '</div></div></div></div>';//End Data column
                 chartVariables += '</div>';//End Whole Graph Container
                 chartVariables += '<hr>'
             }
@@ -94,9 +121,8 @@
             }
         }
         function cleanCommonFacility(list) {
-            var set = new Set();
             var dict = {'all':'All Facilities', 'rec':'Rec Center', 'clawson':'Clawson', 'nq':'North Quad'};
-            var returnString = 'Facilities: ';
+            var returnString = '<b>Facilities: </b>';
             for(var i = 0; i<list.length; i++) {
                 returnString += dict[list[i]] + ', ';
             }
@@ -104,20 +130,91 @@
         }
 
         function cleanCommonArea(list) {
-            var set = new Set();
             var dict = {'all':'All Areas', 'fc':'Fitness Center', 'gf':'Group Fitness'};
-            var returnString = 'Areas: ';
+            var returnString = '<b>Areas: </b>';
             for(var i = 0; i<list.length; i++) {
                 returnString += dict[list[i]] + ', ';
             }
             return returnString.substring(0, returnString.length-2);
         }
 
+        function cleanCommonGender(list) {
+            var returnString = '<b>Gender: </b>';
+            genderDict = {'all':'M/F', 'm': 'Male', 'f':'Female'};
+            returnString += genderDict[list];
+            return returnString;    
+        }
+
         function cleanCommonGrouping(list) {
-            var set = new Set();
             var dict = {'hour':'Hourly', 'day':'Daily', 'week':'Weekly', 'month':'Monthly', 'year':'Yearly'};
-            var returnString = 'Grouped: ';
+            var returnString = '<b>Grouped: </b>';
             for(var i = 0; i<list.length; i++) {
+                returnString += dict[list[i]] + ', ';
+            }
+            return returnString.substring(0, returnString.length-2);
+        }
+        
+
+        function cleanCommonMonth(list) {
+            var dict = {'all':'All Months', '1': 'January', '2':'February', '3':'March', '4':'April', '5':'May', '6':'June', '7':'July', '8':'August', '9':'September', '10':'October', '11':'November', '12':'December'};
+            var returnString = '<b>Months: </b>';
+            for(var i = 0; i<list.length; i++) {
+                returnString += dict[list[i]] + ', ';
+            }
+            return returnString.substring(0, returnString.length-2);
+        }
+
+        function cleanCommonDay(list) {
+            var dict = {'all':'All Days', '1': '1st', '2':'2nd', '3':'3rd', '4':'4th', '5':'5th', '6':'6th', '7':'7th', '8':'8th', '9':'9th', '10':'10th', '11':'11th', '12':'12th', '13': '13th', '14':'14th', '15':'15th', '16':'16th', '17':'17th', '18':'18th', '19':'19th', '20':'20th', '21':'21st', '22':'22nd', '23':'23rd', '24':'24th','25': '25st', '26':'26th', '27':'27th', '28':'28th', '29':'29th', '30':'30th', '31':'31st'};
+            var returnString = '<b>Days: </b>';
+            for(var i = 0; i<list.length; i++) {
+                returnString += dict[list[i]] + ', ';
+            }
+            return returnString.substring(0, returnString.length-2);
+        }
+
+        function cleanCommonYear(list) {
+            var returnString = '<b>Years: </b>';
+            for(var i = 0; i<list.length; i++) {
+                if(list[i]=='all') {
+                    returnString += 'All Years, ';
+                }
+                else {
+                    returnString += list[i] + ', ';
+                }
+            }
+            return returnString.substring(0, returnString.length-2);
+        }
+
+        function cleanCommonWeek(list) {
+            var returnString = '<b>Weeks: </b>';
+            for(var week = 0; week<list.length; week++) {
+                if(parseInt(list[week])<10) {
+                    returnString += list[week].substring(1) + ', ';
+                }
+                else {
+                    returnString += list[week] + ', ';
+                }
+                if(list[week]=='all') {
+                    returnString = 'Weeks: All Weeks, ';
+                    break;
+                }
+            }
+            return returnString.substring(0, returnString.length-2);    
+        }
+
+        function cleanCommonWeekday(list) {
+            var returnString = '<b>Weekday: </b>';
+            var dict = {'all':'All Days', '0': 'Monday', '1':'Tuesday', '2':'Wednesday', '3':'Thursday', '4':'Friday', '5':'Saturday', '6':'Sunday'};
+            for(var i = 0; i<list.length; i++) {
+                returnString += dict[list[i]] + ', ';
+            }
+            return returnString.substring(0, returnString.length-2);
+        }
+
+        function cleanCommonTime(list) {
+            var returnString = '<b>Time: </b>';
+            var dict = {'all':'All Times', '0630': '6:30 am', '0730': '7:30 am', '0830': '8:30 am', '0930': '9:30 am', '1030': '10:30 am', '1130': '11:30 am','1230': '12:30 pm', '1330': '1:30 pm', '1430': '2:30 pm', '1530': '3:30 pm', '1630': '4:30 pm', '1730': '5:30 pm', '1830': '6:30 pm', '1930': '7:30 pm', '2030': '8:30 pm', '2130': '9:30 pm', '2230': '10:30 pm'};            for(var i = 0; i<list.length; i++) {
                 returnString += dict[list[i]] + ', ';
             }
             return returnString.substring(0, returnString.length-2);
@@ -168,36 +265,6 @@
             }
             return returnString.substring(0, returnString.length-2);    
         }
-
-        // function cleanDay(list) {
-        //     var returnString = 'Days: ';
-        //     var currentNumber = -1;
-        //     var loopNumber = -5;
-        //     if(list[0]=='all' && list.length>1) {
-        //         currentNumber = parseInt(list[1]);
-        //     }
-        //     else if(list[0]!='all') {
-        //         currentNumber = parseInt(list[0]);
-        //     }
-        //     returnString += currentNumber;
-        //     for(var day = 0; day<list.length; day++) {
-        //         if(list[day]=='all') {
-        //             returnString = 'Days: All Days';
-        //             break;
-        //         }
-        //         else {
-        //             loopNumber = parseInt(list[day]);
-        //         }
-        //         if(loopNumber == currentNumber+1) {
-        //             returnString += '-';
-        //         }
-        //         else if(loopNumber!=currentNumber) {
-        //             returnString += loopNumber + ', '
-        //         }
-        //         currentnumber = loopNumber;
-        //     }
-        //     return returnString.substring(0, returnString.length);    
-        // }
 
         function cleanDay(list) {
             var returnString = 'Days: ';

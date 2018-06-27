@@ -40,13 +40,15 @@
         if(chartType{{x}}=='line' | chartType{{x}}=='bar') {
             for (var j = 0; j < charts{{x}}.charts.length; j++) { 
                 var dataValues = [];
+                reportData = '<div class="container"><div class="row">';
                 labels[j] = [];
                 for(var i in charts{{x}}.charts[j].graph) {
                     labels[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0]);
                     dataValues.push(Object.values(charts{{x}}.charts[j].graph[i].data));
-                    reportData += (Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data) + ' - ');
+                    reportData += '<div class="col-4">' + (Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data) + '</div>');
                 } 
-                chartDataHtml[{{x}}][j] = '<p style="text-align: center;">' + reportData.substring(0, reportData.length-3) + '</p>';
+                reportData += '</div></div>'
+                chartDataHtml[{{x}}][j] = reportData;
                 reportData = '';
                 datasetValue[j] = {
                     backgroundColor: charts{{x}}.charts[j].color,
@@ -66,13 +68,15 @@
                 labels[0] = [];
                 var colors = [];
                 var dataValues = [];
+                reportData = '<div class="container"><div class="row">';
                 for(var i in charts{{x}}.charts[0].graph) {
                     labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data)[0]);
                     dataValues.push(Object.values(charts{{x}}.charts[0].graph[i].data));
                     colors.push(createRandomColor());
-                    reportData.push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data));
+                    reportData += '<div class="col-4">' + Object.keys(charts{{x}}.charts[0].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[0].graph[i].data) + '</div>';
                 } 
-                chartDataHtml += '<div>' + reportData + '</div>';
+                reportData += '</div></div>';
+                chartDataHtml[{{x}}][0] = reportData;
                 reportData = '';
                 datasetValue[0] = {
                     backgroundColor: colors,
@@ -91,11 +95,12 @@
                     colors.push(charts{{x}}.charts[j].color)
                     for(var i in charts{{x}}.charts[j].graph) {
                         dataValues[j] = parseInt(dataValues[j]) + parseInt(Object.values(charts{{x}}.charts[j].graph[i].data));
-                        reportData.push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data));
                     }
+                    reportData = dataValues[j];
+                    chartDataHtml[{{x}}][j] = '<p style="text-align: center;">' + reportData + ' Patrons</p>';
+                    reportData = '';
+
                 } 
-                chartDataHtml += '<div>' + reportData + '</div>';
-                reportData = '';
                 datasetValue[0] = {
                     backgroundColor: colors,
                     // hoverBackgroundColor: darkenArrayOfColors(colors),
@@ -114,13 +119,18 @@
                 var colors = [charts{{x}}.charts[0].color, charts{{x}}.charts[1].color];
                 for (var j = 0; j < 2; j++) { 
                     var dataValues = []
+                    reportData = '<div class="container"><div class="row">';
                     for(var i in charts{{x}}.charts[j].graph) {
                         dataValues[i] = {
                             x: Object.values(charts{{x}}.charts[0].graph[i].data),
                             y: Object.values(charts{{x}}.charts[1].graph[i].data),
                         }
                         labels[0].push(Object.keys(charts{{x}}.charts[0].graph[i].data)[0]);
+                        reportData += '<div class="col-4">' + Object.keys(charts{{x}}.charts[0].graph[i].data) + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data) + '</div>';
                     } 
+                    reportData += '</div></div>';
+                    chartDataHtml[{{x}}][j] = reportData;
+                    reportData = '';
                     datasetValue[0] = {
                         backgroundColor: charts{{x}}.charts[0].color,
                         pointBackgroundColor: charts{{x}}.charts[0].color,
