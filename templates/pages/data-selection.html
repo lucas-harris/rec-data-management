@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
         <link rel="stylesheet" href="{% static 'css/data-selection.css' %}">
+        <link href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script>
@@ -32,7 +33,84 @@
             <!--Facilities-->
             <form action="/data-visualizer/chart-creation/" method="POST" class="form-group">
                 {% csrf_token %}
-                {{ dataset_form }} 
+                {% for field in dataset_form %}
+                    {% if field.label == 'Label' or field.label == 'Facility' or field.label == 'Area' %}
+                        <div class='row justify-content-center form-row'>
+                            <div class='col-12'>
+                                {{field.label}}
+                                {{ field }} 
+                            </div>
+                        </div>
+                    {% elif field.label == 'Start Date'%}
+                        <div class="row justify-content-center form-row">
+                            <div class='col-4'>
+                                {{field.label}}
+                                {{ field }} 
+                            </div>
+                    {% elif field.label == 'End Date'%}
+                        <div class='col-4'>
+                            {{field.label}}
+                            {{ field }} 
+                        </div>
+                    {% elif field.label == 'Increment Units'%}
+                            <div class='col-4'>
+                                {{field.label}}
+                                {{ field }} 
+                            </div>
+                        </div>
+                    {% elif field.label == 'Gender'%}
+                        <div class="row justify-content-center align-items-center form-row">
+                            <div class='col-4'>
+                                {{field.label}}
+                                {{ field }} 
+                            </div>
+                    {% elif field.label == 'Color'%}
+                        <div class='col-4'>
+                            {{field.label}}
+                            {{ field }} 
+                        </div>
+                    {% elif field.label == 'Time'%}
+                            <div class='col-4'>
+                                {{field.label}}
+                                {{ field }} 
+                            </div>
+                        </div>
+                    {% elif field.label == 'Year'%}
+                        <div class="row justify-content-center align-items-center form-row">
+                            <div class='col-2'>
+                                {{field.label}}
+                                {{ field }} 
+                            </div>
+                    {% elif field.label == 'Month'%}
+                        <div class='col-2'>
+                            {{field.label}}
+                            {{ field }} 
+                        </div>
+                    {% elif field.label == 'Week'%}
+                        <div class='col-2'>
+                            {{field.label}}
+                            {{ field }} 
+                        </div>
+                    {% elif field.label == 'Day of month'%}
+                        <div class='col-2'>
+                            {{field.label}}
+                            {{ field }} 
+                        </div>
+                    {% elif field.label == 'Day of week'%}
+                            <div class='col-2'>
+                                {{field.label}}
+                                {{ field }} 
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col-2">
+                            {{field.label}}
+                            {{ field }} 
+                        </div>
+                    {% endif %}         
+
+                {% endfor %}
+                
             
                 <div class="row justify-content-center">
                     <div class="col-0">

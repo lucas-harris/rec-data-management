@@ -23,6 +23,14 @@ class DatasetForm(forms.Form):
     end_date = forms.DateTimeField(label='End Date', initial=datetime.datetime.now().strftime("%Y-%m-%d"))
     units = forms.ChoiceField(choices = (('hour', 'Hour'), ('day', 'Day'), ('week', 'Week'), ('month', 'Month'), ('year', 'Year'), ('all', 'One Group')), label='Increment Units')
     gender = forms.ChoiceField(choices=(('all', 'All'), ('m', 'Male'), ('f', 'Female')), label='Gender')
+    color = forms.ChoiceField(choices=(('rgb(0, 0, 0, .6)', 'Black'), ('rgb(255, 0, 0, .6)', 'Red'), ('rgb(255, 127, 0, .6)', 'Orange'), ('rgb(255, 255, 0, .6)', 'Yellow'), 
+                                        ('rgb(127, 255, 0, .6)', 'Light Green'), ('rgb(0, 255, 0, .6)', 'Green'), ('rgb(0, 255, 127, .6)', 'Blue Green'),
+                                        ('rgb(0, 255, 255, .6)', 'Cyan'), ('rgb(0, 0, 255, .6)', 'Blue'), ('rgb(127, 0, 255, .6)', 'Violet'), 
+                                        ('rgb(255, 0, 255, .6)', 'Magenta')))
+    time = forms.MultipleChoiceField(initial=('all', 'All'), choices=(('all', 'All'), ('0630', '6:30'), ('0730', '7:30'), ('0830', '8:30'), ('0930', '9:30'),
+                                            ('1030', '10:30'), ('1130', '11:30'), ('1230', '12:30'), ('1330', '13:30'), ('1430', '14:30'),
+                                            ('1530', '15:30'), ('1630', '16:30'), ('1730', '17:30'), ('1830', '18:30'), ('1930', '19:30'),
+                                            ('2030', '20:30'), ('2130', '21:30'), ('2230', '22:30')))
     year = forms.MultipleChoiceField(initial=('all', 'All'), choices=(('all', 'All'), ('2018', '2018'), ('2017', '2017'), ('2016', '2016'), ('2015', '2015'), ('2014', '2014'), ('2013', '2013'), ('2012', '2012'),
                                             ('2011', '2011'), ('2010', '2010'),('2009', '2009'), ('2008', '2008'),('2007', '2007'), ('2006', '2006')))
     month = forms.MultipleChoiceField(initial=('all', 'All'), choices=(('all', 'All'), ('1', 'January'), ('2', 'February'), ('3', 'March'), ('4', 'April'), ('5', 'May'), ('6', 'June'),
@@ -47,14 +55,8 @@ class DatasetForm(forms.Form):
     day_of_week = forms.MultipleChoiceField(initial=('all', 'All'), choices=(('all', 'All'), ('0', 'Monday'), ('1', 'Tuesday'), ('2', 'Wednesday'), ('3', 'Thursday'),
                                                      ('4', 'Friday'), ('5', 'Saturday'), ('6', 'Sunday')))
 
-    time = forms.MultipleChoiceField(initial=('all', 'All'), choices=(('all', 'All'), ('0630', '6:30'), ('0730', '7:30'), ('0830', '8:30'), ('0930', '9:30'),
-                                            ('1030', '10:30'), ('1130', '11:30'), ('1230', '12:30'), ('1330', '13:30'), ('1430', '14:30'),
-                                            ('1530', '15:30'), ('1630', '16:30'), ('1730', '17:30'), ('1830', '18:30'), ('1930', '19:30'),
-                                            ('2030', '20:30'), ('2130', '21:30'), ('2230', '22:30')))
-    color = forms.ChoiceField(choices=(('rgb(0, 0, 0, .6)', 'Black'), ('rgb(255, 0, 0, .6)', 'Red'), ('rgb(255, 127, 0, .6)', 'Orange'), ('rgb(255, 255, 0, .6)', 'Yellow'), 
-                                        ('rgb(127, 255, 0, .6)', 'Light Green'), ('rgb(0, 255, 0, .6)', 'Green'), ('rgb(0, 255, 127, .6)', 'Blue Green'),
-                                        ('rgb(0, 255, 255, .6)', 'Cyan'), ('rgb(0, 0, 255, .6)', 'Blue'), ('rgb(127, 0, 255, .6)', 'Violet'), 
-                                        ('rgb(255, 0, 255, .6)', 'Magenta')))
+    
+    
 
 # class EditDatasetForm(forms.Form):
     # label = EditChartLabel(queryset = Graph)

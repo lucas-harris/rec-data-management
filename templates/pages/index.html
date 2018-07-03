@@ -78,7 +78,7 @@
         <!--Bottom Bar-->
             <div class="row justify-content-end bottom-bar">
 
-                <div class='col-1'>
+                <div class='col-2'>
                 <form action="/data-visualizer/change-selected-chart-redirect/" method="POST">   
                     {% csrf_token %}       
                     <div class='hidden'>
@@ -91,9 +91,6 @@
                     <input type="submit" name='delete' value="Delete" class="btn btn-outline-primary" id="delete-chart-button" disabled>
                 </div>
                 </form>
-                <div class="col-1">
-                    <button type="button" class="btn btn-outline-primary" id="swap-chart-button" disabled>Swap</button>
-                </div>
             </div>
         </div>
     </body>

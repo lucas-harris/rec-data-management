@@ -13,7 +13,7 @@
         </script>
     </head>
     <body>
-        {{text}}
+        {{graphs|safe}}
         <div class="container entire-body">
             <div class="row justify-content-start">
                 <div class="col-0">
@@ -57,9 +57,13 @@
                     {% endfor %}
                 </div>
             </div>
-            <form action="/data-visualizer/confirm-chart-redirect/" method="POST" class="form-group">
-                {% csrf_token %}
-                {{ chart_form }}
+            <div class='row justify-content-center type-row'>
+                <div class="col-8">
+                <form action="/data-visualizer/confirm-chart-redirect/" method="POST" class="form-group">
+                    {% csrf_token %}
+                    {{ chart_form }}
+                </div>
+            </div>
                 <div class="row justify-content-center">
                     <div class="col-0">
                         <input type="submit" value="Select" name='edit-chart' class="btn btn-outline-primary facility-button" id="data-select-confirm">

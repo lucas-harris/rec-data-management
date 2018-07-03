@@ -41,6 +41,22 @@
     margin-top: 50px;
 }
 
+.type-row {
+    margin-top: 40px;
+}
+
 canvas {
     border: 1px solid black;
 }
+
+li {
+    display: inline-block;
+    margin-right: 5%;
+    margin-left: 5%;
+}
+
+label {
+    font-size: 1rem;
+}
+
+

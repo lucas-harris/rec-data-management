@@ -7,7 +7,7 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 import time
 import datetime
-from models import *
+from pages.models import Data
 
 # class Parser():
 def parse_sheet(sheet, start_date):
@@ -24,62 +24,169 @@ def parse_sheet(sheet, start_date):
     result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
     whole_sheet = result.get('values', [])
     start_cell = 3
-    end_cell = 19
     row = 1
-    while row < len(whole_sheet):
-        current_time = whole_sheet[row-1][0]
-        if current_time == '6:30 AM':
-            start_cell = row
-            end_cell = row + 16
-            RANGE_NAME = sheet + '!A' + str(start_cell) + ':AD' + str(end_cell)
-            result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
-            values = result.get('values', [])
-            render_week(values, start_date)
-            # print(values)
-            row+=16
-            time.sleep(1)
-        else:
-            row += 1
-
-
-def render_week(week, start_date):
-    data_dict = {}
-    # for hour in week:
-        # time = time_convert_dict[hour[0]]
-        # day_dict = {}
-        # day_dict['monday'] = convert_day_to_gender_dictionary(hour[1:5])
-        # day_dict['tuesday'] = convert_day_to_gender_dictionary(hour[5:9])
-        # day_dict['wednesday'] = convert_day_to_gender_dictionary(hour[9:13])
-        # day_dict['thursday'] = convert_day_to_gender_dictionary(hour[13:17])
-        # day_dict['friday'] = convert_day_to_gender_dictionary(hour[17:21])
-        # day_dict['saturday'] = convert_day_to_gender_dictionary(hour[21:25])
-        # day_dict['sunday'] = convert_day_to_gender_dictionary(hour[25:29])
-
-    hour = week[0]    
-    convert_row_to_dictionary(hour, start_date, 'yes')
+    current_date = start_date
+    if sheet == 'Rec Patron Counts':
+        end_cell = 19
+        while row < len(whole_sheet):
+            current_time = whole_sheet[row-1][0]
+            if current_time == '6:30 AM':
+                start_cell = row
+                end_cell = row + 16
+                RANGE_NAME = sheet + '!A' + str(start_cell) + ':AD' + str(end_cell)
+                result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+                values = result.get('values', [])
+                render_week_rec(values, current_date)
+                row+=16
+                current_date = current_date + datetime.timedelta(days=7)
+            else:
+                row += 1
+    elif sheet == 'Clawson':
+        end_cell = 21
+        while row < len(whole_sheet):
+            current_time = whole_sheet[row-1][0]
+            if current_time == '2:30':
+                start_cell = row
+                end_cell = row + 18
+                RANGE_NAME = sheet + '!A' + str(start_cell) + ':S' + str(end_cell)
+                result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+                values = result.get('values', [])
+                render_week_clawson(values, current_date)
+                row += 18
+                current_date = current_date + datetime.timedelta(days=7)
+            else:
+                row += 1
+    elif sheet == 'North Quad':
+        start_cell = 220
+        end_cell = 238
+        row = 220
+        while row < len(whole_sheet):
+            current_time = whole_sheet[row-1][0]
+            if current_time == '2:30':
+                start_cell = row
+                end_cell = row + 18
+                RANGE_NAME = sheet + '!A' + str(start_cell) + ':S' + str(end_cell)
+                result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+                values = result.get('values', [])
+                render_week_nq(values, current_date)
+                row += 18
+                current_date = current_date + datetime.timedelta(days=7)
+            else:
+                row += 1
         
-def convert_row_to_dictionary(row, date, data_dict):
-    time_convert_dict = {'6:30 AM':'0630', '7:30 AM':'0730', '8:30 AM':'0830', '9:30 AM':'0930', '10:30 AM':'1030', '11:30 AM':'1130', '12:30 PM':'1230', '1:30 PM':'1330', '2:30 PM':'1430', '3:30 PM':'1530', '4:30 PM':'1630', '5:30 PM':'1730', '6:30 PM':'1830', '7:30 PM':'1930', '8:30 PM':'2030', '9:30 PM':'2130', '10:30 PM':'2230'}
-    return_data_dictionary = {}
-    time = time_convert_dict[row[0]]
-    current_index = 1
-    hour_dict = {}
-    for day in range(0,7):
-        m_fc = {'gender':'m', 'facility':'rec', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(row[current_index])}
-        current_index += 1
-        f_fc = {'gender':'f', 'facility':'rec', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(row[current_index])}
-        current_index += 1
-        m_gf = {'gender':'m', 'facility':'rec', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(row[current_index])}
-        current_index += 1
-        f_gf = {'gender':'f', 'facility':'rec', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(row[current_index])}
-        current_index += 1
-        day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
-        hour_dict[date + datetime.timedelta(days=day)] = day_dict
-    for day in hour_dict.values():
-        for data in day.values():
-            key = str(data['date'])[0:10] + ' ' + data['facility'] + ' ' + data['area'] + ' ' + data['time'] + ' ' + data['gender']
-            data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'])
+def render_week_rec(week, date):
+    for hour in week:
+        time_convert_dict = {'6:30 AM':'0630', '7:30 AM':'0730', '8:30 AM':'0830', '9:30 AM':'0930', '10:30 AM':'1030', '11:30 AM':'1130', '12:30 PM':'1230', '1:30 PM':'1330', '2:30 PM':'1430', '3:30 PM':'1530', '4:30 PM':'1630', '5:30 PM':'1730', '6:30 PM':'1830', '7:30 PM':'1930', '8:30 PM':'2030', '9:30 PM':'2130', '10:30 PM':'2230'}
+        time = time_convert_dict[hour[0]]
+        current_index = 1
+        hour_dict = {}
+        for day in range(0,7):
+            m_fc = {'gender':'m', 'facility':'rec', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_fc = {'gender':'f', 'facility':'rec', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            m_gf = {'gender':'m', 'facility':'rec', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_gf = {'gender':'f', 'facility':'rec', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
+            hour_dict[date + datetime.timedelta(days=day)] = day_dict
+        for day in hour_dict.values():
+            for data in day.values():
+                if not data['value'] == None:
+                    key = str(data['date'])[0:10] + ' ' + data['facility'] + ' ' + data['area'] + ' ' + data['time'] + ' ' + data['gender']
+                    data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'])
+                    data.save()
 
+def render_week_clawson(week, date):
+    time_convert_dict = {'2:30':'1430', '3:30':'1530', '4:30':'1630', '5:30':'1730', '6:30':'1830', '7:30':'1930', '8:30':'2030', '9:30':'2130'}
+    hour_dict = {}
+    for hour in week[0:8]:
+        time = time_convert_dict[hour[0]]
+        current_index = 1
+        for day in range(0,4):
+            m_fc = {'gender':'m', 'facility':'clawson', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_fc = {'gender':'f', 'facility':'clawson', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            m_gf = {'gender':'m', 'facility':'clawson', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_gf = {'gender':'f', 'facility':'clawson', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
+            hour_dict[date + datetime.timedelta(days=day)] = day_dict
+        for day in hour_dict.values():
+            for data in day.values():
+                if not data['value'] == None:
+                    key = str(data['date'])[0:10] + ' ' + data['facility'] + ' ' + data['area'] + ' ' + data['time'] + ' ' + data['gender']
+                    data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'])
+                    data.save()
+    date = date + datetime.timedelta(days=4)
+    for hour in week[11:19]:
+        time = time_convert_dict[hour[0]]
+        current_index = 1
+        for day in range(0,3):
+            m_fc = {'gender':'m', 'facility':'clawson', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_fc = {'gender':'f', 'facility':'clawson', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            m_gf = {'gender':'m', 'facility':'clawson', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_gf = {'gender':'f', 'facility':'clawson', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
+            hour_dict[date + datetime.timedelta(days=day)] = day_dict
+        for day in hour_dict.values():
+            for data in day.values():
+                if not data['value'] == None:
+                    key = str(data['date'])[0:10] + ' ' + data['facility'] + ' ' + data['area'] + ' ' + data['time'] + ' ' + data['gender']
+                    data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'])
+                    data.save()
+            
+def render_week_nq(week, date):
+    time_convert_dict = {'2:30':'1430', '3:30':'1530', '4:30':'1630', '5:30':'1730', '6:30':'1830', '7:30':'1930', '8:30':'2030', '9:30':'2130'}
+    hour_dict = {}
+    for hour in week[0:8]:
+        time = time_convert_dict[hour[0]]
+        current_index = 1
+        for day in range(0,4):
+            m_fc = {'gender':'m', 'facility':'nq', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_fc = {'gender':'f', 'facility':'nq', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            m_gf = {'gender':'m', 'facility':'nq', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_gf = {'gender':'f', 'facility':'nq', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
+            hour_dict[date + datetime.timedelta(days=day)] = day_dict
+        for day in hour_dict.values():
+            for data in day.values():
+                if not data['value'] == None:
+                    key = str(data['date'])[0:10] + ' ' + data['facility'] + ' ' + data['area'] + ' ' + data['time'] + ' ' + data['gender']
+                    data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'])
+                    data.save()
+    date = date + datetime.timedelta(days=4)
+    for hour in week[11:19]:
+        time = time_convert_dict[hour[0]]
+        current_index = 1
+        for day in range(0,3):
+            m_fc = {'gender':'m', 'facility':'nq', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_fc = {'gender':'f', 'facility':'nq', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            m_gf = {'gender':'m', 'facility':'nq', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            f_gf = {'gender':'f', 'facility':'nq', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            current_index += 1
+            day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
+            hour_dict[date + datetime.timedelta(days=day)] = day_dict
+        for day in hour_dict.values():
+            for data in day.values():
+                if not data['value'] == None:
+                    key = str(data['date'])[0:10] + ' ' + data['facility'] + ' ' + data['area'] + ' ' + data['time'] + ' ' + data['gender']
+                    data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'])
+                    data.save()
 
 def check_string(string):
     try: 
@@ -87,4 +194,4 @@ def check_string(string):
     except ValueError:
         return None
 
-parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 27))
+parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 28))

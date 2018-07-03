@@ -22,3 +22,33 @@
     font-style: italic;
     font-size: .75em;
 }
+
+li {
+    display: inline-block;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+label {
+    font-size: 1.5rem;
+}
+
+* {
+    font-size: 1.05rem;
+}
+
+.form-row {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid black;
+    padding: 10px;
+}
+
+.ui-datepicker-div {
+    background: #ff0000;
+}
+
+form {
+    text-align: center;
+    /* outline: 1px solid black; */
+}
