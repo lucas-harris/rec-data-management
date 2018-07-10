@@ -157,7 +157,6 @@ class Query():
             return 1
 
 #Increment Grouping
-
     def group_queries(self, graph):
         """Returns a dictionary containing the values of the Data selected in the Dataset form"""
         """grouped by the increment unit selected in the form"""
@@ -315,7 +314,22 @@ class Query():
 
     def query_all(self, graph, date):
         """Returns a QuerySet that matches all the non-date attributes of Dataset form"""
-        return self.query_facilities(graph, date) & self.query_area(graph, date) & self.query_gender(graph, date) & self.query_time(graph, date)
+        facilities = self.query_facilities(graph, date)
+        area = self.query_area(graph, date)
+        gender = self.query_gender(graph, date)
+        time = self.query_time(graph, date)
+        ret = Date.objects.none()
+        if facilities == 'all' and area == 'all' and gender == 'all' and time == 'all':
+            return Date.objects.get(date=date).data_set.all()
+        elif not facilities == 'all':
+            ret = ret | facilities 
+        elif not area == 'all':
+            ret = ret | area 
+        elif not gender == 'all':
+            ret = ret | gender
+        elif not time == 'all':
+            ret = ret | time
+        return ret
 
     def create_date_group(self, graph):
         """Returns a QuerySet that is the period and date queries combined"""
@@ -337,7 +351,25 @@ class Query():
     
     def get_date_queries(self, graph):
         """Returns a QuerySet of all dates that match the values chosen in Dataset form"""
-        return self.query_month(graph) & self.query_week(graph) & self.query_year(graph) & self.query_day_of_month(graph) & self.query_day_of_week(graph)
+        month = self.query_month(graph)
+        week = self.query_week(graph)
+        year = self.query_year(graph)
+        dom = self.query_day_of_month(graph)
+        dow = self.query_day_of_week(graph)
+        ret = Date.objects.none()
+        if month == 'all' and week == 'all' and year == 'all' and dom == 'all' and dow == 'all':
+            return Date.objects.all()
+        elif not month == 'all':
+            ret = ret | month 
+        elif not week == 'all':
+            ret = ret | week 
+        elif not year == 'all':
+            ret = ret | year
+        elif not dom == 'all':
+            ret = ret | dom
+        elif not dow == 'all':
+            ret = ret | dow
+        return ret
 
 
 #Date Queries-------------------------
@@ -348,7 +380,7 @@ class Query():
         ret = Date.objects.none()
         for x in years:
             if x == 'all':
-                return Date.objects.all()
+                return 'all'
             ret = ret | Date.objects.filter(year=x)
         return ret
 
@@ -358,7 +390,7 @@ class Query():
         ret = Date.objects.none()
         for x in months:
             if x == 'all':
-                return Date.objects.all()
+                return 'all'
             ret = ret | Date.objects.filter(month=x)
         return ret
 
@@ -368,7 +400,7 @@ class Query():
         ret = Date.objects.none()
         for x in days:
             if x == 'all':
-                return Date.objects.all()
+                return 'all'
             ret = ret | Date.objects.filter(day_of_month=x)
         return ret
 
@@ -378,7 +410,7 @@ class Query():
         ret = Date.objects.none()
         for x in weeks:
             if x == 'all':
-                return Date.objects.all()
+                return 'all'
             ret = ret | Date.objects.filter(week=x)
         return ret
 
@@ -388,7 +420,7 @@ class Query():
         ret = Date.objects.none()
         for x in days:
             if x == 'all':
-                return Date.objects.all()
+                return 'all'
             ret = ret | Date.objects.filter(day_of_week=x)
         return ret
 
@@ -399,7 +431,7 @@ class Query():
         ret = Date.objects.get(date=date).data_set.none()
         for x in facilities:
             if x == 'all':
-                return Date.objects.get(date=date).data_set.all()
+                return 'all'
             ret = ret | Date.objects.get(date=date).data_set.filter(facility=x)
         return ret
 
@@ -409,7 +441,7 @@ class Query():
         ret = Date.objects.get(date=date).data_set.none()
         for x in areas:
             if x == 'all':
-                return Date.objects.get(date=date).data_set.all()
+                return 'all'
             ret = ret | Date.objects.get(date=date).data_set.filter(area=x)
         return ret
 
@@ -418,7 +450,7 @@ class Query():
         gender = self.replace_characters(graph.gender)[0]
         ret = Date.objects.get(date=date).data_set.none()
         if gender == 'all':
-            return Date.objects.get(date=date).data_set.all()
+            return 'all'
         else:
             ret = ret | Date.objects.get(date=date).data_set.filter(gender=gender)
         return ret
@@ -429,7 +461,7 @@ class Query():
         ret = Date.objects.get(date=date).data_set.none()
         for x in times:
             if x == 'all':
-                return Date.objects.get(date=date).data_set.all()
+                return 'all'
             ret = ret | Date.objects.get(date=date).data_set.filter(time=x)
         return ret
 
