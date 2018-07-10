@@ -337,7 +337,7 @@ class Query():
     
     def get_date_queries(self, graph):
         """Returns a QuerySet of all dates that match the values chosen in Dataset form"""
-        return self.query_month(graph) & self.query_week(graph)  & self.query_year(graph) & self.query_day_of_month(graph) & self.query_day_of_week(graph)
+        return self.query_month(graph) & self.query_week(graph) & self.query_year(graph) & self.query_day_of_month(graph) & self.query_day_of_week(graph)
 
 
 #Date Queries-------------------------

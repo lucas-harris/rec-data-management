@@ -45,7 +45,7 @@
                 for(var i in charts{{x}}.charts[j].graph) {
                     labels[j].push(Object.keys(charts{{x}}.charts[j].graph[i].data)[0]);
                     dataValues.push(Object.values(charts{{x}}.charts[j].graph[i].data));
-                    reportData += '<div class="col-4">' + (Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data) + '</div>');
+                    reportData += '<div class="col-4" style="margin-top:5px; margin-bottom:5px;">' + (Object.keys(charts{{x}}.charts[j].graph[i].data)[0] + ': ' + Object.values(charts{{x}}.charts[j].graph[i].data) + '</div>');
                 } 
                 reportData += '</div></div>'
                 chartDataHtml[{{x}}][j] = reportData;
@@ -159,9 +159,9 @@
                 },
                 options: {
                     pieceLabel: {
-                        mode: 'label', 
+                        mode: 'percent', 
                         precision: 2,
-                        position: 'border',
+                        position: 'outside',
                         overlap: true,
                         fontStyle: 'bold',
                         fontColor: 'black',  

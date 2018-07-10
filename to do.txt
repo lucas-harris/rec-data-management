@@ -1,0 +1,5 @@
+To Do:
+
+-Line up data points in line/bar (nq and clawson start at the same point as the rec even though the hours are different)
+-Some solution to missing sheet data
+-Report positioning

@@ -194,4 +194,12 @@ def check_string(string):
     except ValueError:
         return None
 
-parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 28))
+# def generate_average_cell(time, weekday):
+
+
+def parse_all():
+    parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 28))
+    parse_sheet('Clawson',  datetime.datetime(2017, 11, 6))
+    parse_sheet('North Quad',  datetime.datetime(2017, 10, 30))
+
+parse_all()

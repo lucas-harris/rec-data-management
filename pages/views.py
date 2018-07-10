@@ -8,7 +8,6 @@ from .queries import *
 from pages.entry_scripts.data_entry_script import *
 from pages.entry_scripts.date_entry_script import *
 from django.db.models import Max
-
 #Index View -----------------------------------
 def index(request):
     # parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 27))
@@ -35,19 +34,19 @@ def index(request):
     request.session['current_page'] = 'dashboard'
     if 'current_chartset' not in request.session:
         chartset = ChartSet()
-        request.session['current_chartset'] = ChartSet.objects.latest('id').id
+        saved_chartsets = ChartSet.objects.filter(saved=True)
+        request.session['current_chartset'] = saved_chartsets[0].id
     charts = Chart.objects.filter(chart_set_id=request.session['current_chartset'])
     charts = charts & Chart.objects.filter(saved=True)
     chart_number = len(charts)
     chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
     text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
-    # text = create_label(Chart.objects.get(id=44))
     name_taken_flag = request.session.get('name_taken_flag')
     request.session['name_taken_flag'] = 'false'
+    current_saved = str(ChartSet.objects.get(id=request.session.get('current_chartset')).saved)
     return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number), 'save_template_form': save_template_form, 
-    'text':text, 'name_taken_flag':name_taken_flag, 'select_template_form':select_template_form, 'select_chart_form':select_chart_form})
-
+    'text':text, 'name_taken_flag':name_taken_flag, 'select_template_form':select_template_form, 'select_chart_form':select_chart_form, 'current_saved':current_saved})
 def createchartset(request):
     new_chart_set = ChartSet()
     new_chart_set.save()
@@ -65,6 +64,8 @@ def savechartset(request):
                 chartset.name = save_template_form.cleaned_data['name']
                 chartset.saved = True
                 chartset.save()
+                for unsaved_chart in ChartSet.objects.filter(saved=0):
+                    unsaved_chart.delete()
                 request.session['current_chartset'] = chartset.id
             else:
                 request.session['name_taken_flag'] = 'true'

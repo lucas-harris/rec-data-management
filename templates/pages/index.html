@@ -17,12 +17,20 @@
         <div class="container body entire-body">
         {{text}}
         <!-- Top Bar-->
+            
             <div class="row justify-content-start top-bar">
+                <div class="col-2">
+                    <button type="button" class="btn btn-outline-primary" id="new-chartset-button">Create Template</button>
+                    
+                </div>
                 <div class="col-2">
                     <button type="button" class="btn btn-outline-primary" id="save-template-button">Save Template</button>
                 </div>
                 <div class="col-2">
                     <button type="button" class="btn btn-outline-primary" id="view-template-button">View Templates</button>
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-outline-primary" id="new-chartset-button"><a href="{% url 'report' %}">View Report</a></button>
                 </div>
             </div>
         
@@ -49,7 +57,7 @@
                 </div>
             </div>
 
-            <button type="button" class="btn btn-outline-primary" id="new-chartset-button"><a href="{% url 'create-chartset-redirect' %}">Create Chartset</a></button>
+            
 
             <div class="container">
                 <div class="row">
@@ -99,12 +107,28 @@
         {% if name_taken_flag == None %}
             var name_taken = false;
         {% else %}
-            var name_taken = {{name_taken_flag}};
+        if({{name_taken_flag}}=='False') {
+            var name_taken = false;
+        }
+        else {
+            var name_taken_flag = true;
+        }
         {% endif %}
 
         window.onload = function() {
-            if(name_taken) {
+            if({{name_taken_flag}}) {
                 alert('Chart Set Name Taken');
+            }
+        }
+
+        document.getElementById('new-chartset-button').onclick = function() {
+            if('{{current_saved}}'=='False') {
+                if(window.confirm('Template has not been saved, continue?')==true) {
+                    window.location = "{% url 'create-chartset-redirect' %}";
+                }
+            }
+            else {
+                window.location = "{% url 'create-chartset-redirect' %}";
             }
         }
     </script>
