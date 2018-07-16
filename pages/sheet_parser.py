@@ -7,9 +7,8 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 import time
 import datetime
-from pages.models import Data
+from pages.models import Data, Date
 
-# class Parser():
 def parse_sheet(sheet, start_date):
     column_dict = {0:'A', 1:'B', 2:'C', 3:'D', 4:'E', 5:'F', 6:'G', 7:'H', 8:'I', 9:'J', 10:'K', 11:'L', 12:'M', 13:'N', 14:'O', 15:'P', 16:'Q', 17:'R', 18:'S', 19:'T', 20:'U', 21:'V', 22:'W', 23:'X', 24:'Y', 25:'Z', 26:'AA', 27:'AB', 28:'AC'}
     SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
@@ -73,21 +72,22 @@ def parse_sheet(sheet, start_date):
                 current_date = current_date + datetime.timedelta(days=7)
             else:
                 row += 1
-        
+
 def render_week_rec(week, date):
     for hour in week:
         time_convert_dict = {'6:30 AM':'0630', '7:30 AM':'0730', '8:30 AM':'0830', '9:30 AM':'0930', '10:30 AM':'1030', '11:30 AM':'1130', '12:30 PM':'1230', '1:30 PM':'1330', '2:30 PM':'1430', '3:30 PM':'1530', '4:30 PM':'1630', '5:30 PM':'1730', '6:30 PM':'1830', '7:30 PM':'1930', '8:30 PM':'2030', '9:30 PM':'2130', '10:30 PM':'2230'}
         time = time_convert_dict[hour[0]]
         current_index = 1
+        current_value = 0
         hour_dict = {}
         for day in range(0,7):
-            m_fc = {'gender':'m', 'facility':'rec', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_fc = gather_data_from_cell(hour, date, day, 'rec', 'fc', time, 'm', current_index)
             current_index += 1
-            f_fc = {'gender':'f', 'facility':'rec', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_fc = gather_data_from_cell(hour, date, day, 'rec', 'fc', time, 'f', current_index)
             current_index += 1
-            m_gf = {'gender':'m', 'facility':'rec', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_gf = gather_data_from_cell(hour, date, day, 'rec', 'gf', time, 'm', current_index)
             current_index += 1
-            f_gf = {'gender':'f', 'facility':'rec', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_gf = gather_data_from_cell(hour, date, day, 'rec', 'gf', time, 'f', current_index)
             current_index += 1
             day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
             hour_dict[date + datetime.timedelta(days=day)] = day_dict
@@ -105,13 +105,13 @@ def render_week_clawson(week, date):
         time = time_convert_dict[hour[0]]
         current_index = 1
         for day in range(0,4):
-            m_fc = {'gender':'m', 'facility':'clawson', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_fc = gather_data_from_cell(hour, date, day, 'clawson', 'fc', time, 'm', current_index)
             current_index += 1
-            f_fc = {'gender':'f', 'facility':'clawson', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_fc = gather_data_from_cell(hour, date, day, 'clawson', 'fc', time, 'f', current_index)
             current_index += 1
-            m_gf = {'gender':'m', 'facility':'clawson', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_gf = gather_data_from_cell(hour, date, day, 'clawson', 'gf', time, 'm', current_index)
             current_index += 1
-            f_gf = {'gender':'f', 'facility':'clawson', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_gf = gather_data_from_cell(hour, date, day, 'clawson', 'gf', time, 'f', current_index)
             current_index += 1
             day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
             hour_dict[date + datetime.timedelta(days=day)] = day_dict
@@ -126,13 +126,13 @@ def render_week_clawson(week, date):
         time = time_convert_dict[hour[0]]
         current_index = 1
         for day in range(0,3):
-            m_fc = {'gender':'m', 'facility':'clawson', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_fc = gather_data_from_cell(hour, date, day, 'clawson', 'fc', time, 'm', current_index)
             current_index += 1
-            f_fc = {'gender':'f', 'facility':'clawson', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_fc = gather_data_from_cell(hour, date, day, 'clawson', 'fc', time, 'f', current_index)
             current_index += 1
-            m_gf = {'gender':'m', 'facility':'clawson', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_gf = gather_data_from_cell(hour, date, day, 'clawson', 'gf', time, 'm', current_index)
             current_index += 1
-            f_gf = {'gender':'f', 'facility':'clawson', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_gf = gather_data_from_cell(hour, date, day, 'clawson', 'gf', time, 'f', current_index)
             current_index += 1
             day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
             hour_dict[date + datetime.timedelta(days=day)] = day_dict
@@ -150,13 +150,13 @@ def render_week_nq(week, date):
         time = time_convert_dict[hour[0]]
         current_index = 1
         for day in range(0,4):
-            m_fc = {'gender':'m', 'facility':'nq', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_fc = gather_data_from_cell(hour, date, day, 'nq', 'fc', time, 'm', current_index)
             current_index += 1
-            f_fc = {'gender':'f', 'facility':'nq', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_fc = gather_data_from_cell(hour, date, day, 'nq', 'fc', time, 'f', current_index)
             current_index += 1
-            m_gf = {'gender':'m', 'facility':'nq', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_gf = gather_data_from_cell(hour, date, day, 'nq', 'gf', time, 'm', current_index)
             current_index += 1
-            f_gf = {'gender':'f', 'facility':'nq', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_gf = gather_data_from_cell(hour, date, day, 'nq', 'gf', time, 'f', current_index)
             current_index += 1
             day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
             hour_dict[date + datetime.timedelta(days=day)] = day_dict
@@ -171,13 +171,13 @@ def render_week_nq(week, date):
         time = time_convert_dict[hour[0]]
         current_index = 1
         for day in range(0,3):
-            m_fc = {'gender':'m', 'facility':'nq', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_fc = gather_data_from_cell(hour, date, day, 'nq', 'fc', time, 'm', current_index)
             current_index += 1
-            f_fc = {'gender':'f', 'facility':'nq', 'time':time, 'area':'fc', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_fc = gather_data_from_cell(hour, date, day, 'nq', 'fc', time, 'f', current_index)
             current_index += 1
-            m_gf = {'gender':'m', 'facility':'nq', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            m_gf = gather_data_from_cell(hour, date, day, 'nq', 'gf', time, 'm', current_index)
             current_index += 1
-            f_gf = {'gender':'f', 'facility':'nq', 'time':time, 'area':'gf', 'date':date + datetime.timedelta(days=day), 'value':check_string(hour[current_index])}
+            f_gf = gather_data_from_cell(hour, date, day, 'nq', 'gf', time, 'f', current_index)
             current_index += 1
             day_dict = {'m_fc': m_fc, 'f_fc':f_fc, 'm_gf':m_gf, 'f_gf':f_gf}
             hour_dict[date + datetime.timedelta(days=day)] = day_dict
@@ -194,8 +194,27 @@ def check_string(string):
     except ValueError:
         return None
 
-# def generate_average_cell(time, weekday):
+def gather_data_from_cell(hour, date, day, facility, area, time, gender, current_index):
+    current_day_query = Date.objects.filter(day_of_week = (date + datetime.timedelta(days=day)).weekday())
+    cell_query = Data.objects.filter(date_id__in = current_day_query)
+    cell_query = cell_query & Data.objects.filter(time=time)
+    if hour[current_index] == '':
+        current_cell_query = cell_query & Data.objects.filter(facility=facility)
+        current_cell_query = current_cell_query & Data.objects.filter(area=area)
+        current_cell_query = current_cell_query & Data.objects.filter(gender=gender)
+        if len(current_cell_query) == 0:
+            value = 0
+        else:
+            value = make_average(current_cell_query)
+    else:
+        value = check_string(hour[current_index])
+    return {'gender':gender, 'facility':facility, 'time':time, 'area':area, 'date':date + datetime.timedelta(days=day), 'value':value}
 
+def make_average(queryset):
+    total = 0
+    for number in queryset:
+        total += number.value
+    return total/len(queryset)
 
 def parse_all():
     parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 28))

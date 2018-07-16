@@ -4,7 +4,7 @@ from django.urls import reverse
 import json
 from .forms import *
 from .queries import *
-# from .sheet_parser import *
+from .sheet_parser import *
 from pages.entry_scripts.data_entry_script import *
 from pages.entry_scripts.date_entry_script import *
 from django.db.models import Max
@@ -42,6 +42,8 @@ def index(request):
     chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
     text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
+    # chillin_date = Date.objects.filter(date=datetime(2018, 1, 29))
+    # chillin_data = Data.objects.filter(date_id__in=chillin_date)
     name_taken_flag = request.session.get('name_taken_flag')
     request.session['name_taken_flag'] = 'false'
     current_saved = str(ChartSet.objects.get(id=request.session.get('current_chartset')).saved)

@@ -296,31 +296,22 @@ class Query():
     #Creates a dictionary of dictionaries. The upper level dicts contain 100 or less dicts that contain query results
     def query_every_day(self, graph):
         """Returns a QuerySet of all date and non-date variables of the Dataset form combined"""
-        return_query = Data.objects.none()
-        dates = self.create_date_group(graph)
-        size = len(dates)
         queries_dict = dict()
-        index = 0
-        dict_index = 0
-        for x in range(0,size):
-            if index == 100:
-                index = 0
-                dict_index += 1
-            if not dict_index in queries_dict:
-                queries_dict[dict_index] = Data.objects.none()
-            queries_dict[dict_index] = queries_dict[dict_index] | self.query_all(graph, dates[x].date)
-            index += 1
+        dates = self.create_date_group(graph)
+        data = self.query_all(graph)
+        queries_dict[0] = data & Data.objects.filter(date_id__in=dates)
         return queries_dict
 
-    def query_all(self, graph, date):
+    def query_all(self, graph):
         """Returns a QuerySet that matches all the non-date attributes of Dataset form"""
-        facilities = self.query_facilities(graph, date)
-        area = self.query_area(graph, date)
-        gender = self.query_gender(graph, date)
-        time = self.query_time(graph, date)
-        ret = Date.objects.none()
+        dates = '' #Currently a placeholder, need to add dates implementation to query methods for the time period being queried
+        facilities = self.query_facilities(graph, dates)
+        area = self.query_area(graph, dates)
+        gender = self.query_gender(graph, dates)
+        time = self.query_time(graph, dates)
+        ret = Data.objects.none()
         if facilities == 'all' and area == 'all' and gender == 'all' and time == 'all':
-            return Date.objects.get(date=date).data_set.all()
+            return Data.objects.all()
         elif not facilities == 'all':
             ret = ret | facilities 
         elif not area == 'all':
@@ -425,44 +416,44 @@ class Query():
         return ret
 
 #Data Queries-------------------------
-    def query_facilities(self, graph, date):
+    def query_facilities(self, graph, dates):
         """Returns a QuerySet of all the facilities selected in the Dataset form"""
         facilities = self.replace_characters(graph.facility)
-        ret = Date.objects.get(date=date).data_set.none()
+        ret = Data.objects.none()
         for x in facilities:
             if x == 'all':
                 return 'all'
-            ret = ret | Date.objects.get(date=date).data_set.filter(facility=x)
+            ret = ret | Data.objects.filter(facility=x)
         return ret
 
-    def query_area(self, graph, date):
+    def query_area(self, graph, dates):
         """Returns a QuerySet of all the areas selected in the Dataset form"""
         areas = self.replace_characters(graph.area)
-        ret = Date.objects.get(date=date).data_set.none()
+        ret = Data.objects.none()
         for x in areas:
             if x == 'all':
                 return 'all'
-            ret = ret | Date.objects.get(date=date).data_set.filter(area=x)
+            ret = ret | Data.objects.filter(area=x)
         return ret
 
-    def query_gender(self, graph, date):
+    def query_gender(self, graph, dates):
         """Returns a QuerySet of the gender selected in the Dataset form"""
         gender = self.replace_characters(graph.gender)[0]
-        ret = Date.objects.get(date=date).data_set.none()
+        ret = Data.objects.none()
         if gender == 'all':
             return 'all'
         else:
-            ret = ret | Date.objects.get(date=date).data_set.filter(gender=gender)
+            ret = ret | Data.objects.filter(gender=gender)
         return ret
 
-    def query_time(self, graph, date):
+    def query_time(self, graph, dates):
         """Returns a QuerySet of all the times selected in the Dataset form"""
         times = self.replace_characters(graph.time)
-        ret = Date.objects.get(date=date).data_set.none()
+        ret = Data.objects.none()
         for x in times:
             if x == 'all':
                 return 'all'
-            ret = ret | Date.objects.get(date=date).data_set.filter(time=x)
+            ret = ret | Data.objects.filter(time=x)
         return ret
 
     #Replace Characters
