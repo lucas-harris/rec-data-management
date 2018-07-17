@@ -185,7 +185,7 @@ def render_week_nq(week, date):
             for data in day.values():
                 if not data['value'] == None:
                     key = str(data['date'])[0:10] + ' ' + data['facility'] + ' ' + data['area'] + ' ' + data['time'] + ' ' + data['gender']
-                    data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'])
+                    data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'], estimated=data['estimated'])
                     data.save()
 
 def check_string(string):
@@ -195,30 +195,42 @@ def check_string(string):
         return None
 
 def gather_data_from_cell(hour, date, day, facility, area, time, gender, current_index):
-    current_day_query = Date.objects.filter(day_of_week = (date + datetime.timedelta(days=day)).weekday())
-    cell_query = Data.objects.filter(date_id__in = current_day_query)
-    cell_query = cell_query & Data.objects.filter(time=time)
-    if hour[current_index] == '':
+    estimated = False
+    if not hour[current_index]:
+        current_day_query = Date.objects.filter(date = (date + datetime.timedelta(days=day-14)))
+        current_day_query = current_day_query | Date.objects.filter(date = (date + datetime.timedelta(days=day-7)))
+        current_day_query = current_day_query | Date.objects.filter(date = (date + datetime.timedelta(days=day+7)))
+        current_day_query = current_day_query | Date.objects.filter(date = (date + datetime.timedelta(days=day+14)))
+        cell_query = Data.objects.filter(date_id__in = current_day_query)
+        cell_query = cell_query & Data.objects.filter(time=time)
         current_cell_query = cell_query & Data.objects.filter(facility=facility)
         current_cell_query = current_cell_query & Data.objects.filter(area=area)
         current_cell_query = current_cell_query & Data.objects.filter(gender=gender)
         if len(current_cell_query) == 0:
             value = 0
+            estimated = True
         else:
             value = make_average(current_cell_query)
+            estimated = True
     else:
         value = check_string(hour[current_index])
-    return {'gender':gender, 'facility':facility, 'time':time, 'area':area, 'date':date + datetime.timedelta(days=day), 'value':value}
+    return {'gender':gender, 'facility':facility, 'time':time, 'area':area, 'date':date + datetime.timedelta(days=day), 'value':value, 'estimated':estimated}
 
 def make_average(queryset):
     total = 0
+    length = 0
     for number in queryset:
-        total += number.value
-    return total/len(queryset)
+        if number.value:
+            total += number.value
+            length += 1
+    if length>0:
+        return total/length
+    else:
+        return 0
 
 def parse_all():
-    parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 28))
-    parse_sheet('Clawson',  datetime.datetime(2017, 11, 6))
+    # parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 28))
+    # parse_sheet('Clawson',  datetime.datetime(2017, 11, 6))
     parse_sheet('North Quad',  datetime.datetime(2017, 10, 30))
 
 parse_all()

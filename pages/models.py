@@ -19,6 +19,7 @@ class Data(models.Model):
     time = models.CharField(max_length=5)
     gender = models.CharField(max_length=3)
     date = models.ForeignKey(Date, on_delete=models.CASCADE)
+    estimated = models.BooleanField(default = False)
 
     class Meta:
         ordering = ['value']

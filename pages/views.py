@@ -2,15 +2,16 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 import json
+import datetime
+from datetime import timedelta
 from .forms import *
 from .queries import *
-from .sheet_parser import *
+# from .sheet_parser import *
 from pages.entry_scripts.data_entry_script import *
 from pages.entry_scripts.date_entry_script import *
 from django.db.models import Max
 #Index View -----------------------------------
 def index(request):
-    # parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 27))
     save_template_form = SaveTemplateForm()
     select_template_form = SelectTemplateForm()
     select_chart_form = SelectChartForm()
