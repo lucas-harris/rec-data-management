@@ -9,9 +9,6 @@ class DataForm(ModelForm):
     class Meta:
         model = Data
         fields = ['key', 'value', 'date', 'facility', 'area']
-    # facility = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(),
-    #                                      choices=((1, 'Rec Center'), (2, 'Clawson'), (3, 'North Quad'), (4,'All')))
-    
 
 class DatasetForm(forms.Form):
     label = forms.CharField(max_length=40)
@@ -54,12 +51,6 @@ class DatasetForm(forms.Form):
                                                      ('28', 'Day 28'), ('29', 'Day 29'), ('30', 'Day 30'), ('31', 'Day 31')))
     day_of_week = forms.MultipleChoiceField(initial=('all', 'All'), choices=(('all', 'All'), ('0', 'Monday'), ('1', 'Tuesday'), ('2', 'Wednesday'), ('3', 'Thursday'),
                                                      ('4', 'Friday'), ('5', 'Saturday'), ('6', 'Sunday')))
-
-    
-    
-
-# class EditDatasetForm(forms.Form):
-    # label = EditChartLabel(queryset = Graph)
 
 class ChartForm(forms.Form):
     type = forms.ChoiceField(initial=('line', 'Line Chart'), required=True, widget=forms.RadioSelect(), choices=(('line', 'Line Chart'), ('bar', 'Bar Chart'), ('pie', 'Pie Chart'),

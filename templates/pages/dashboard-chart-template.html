@@ -12,7 +12,7 @@
         var ctx = document.getElementById("template-chart{{x}}");
         var datasetValue = [];
         var chartData = charts{{x}}.charts;
-        var labels = []
+        var labels = [];
         var chartType{{x}} = charts{{x}}.type;
         if(chartType{{x}}=='line' | chartType{{x}}=='bar') {
             for (var j = 0; j < charts{{x}}.charts.length; j++) { 
@@ -66,10 +66,8 @@
                 }
                 datasetValue[0] = {
                     backgroundColor: colors,
-                    // hoverBackgroundColor: darkenArrayOfColors(colors),
                     pointBackgroundColor: darkenArrayOfColors(colors),
                     borderColor: 'white',
-                    // strokeColor : darkenArrayOfColors(colors),
                     title :'2013',
                     data: dataValues,
                     fill: false
@@ -149,10 +147,6 @@
                     },
                     legend: {
                         display: displayLabels
-                        // labels: {
-                        //     fontStyle: 'bold',
-                        //     fontSize: 16,
-                        // }
                     }
                 }
             });

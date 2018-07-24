@@ -37,6 +37,12 @@
 .chart-div {
     border: 1px solid white;
 }
+
+.chart-row {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
 #data-select-confirm {
     margin-top: 25px;
 }

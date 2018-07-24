@@ -13,13 +13,14 @@
         </script>
     </head>
     <body>
+        {{text}}
         <div class="container entire-body">
             <div class="row justify-content-start">
                 <div class="col-0">
                     <button type="button" class="btn btn-outline-primary" id="chart-back-button"><a href="{% url 'delete-chart-redirect' %}">Back</a></button>
                 </div>
             </div>
-            <div class="row justify-content-center">
+            <div class="row justify-content-center choose-dataset-button-row">
                 <div class="col-0">
                     <form name="select-dataset-form" action="/data-visualizer/select-dataset-redirect/" method="POST">
                         {% csrf_token %}
@@ -63,6 +64,11 @@
                     {{ chart_form }}
                 </div>
             </div>
+            <div class="row justify-content-center">
+                <div class="col-0">
+                    <p id="length-warning"></p>
+                </div>
+            </div>
                 <div class="row justify-content-center">
                     <div class="col-0">
                         <input type="submit" value="Select" name='edit-chart' class="btn btn-outline-primary facility-button" id="data-select-confirm">
@@ -76,6 +82,16 @@
             if('{{chart_type}}'==document.getElementById('id_type_'+t).value) {
                 document.getElementById('id_type_'+t).checked = true;
             }
+        }
+        var set = new Set();
+        for(var i = 0; i<json.length; i++) {
+            set.add(json[i].length);
+        }
+        if(set.size>1) {
+            document.getElementById('length-warning').innerHTML = '* Warning: Length mismatch. Data points may not align. If intentional, make sure each dataset begins at the same date/time *';
+        }
+        else {
+            document.getElementById('length-warning').innerHTML = '';
         }
     </script>
     <!-- <script src="{% static 'js/chart-creation.js' %}" type="module"></script> -->

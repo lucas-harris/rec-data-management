@@ -108,8 +108,12 @@
                             {{ field }} 
                         </div>
                     {% endif %}         
-
                 {% endfor %}
+                <div class="row">
+                    <div class="col-12">
+                        <p class="tip">* Hold 'Ctrl' and click to select multiple options, hold 'Shift' and click to select consecutive options</p>
+                    </div>
+                </div>
                 
             
                 <div class="row justify-content-center">
@@ -202,6 +206,10 @@
                 }
             }           
             document.getElementById('id_color').value = graph_json.color;
+        }
+        else{
+            var graph_json = {{graph_json|safe}};
+            document.getElementById('id_units').value = graph_json.unit;
         }
     </script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

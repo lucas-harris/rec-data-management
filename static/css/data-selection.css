@@ -1,3 +1,7 @@
+* {
+    font-size: 1.05rem;
+}
+
 .section {
     margin: 20px;
 }
@@ -23,6 +27,19 @@
     font-size: .75em;
 }
 
+.entire-body {
+    border: 1px solid black;
+}
+
+#chart-back-button {
+    margin-top: 15px;
+    margin-left: 15px;
+}
+
+#data-select-confirm {
+    margin-bottom: 15px;
+}
+
 li {
     display: inline-block;
     margin-left: 5%;
@@ -33,8 +50,10 @@ label {
     font-size: 1.5rem;
 }
 
-* {
-    font-size: 1.05rem;
+.tip {
+    font-size: .75rem;
+    font-style: italic;
+    
 }
 
 .form-row {

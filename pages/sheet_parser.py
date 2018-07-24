@@ -9,7 +9,7 @@ import time
 import datetime
 from pages.models import Data, Date
 
-def parse_sheet(sheet, start_date):
+def parse_sheet(sheet):
     column_dict = {0:'A', 1:'B', 2:'C', 3:'D', 4:'E', 5:'F', 6:'G', 7:'H', 8:'I', 9:'J', 10:'K', 11:'L', 12:'M', 13:'N', 14:'O', 15:'P', 16:'Q', 17:'R', 18:'S', 19:'T', 20:'U', 21:'V', 22:'W', 23:'X', 24:'Y', 25:'Z', 26:'AA', 27:'AB', 28:'AC'}
     SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
     store = file.Storage('credentials.json')
@@ -24,8 +24,9 @@ def parse_sheet(sheet, start_date):
     whole_sheet = result.get('values', [])
     start_cell = 3
     row = 1
-    current_date = start_date
+   
     if sheet == 'Rec Patron Counts':
+        current_date = datetime.datetime(2017, 8, 28)
         end_cell = 19
         while row < len(whole_sheet):
             current_time = whole_sheet[row-1][0]
@@ -41,6 +42,7 @@ def parse_sheet(sheet, start_date):
             else:
                 row += 1
     elif sheet == 'Clawson':
+        current_date = datetime.datetime(2017, 11, 6)
         end_cell = 21
         while row < len(whole_sheet):
             current_time = whole_sheet[row-1][0]
@@ -56,6 +58,7 @@ def parse_sheet(sheet, start_date):
             else:
                 row += 1
     elif sheet == 'North Quad':
+        current_date = datetime.datetime(2017, 10, 30)
         start_cell = 220
         end_cell = 238
         row = 220
@@ -196,6 +199,7 @@ def check_string(string):
 
 def gather_data_from_cell(hour, date, day, facility, area, time, gender, current_index):
     estimated = False
+    value = 0
     if not hour[current_index]:
         current_day_query = Date.objects.filter(date = (date + datetime.timedelta(days=day-14)))
         current_day_query = current_day_query | Date.objects.filter(date = (date + datetime.timedelta(days=day-7)))
@@ -222,15 +226,11 @@ def make_average(queryset):
     for number in queryset:
         if number.value:
             total += number.value
-            length += 1
-    if length>0:
-        return total/length
-    else:
-        return 0
+    return total/len(queryset)
 
 def parse_all():
-    # parse_sheet('Rec Patron Counts', datetime.datetime(2017, 8, 28))
-    # parse_sheet('Clawson',  datetime.datetime(2017, 11, 6))
-    parse_sheet('North Quad',  datetime.datetime(2017, 10, 30))
+    parse_sheet('Rec Patron Counts')
+    # parse_sheet('Clawson')
+    # parse_sheet('North Quad')
 
 parse_all()

@@ -6,7 +6,7 @@ import datetime
 from datetime import timedelta
 from .forms import *
 from .queries import *
-# from .sheet_parser import *
+from .sheet_parser import *
 from pages.entry_scripts.data_entry_script import *
 from pages.entry_scripts.date_entry_script import *
 from django.db.models import Max
@@ -43,13 +43,12 @@ def index(request):
     chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
     text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
-    # chillin_date = Date.objects.filter(date=datetime(2018, 1, 29))
-    # chillin_data = Data.objects.filter(date_id__in=chillin_date)
     name_taken_flag = request.session.get('name_taken_flag')
     request.session['name_taken_flag'] = 'false'
     current_saved = str(ChartSet.objects.get(id=request.session.get('current_chartset')).saved)
     return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number), 'save_template_form': save_template_form, 
     'text':text, 'name_taken_flag':name_taken_flag, 'select_template_form':select_template_form, 'select_chart_form':select_chart_form, 'current_saved':current_saved})
+
 def createchartset(request):
     new_chart_set = ChartSet()
     new_chart_set.save()
@@ -210,7 +209,7 @@ def chartcreation(request):
         graphs_json = json.dumps(labels_and_colors) 
         graph_count = range(len(Graph.objects.filter(chart_id=current_chart)))
     return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 'chart_type':chart_type,
-    'graphs':graphs_json, 'select_graph_form':select_graph_form, 'text':current_chart})
+    'graphs':graphs_json, 'select_graph_form':select_graph_form, 'current_chart':current_chart})
 
 def deletechartredirect(request):
     return HttpResponseRedirect('/data-visualizer/dashboard')
@@ -224,8 +223,18 @@ def dataselection(request):
         graph_json = json.dumps(graph_dictionary) 
         use_json = True
     elif request.session.get('current_graph_action') == 'new':
-        graph_json = {}
-        use_json = False
+        if request.session.get('current_chart_action') == 'new':
+            current_chart = request.session.get('current_chart')
+        elif request.session.get('current_chart_action') == 'edit':
+            current_chart = request.session.get('current_edit')
+        if len(Graph.objects.filter(chart_id=current_chart))>0:
+            graph_dictionary = {'unit':Graph.objects.filter(chart_id=current_chart)[0].unit}
+            graph_json = json.dumps(graph_dictionary)
+            use_json = False
+        else:
+            graph_dictionary = {'unit':'hour'}
+            graph_json = json.dumps(graph_dictionary)
+            use_json = False
     return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form, 'graph_json':graph_json, 'use_json':use_json})
 
 
@@ -235,11 +244,17 @@ def editdataset(request):
     if request.session.get('current_graph_action') == 'edit':
         request.session['current_page'] = 'data-selection'
         graph_dictionary = graph_to_json_all_fields(Graph.objects.get(id=request.session.get('current_graph_edit')))
-        graph_json = json.dumps(graph_dictionary) 
+        graph_json = json.dumps(graph_dictionary)
         use_json = True
     elif request.session.get('current_graph_action') == 'new':
-        graph_json = {}
-        use_json = False
+        if len(Graph.objects.filter(chart_id=request.session.get('current_chart')))>0:
+            # graph_json = {'unit':Graph.objects.filter(chart_id=request.session.get('current_chart'))[0].unit}
+            graph_dictionary = {}
+            graph_json = json.dumps(graph_dictionary)
+            use_json = True
+        else:
+            graph_json = {}
+            use_json = False
     return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form, 'graph_json':graph_json, 'use_json':use_json})
 
 def selectdatasetredirect(request):
@@ -547,7 +562,8 @@ def data_to_json(key, value):
 def graph_to_json_no_data(graph_list):
     return_list = []
     for graph in graph_list:
-        return_list.append({'label':graph.label, 'color':graph.color, 'id':graph.id})
+        graph_values = Query().sort_results(graph)
+        return_list.append({'label':graph.label, 'color':graph.color, 'id':graph.id, 'length':len(graph_values)})
     return return_list
 
 def graph_to_json_all_fields(graph):
