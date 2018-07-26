@@ -230,13 +230,14 @@ def make_average(queryset):
 
 def parse_all():
     parse_sheet('Rec Patron Counts')
-    # parse_sheet('Clawson')
-    # parse_sheet('North Quad')
+    parse_sheet('Clawson')
+    parse_sheet('North Quad')
 
 def update_week(sheet, date):
     sheet_info = update_week_advancer(sheet)
     loop_flag = True
-    date_incrementer = sheet_info['first_week']
+    date = datetime.datetime.strptime(date.strftime('%Y-%m-%d'), "%Y-%m-%d")
+    date_incrementer = sheet_info['first week']
     start_cell = sheet_info['start cell']
     end_cell = sheet_info['end cell']
     column_dict = {0:'A', 1:'B', 2:'C', 3:'D', 4:'E', 5:'F', 6:'G', 7:'H', 8:'I', 9:'J', 10:'K', 11:'L', 12:'M', 13:'N', 14:'O', 15:'P', 16:'Q', 17:'R', 18:'S', 19:'T', 20:'U', 21:'V', 22:'W', 23:'X', 24:'Y', 25:'Z', 26:'AA', 27:'AB', 28:'AC'}
@@ -255,12 +256,10 @@ def update_week(sheet, date):
     while loop_flag:
         current_time = whole_sheet[row-1][0]
         if current_time == sheet_info['time']:
-            print('time is 6:30')
             start_cell = row
             end_cell = row + sheet_info['increment']
             row += sheet_info['increment']
             if date >= date_incrementer and date <= date_incrementer + datetime.timedelta(days=6):
-                print(date_incrementer)
                 loop_flag = False
                 RANGE_NAME = sheet + '!A' + str(start_cell) + ':' + sheet_info['range_end'] + str(end_cell)
                 result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
@@ -272,18 +271,14 @@ def update_week(sheet, date):
                 elif sheet=='Clawson':
                     render_week_clawson(values, date_incrementer)
             else:
-                print('no')
                 date_incrementer = date_incrementer + datetime.timedelta(days=7)
         else:
             row += 1
 
 def update_week_advancer(sheet):
     if sheet == 'Rec Patron Counts':
-        return {'first_week':datetime.datetime(2017, 8, 28), 'start cell': 3, 'end cell': 19, 'increment':16, 'range_end':'AD', 'time':'6:30 AM'}
+        return {'first week':datetime.datetime(2017, 8, 28), 'start cell': 3, 'end cell': 19, 'increment':16, 'range_end':'AD', 'time':'6:30 AM'}
     elif sheet == 'Clawson':
-        return {'first_week':datetime.datetime(2017, 11, 6),'start cell': 3, 'end cell': 21, 'increment':18, 'range_end':'S', 'time':'2:30'}
+        return {'first week':datetime.datetime(2017, 11, 6),'start cell': 3, 'end cell': 21, 'increment':18, 'range_end':'S', 'time':'2:30'}
     elif sheet == 'North Quad':
-        return {'first_week':datetime.datetime(2017, 10, 30),'start cell': 220, 'end cell': 238, 'increment':18, 'range_end':'S', 'time':'2:30'}
-
-
-update_week('Rec Patron Counts', datetime.datetime(2018, 7, 23))
+        return {'first week':datetime.datetime(2017, 10, 30),'start cell': 220, 'end cell': 238, 'increment':18, 'range_end':'S', 'time':'2:30'}

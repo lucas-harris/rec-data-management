@@ -11,8 +11,10 @@ urlpatterns = [
     url(r'save-chartset-redirect/', views.savechartset, name='save-chartset-redirect'),
     url(r'change-chartset-redirect/', views.changechartset, name='change-chartset-redirect'),
     url(r'change-selected-chart-redirect/', views.changeselectedchartredirect, name='change-selected-chart-redirect'),
-    # url(r'edit-chart/', views.editchart, name='edit-chart'),
     url(r'edit-dataset/', views.editdataset, name='edit-dataset'), 
     url(r'select-dataset-redirect/', views.selectdatasetredirect, name='select-dataset-redirect'),
-    url(r'report', views.reportview, name='report'),
+    url(r'report/', views.reportview, name='report'),
+    url(r'db-updater/', views.updatedb, name='db-updater'),
+    url(r'db-updater-all-redirect/', views.updatedballredirect, name='db-updater-all-redirect'),
+    url(r'db-updater-week-redirect/', views.updatedbweekredirect, name='db-updater-week-redirect'),
 ]

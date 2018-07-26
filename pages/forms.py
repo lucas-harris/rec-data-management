@@ -72,6 +72,15 @@ class SelectChartForm(forms.Form):
 class SelectGraphForm(forms.Form):
     selected_graph_id = forms.CharField()
 
+class UpdateWeekDBForm(forms.Form):
+    date = forms.DateTimeField(label='Date', initial=datetime.datetime.now().strftime("%Y-%m-%d"))
+    type_week = forms.ChoiceField(initial=('all', 'All'), required=True, widget=forms.RadioSelect(), choices=(('all', 'All'), ('Rec Patron Counts', 'Rec Center'), ('North Quad', 'North Quad'),
+                                                  ('Clawson', 'Clawson')))
+
+class UpdateAllDBForm(forms.Form):
+    type_all = forms.ChoiceField(initial=('all', 'All'), required=True, widget=forms.RadioSelect(), choices=(('all', 'All'), ('Rec Patron Counts', 'Rec Center'), ('North Quad', 'North Quad'),
+                                                  ('Clawson', 'Clawson')))
+
 class EditChartLabel(ModelChoiceField):
     def label_from_instance(self, obj):
         return str(obj.name)

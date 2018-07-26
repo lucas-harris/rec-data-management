@@ -1,0 +1,33 @@
+
+
+li {
+    display: inline-block;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+label {
+    font-size: 1rem;
+}
+
+p {
+    text-align: center;
+}
+
+#id_type_week {
+    display: inline;
+}
+
+.warning {
+    font-size: .75rem;
+    font-style: italic;
+}
+
+.no-padding {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.left-box {
+    border-right: 1px solid black;
+}

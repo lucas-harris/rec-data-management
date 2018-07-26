@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>DB Updater</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        <link rel="stylesheet" href="{% static 'css/db-updater.css' %}">
+        <script src="{% static 'js/chartjs/dist/Chart.js' %}" type="text/javascript"></script>
+        <link href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script>
+            $.noConflict();
+            jQuery(document).ready(function ($) {
+                $("#id_date").datepicker({dateFormat: "yy-mm-dd"});
+            });
+        </script>
+    </head>
+    <body>
+        <div class="container entire-body">
+            <div class="row justify-content-start">
+                <div class="col-0">
+                    <button type="button" class="btn btn-outline-primary" id="chart-back-button"><a href="{% url 'dashboard' %}">Back</a></button>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-6 left-box no-padding">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-0">
+                                <p>Update All Dates</p>
+                                <p class='warning'>* takes several minutes *</p>
+                            </div>
+                        </div>
+                        <form action="/data-visualizer/db-updater-all-redirect/" method="POST" class="form-group">
+                        {% csrf_token %}
+                        {% for field in update_form_all %}
+                        <div class="row justify-content-center align-items-center">
+                            <div class='col-0'>
+                                <p>Type</p>
+                                {{ field }} 
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="row justify-content-center">
+                            <div class="col-0">
+                                <input type="submit" value="Select" class="btn btn-outline-primary facility-button" id="data-select-confirm">
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="container right-box no-padding">
+                        <div class="row justify-content-center">
+                            <div class="col-0">
+                                <p>Update One Week</p>
+                                <p class='warning'>* will update week that contains the given date *</p>
+                            </div>
+                        </div>
+                        <form action="/data-visualizer/db-updater-week-redirect/" method="POST" class="form-group">
+                            {% csrf_token %}
+                            {% for field in update_form_week %}
+                                {% if field.label == 'Type week' %}
+                                <div class="row justify-content-center align-items-center">
+                                    <div class='col-0'>
+                                        <p>Type</p>
+                                        {{ field }} 
+                                    </div>
+                                </div>
+                                {% elif field.label == 'Date' %}
+                                <div class="row justify-content-center align-items-center">
+                                    <div class='col-0'>
+                                        <p>Date</p>
+                                        {{ field }} 
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                            <div class="row justify-content-center">
+                                <div class="col-0">
+                                    <input type="submit" value="Select" class="btn btn-outline-primary facility-button" id="data-select-confirm">
+                                </div>
+                            </div>
+                        </form> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

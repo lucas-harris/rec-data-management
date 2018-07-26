@@ -294,6 +294,36 @@ def reportview(request):
     label_json = json.dumps(label_json)
     return render(request, 'pages/report.html', {'json': chartset_json, 'chart_number':range(chart_number), 'label':label_json})
 
+
+#Database Updater -----------------------------------
+def updatedb(request):
+    update_form_week = UpdateWeekDBForm()
+    update_form_all = UpdateAllDBForm()
+    return render(request, 'pages/db-updater.html', {'update_form_week':update_form_week, 'update_form_all':update_form_all})
+
+def updatedballredirect(request):
+    if request.method == "POST":
+        update_form = UpdateAllDBForm(request.POST)
+        if update_form.is_valid():
+            sheet = update_form.cleaned_data['type_all']
+            parse_sheet(sheet)
+            return HttpResponseRedirect('/data-visualizer/dashboard')
+    else:
+        update_form = UpdateAllDBForm()
+    return HttpResponseRedirect('/data-visualizer/dashboard')
+
+def updatedbweekredirect(request):
+    if request.method == "POST":
+        update_form = UpdateWeekDBForm(request.POST)
+        if update_form.is_valid():
+            sheet = update_form.cleaned_data['type_week']
+            date = update_form.cleaned_data['date']
+            update_week(sheet, date)
+            return HttpResponseRedirect('/data-visualizer/dashboard')
+    else:
+        update_form = UpdateWeekDBForm()
+    return HttpResponseRedirect('/data-visualizer/dashboard')
+
 #Additional Methods -----------------------------------
 def create_dates():
     start = datetime(2015, 1, 1)
