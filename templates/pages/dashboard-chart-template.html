@@ -125,7 +125,6 @@
                     tooltips: {
                         callbacks: {
                             label: function(tooltipItem, data) {
-                                // if(tooltipItem.xLabel>0 & tooltipItem.yLabel>0) {
                                 if(chartType{{x}}=='scatter') {
                                     return data.labels[tooltipItem.index] + ': (' + tooltipItem.xLabel + ', ' + tooltipItem.yLabel + ')';
                                 }
@@ -140,6 +139,11 @@
                     },
                     scales: {
                         yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }],
+                        xAxes: [{
                             ticks: {
                                 beginAtZero: true
                             }

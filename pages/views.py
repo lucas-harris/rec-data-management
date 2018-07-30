@@ -248,7 +248,6 @@ def editdataset(request):
         use_json = True
     elif request.session.get('current_graph_action') == 'new':
         if len(Graph.objects.filter(chart_id=request.session.get('current_chart')))>0:
-            # graph_json = {'unit':Graph.objects.filter(chart_id=request.session.get('current_chart'))[0].unit}
             graph_dictionary = {}
             graph_json = json.dumps(graph_dictionary)
             use_json = True
@@ -305,8 +304,11 @@ def updatedballredirect(request):
     if request.method == "POST":
         update_form = UpdateAllDBForm(request.POST)
         if update_form.is_valid():
-            sheet = update_form.cleaned_data['type_all']
-            parse_sheet(sheet)
+            if update_form.cleaned_data['type_all'] == 'all':
+                parse_all()
+            else:
+                sheet = update_form.cleaned_data['type_all']
+                parse_sheet(sheet)
             return HttpResponseRedirect('/data-visualizer/dashboard')
     else:
         update_form = UpdateAllDBForm()
@@ -316,9 +318,13 @@ def updatedbweekredirect(request):
     if request.method == "POST":
         update_form = UpdateWeekDBForm(request.POST)
         if update_form.is_valid():
-            sheet = update_form.cleaned_data['type_week']
-            date = update_form.cleaned_data['date']
-            update_week(sheet, date)
+            if update_form.cleaned_data['type_week'] == 'all':
+                date = update_form.cleaned_data['date']
+                update_all(date)
+            else:
+                sheet = update_form.cleaned_data['type_week']
+                date = update_form.cleaned_data['date']
+                update_week(sheet, date)
             return HttpResponseRedirect('/data-visualizer/dashboard')
     else:
         update_form = UpdateWeekDBForm()
@@ -418,7 +424,7 @@ def create_label(chart):
         varying_label['date'] = []
         independent_label['date'] = []
         for graph in queryset:
-            datelabel = str(graph.start_date)[0:10] + ' - ' + str(graph.end_date)[0:10] + ')'
+            datelabel = '(' + str(graph.start_date)[0:10] + ' - ' + str(graph.end_date)[0:10] + ')'
             varying_label['date'].append(datelabel)
             independent_label['date'].append(datelabel)
         common_label['date'] =  []

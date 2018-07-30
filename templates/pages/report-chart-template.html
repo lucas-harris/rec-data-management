@@ -103,10 +103,8 @@
                 } 
                 datasetValue[0] = {
                     backgroundColor: colors,
-                    // hoverBackgroundColor: darkenArrayOfColors(colors),
                     pointBackgroundColor: darkenArrayOfColors(colors),
                     borderColor: 'white',
-                    // strokeColor : darkenArrayOfColors(colors),
                     title :'2013',
                     data: dataValues,
                     fill: false
@@ -150,6 +148,17 @@
         }
         var title = charts{{x}}.title;
         var displayLabels = !(chartType{{x}} == 'pie');
+        if(chartType{{x}} == 'pie') {
+            var position = 'outside';
+            var drawBorder = false;
+            var display = false;
+            // var labels = [];
+        }
+        else {
+            var position = 'border';
+            var drawBorder = true;
+            var display = true;
+        }
         var chart{{x}} = new Chart(ctx, {
             type: chartType{{x}},
                 data: { 
@@ -158,13 +167,13 @@
                     lineTension: 1,
                 },
                 options: {
-                    pieceLabel: {
+                    pieceLabel: { //NEED TO GET THIS TO WORK FOR PIE CHARTS BUT NOT FOR NON PIE CHARTS
                         mode: 'percent', 
                         precision: 2,
-                        position: 'outside',
-                        overlap: true,
+                        position: position,
+                        overlap: false,
                         fontStyle: 'bold',
-                        fontColor: 'black',  
+                        fontColor: 'black',
                     },
                     tooltips: {
                         enabled: false,
@@ -172,17 +181,28 @@
                     scales: {
                         yAxes: [{
                             ticks: {
-                                beginAtZero: true
+                                beginAtZero: true,
+                                display: display
                             }, 
+                            gridLines: {
+                                drawBorder: drawBorder,
+                                display: display
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                display: display,
+                            },
+                            gridLines: {
+                                drawBorder: drawBorder,
+                                display: display
+                            }
                         }]
                     },
                     legend: {
-                        display: displayLabels
-                        // labels: {
-                        //     fontStyle: 'bold',
-                        //     fontSize: 16,
-                        // }
-                    }
+                        display: displayLabels,
+                    },
                 }
             });
         

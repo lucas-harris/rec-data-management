@@ -1,7 +1,6 @@
 import calendar
 from collections import OrderedDict
 from functools import cmp_to_key
-
 from django import forms
 from .models import *
 from datetime import *
@@ -309,17 +308,17 @@ class Query():
         area = self.query_area(graph, dates)
         gender = self.query_gender(graph, dates)
         time = self.query_time(graph, dates)
-        ret = Data.objects.none()
+        ret = Data.objects.all()
         if facilities == 'all' and area == 'all' and gender == 'all' and time == 'all':
-            return Data.objects.all()
-        elif not facilities == 'all':
-            ret = ret | facilities 
-        elif not area == 'all':
-            ret = ret | area 
-        elif not gender == 'all':
-            ret = ret | gender
-        elif not time == 'all':
-            ret = ret | time
+            return ret
+        if not facilities == 'all':
+            ret = ret & facilities
+        if not area == 'all':
+            ret = ret & area
+        if not gender == 'all':
+            ret = ret & gender
+        if not time == 'all':
+            ret = ret & time
         return ret
 
     def create_date_group(self, graph):
@@ -347,19 +346,19 @@ class Query():
         year = self.query_year(graph)
         dom = self.query_day_of_month(graph)
         dow = self.query_day_of_week(graph)
-        ret = Date.objects.none()
+        ret = Date.objects.all()
         if month == 'all' and week == 'all' and year == 'all' and dom == 'all' and dow == 'all':
-            return Date.objects.all()
-        elif not month == 'all':
-            ret = ret | month 
-        elif not week == 'all':
-            ret = ret | week 
-        elif not year == 'all':
-            ret = ret | year
-        elif not dom == 'all':
-            ret = ret | dom
-        elif not dow == 'all':
-            ret = ret | dow
+            return ret
+        if not month == 'all':
+            ret = ret & month 
+        if not week == 'all':
+            ret = ret & week 
+        if not year == 'all':
+            ret = ret & year
+        if not dom == 'all':
+            ret = ret & dom
+        if not dow == 'all':
+            ret = ret & dow
         return ret
 
 
@@ -438,13 +437,11 @@ class Query():
 
     def query_gender(self, graph, dates):
         """Returns a QuerySet of the gender selected in the Dataset form"""
-        gender = self.replace_characters(graph.gender)[0]
-        ret = Data.objects.none()
+        gender = graph.gender
         if gender == 'all':
             return 'all'
         else:
-            ret = ret | Data.objects.filter(gender=gender)
-        return ret
+            return Data.objects.filter(gender=gender)
 
     def query_time(self, graph, dates):
         """Returns a QuerySet of all the times selected in the Dataset form"""
