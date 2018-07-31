@@ -11,6 +11,7 @@ from pages.entry_scripts.data_entry_script import *
 from pages.entry_scripts.date_entry_script import *
 from django.db.models import Max
 #Index View -----------------------------------
+"""Home Page"""
 def index(request):
     save_template_form = SaveTemplateForm()
     select_template_form = SelectTemplateForm()
@@ -42,13 +43,14 @@ def index(request):
     chart_number = len(charts)
     chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
-    text = ChartSet.objects.get(id=request.session.get('current_chartset')).name
+    title = ChartSet.objects.get(id=request.session.get('current_chartset')).name
     name_taken_flag = request.session.get('name_taken_flag')
     request.session['name_taken_flag'] = 'false'
     current_saved = str(ChartSet.objects.get(id=request.session.get('current_chartset')).saved)
     return render(request, 'pages/index.html', {'json': chartset_json, 'chart_number':range(chart_number), 'save_template_form': save_template_form, 
-    'text':text, 'name_taken_flag':name_taken_flag, 'select_template_form':select_template_form, 'select_chart_form':select_chart_form, 'current_saved':current_saved})
+    'title':title, 'name_taken_flag':name_taken_flag, 'select_template_form':select_template_form, 'select_chart_form':select_chart_form, 'current_saved':current_saved})
 
+"""Page that opens when a new chartset is created"""
 def createchartset(request):
     new_chart_set = ChartSet()
     new_chart_set.save()
@@ -56,7 +58,8 @@ def createchartset(request):
     request.session['current_page'] = 'create-chartset-redirect'
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
-def savechartset(request):
+"""Redirect for when a chartset is saved, redirected from home page"""
+def savechartsetredirect(request):
     request.session['name_taken_flag'] = 'false'
     if request.method == "POST":
         save_template_form = SaveTemplateForm(request.POST)
@@ -76,6 +79,8 @@ def savechartset(request):
             save_template_form = SaveTemplateForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
+"""Redirect that changes the chartset that is currently being focused"""
+#Can probs delete this
 def changechartset(request):
     if request.method == "POST":
         select_template_form = SelectTemplateForm(request.POST)
@@ -93,7 +98,7 @@ def changechartset(request):
         select_template_form = SelectTemplateForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
-
+"""Redirect that changes the chartset being focused, redirected from home page"""
 def changeselectedchartredirect(request):
     if request.method == "POST":
         select_chart_form = SelectChartForm(request.POST)
@@ -119,7 +124,7 @@ def changeselectedchartredirect(request):
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
 #Chart Creation View -----------------------------------
-
+"""Redirect that creates a new chart or edits a previous chart, redirected from home page"""
 def confirmchartredirect(request):
     if request.session.get('current_chart_action') == 'new':
         chart_id = request.session.get('current_chart')
@@ -137,6 +142,7 @@ def confirmchartredirect(request):
             chart_form = ChartForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
+"""Page that displays information about the selected chart"""
 def chartcreation(request):
     chart_form = ChartForm()
     select_graph_form = SelectGraphForm()
@@ -211,10 +217,12 @@ def chartcreation(request):
     return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 'chart_type':chart_type,
     'graphs':graphs_json, 'select_graph_form':select_graph_form, 'current_chart':current_chart})
 
+"""Redirect that exits the current chart process, redirected from the chart creation page"""
 def deletechartredirect(request):
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
 #Data Selection View -----------------------------------
+"""Page that allows user to edit or select the dataset to be added to the current chart"""
 def dataselection(request):
     dataset_form = DatasetForm()
     if request.session.get('current_graph_action') == 'edit':
@@ -237,25 +245,7 @@ def dataselection(request):
             use_json = False
     return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form, 'graph_json':graph_json, 'use_json':use_json})
 
-
-
-def editdataset(request):
-    dataset_form = DatasetForm()
-    if request.session.get('current_graph_action') == 'edit':
-        request.session['current_page'] = 'data-selection'
-        graph_dictionary = graph_to_json_all_fields(Graph.objects.get(id=request.session.get('current_graph_edit')))
-        graph_json = json.dumps(graph_dictionary)
-        use_json = True
-    elif request.session.get('current_graph_action') == 'new':
-        if len(Graph.objects.filter(chart_id=request.session.get('current_chart')))>0:
-            graph_dictionary = {}
-            graph_json = json.dumps(graph_dictionary)
-            use_json = True
-        else:
-            graph_json = {}
-            use_json = False
-    return render(request, 'pages/data-selection.html', {'dataset_form':dataset_form, 'graph_json':graph_json, 'use_json':use_json})
-
+"""Redirect that creates, edits, or deletes a dataset, redirected from the chart creation page"""
 def selectdatasetredirect(request):
     if request.method == "POST":
         select_graph_form = SelectGraphForm(request.POST)
@@ -278,6 +268,7 @@ def selectdatasetredirect(request):
 
 
 #Report View --------------------------------------
+"""Page that displays a report containing the selected datasets"""
 def reportview(request):
     charts = Chart.objects.filter(chart_set_id=request.session['current_chartset'])
     charts = charts & Chart.objects.filter(saved=True)
@@ -293,13 +284,14 @@ def reportview(request):
     label_json = json.dumps(label_json)
     return render(request, 'pages/report.html', {'json': chartset_json, 'chart_number':range(chart_number), 'label':label_json})
 
-
 #Database Updater -----------------------------------
+"""Page that updates the current database"""
 def updatedb(request):
     update_form_week = UpdateWeekDBForm()
     update_form_all = UpdateAllDBForm()
     return render(request, 'pages/db-updater.html', {'update_form_week':update_form_week, 'update_form_all':update_form_all})
 
+"""Redirect that reads the entire google sheet to update the database, redirected from the update db page"""
 def updatedballredirect(request):
     if request.method == "POST":
         update_form = UpdateAllDBForm(request.POST)
@@ -314,6 +306,7 @@ def updatedballredirect(request):
         update_form = UpdateAllDBForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
+"""Redirect that reads one week of the google sheet to update the database, redirected from the update db page"""
 def updatedbweekredirect(request):
     if request.method == "POST":
         update_form = UpdateWeekDBForm(request.POST)
@@ -331,11 +324,13 @@ def updatedbweekredirect(request):
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
 #Additional Methods -----------------------------------
+"""Adds date objects to the database"""
 def create_dates():
     start = datetime(2015, 1, 1)
     end = datetime(2015, 12, 31)
     date_creation_loop(start, end)
 
+"""Helper method for the create dates method"""
 def date_creation_loop(start, end):
     flag = True
     while (flag):
@@ -345,6 +340,7 @@ def date_creation_loop(start, end):
         date.create_date()
         start += timedelta(days=1)
 
+"""Creates the labels for the report page"""
 def create_label(chart):
     queryset = Graph.objects.filter(chart_id = chart.id)
     querier = Query()
@@ -556,7 +552,6 @@ def create_label(chart):
             varying_label['day_of_week'].append(day_of_weeklabel)
             independent_label['day_of_week'].append(day_of_weeklabel)
         common_label['day_of_week'] =  []
-
     json = dict()
     json['common_label'] = common_label
     json['varying_label'] = varying_label
@@ -564,6 +559,7 @@ def create_label(chart):
     json['count'] = len(queryset)
     return json
 
+"""Converts chartset information to json"""
 def chartset_to_json(chartset):
     query = Chart.objects.filter(chart_set_id=chartset.id)
     query = query & Chart.objects.filter(saved=True)
@@ -574,6 +570,7 @@ def chartset_to_json(chartset):
         index+=1
     return {'chartset':chart_list, 'id':chartset.id, 'title':chartset.name}
 
+"""Converts chart information from a given chartset to json"""
 def chart_to_json(chart, passed_index):
     query = Graph.objects.filter(chart_id=chart.id)
     graph_list = []
@@ -583,6 +580,7 @@ def chart_to_json(chart, passed_index):
         index+=1
     return {'charts':graph_list, 'title':chart.title, 'type':chart.type, 'id':chart.id}
 
+"""Converts dataset information from a given chart to json"""
 def graph_to_json(graph, passed_index):
     graph_values = Query().sort_results(graph)
     data_list = []
@@ -592,9 +590,11 @@ def graph_to_json(graph, passed_index):
         index+=1
     return {'graph':data_list, 'color':graph.color, 'label':graph.label}
 
+"""Converts data information to json"""
 def data_to_json(key, value):
     return {'data':{key:value}}
 
+"""Converts chart information to json, this is for the list of datasets in the chart creation page"""
 def graph_to_json_no_data(graph_list):
     return_list = []
     for graph in graph_list:
@@ -602,6 +602,7 @@ def graph_to_json_no_data(graph_list):
         return_list.append({'label':graph.label, 'color':graph.color, 'id':graph.id, 'length':len(graph_values)})
     return return_list
 
+"""Converts all the information about a dataset to json, this is for report label creation"""
 def graph_to_json_all_fields(graph):
     return {'label':graph.label, 'facility':graph.facility, 'area':graph.area, 'start_date':str(graph.start_date)[0:10], 'end_date':str(graph.end_date)[0:10],
     'unit':graph.unit, 'gender':graph.gender, 'year':graph.year, 'month':graph.month, 'week':graph.week, 

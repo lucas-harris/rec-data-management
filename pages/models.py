@@ -43,7 +43,6 @@ class Chart(models.Model):
     saved = models.BooleanField(default=False)
 
 class Graph(models.Model):
-
     id = models.IntegerField(primary_key=True)
     chart = models.ForeignKey(Chart, on_delete=models.CASCADE)
     data = models.ManyToManyField('Data')
@@ -61,3 +60,4 @@ class Graph(models.Model):
     day_of_month = models.CharField(max_length=4, default='1')
     day_of_week = models.CharField(max_length=20, default='Monday')
     time = models.CharField(max_length=5, default='0630')
+    data_json = models.CharField(max_length=100000, default='')
