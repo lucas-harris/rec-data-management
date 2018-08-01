@@ -326,8 +326,8 @@ def updatedbweekredirect(request):
 #Additional Methods -----------------------------------
 """Adds date objects to the database"""
 def create_dates():
-    start = datetime(2015, 1, 1)
-    end = datetime(2015, 12, 31)
+    start = datetime.datetime(2016, 1, 1)
+    end = datetime.datetime(2018, 12, 31)
     date_creation_loop(start, end)
 
 """Helper method for the create dates method"""

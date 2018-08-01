@@ -176,7 +176,19 @@
                         fontColor: 'black',
                     },
                     tooltips: {
-                        enabled: false,
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                if(chartType{{x}}=='scatter') {
+                                    return data.labels[tooltipItem.index] + ': (' + tooltipItem.xLabel + ', ' + tooltipItem.yLabel + ')';
+                                }
+                                else if(chartType{{x}}=='pie') {
+                                    return chart{{x}}.data.datasets[0].data[tooltipItem.index] + ' patrons';
+                                }
+                                else {
+                                    return tooltipItem.yLabel + ' patrons';
+                                }
+                            }
+                        }
                     },
                     scales: {
                         yAxes: [{

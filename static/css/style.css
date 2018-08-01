@@ -63,3 +63,8 @@ label {
 .hidden {
     display: none;
 }
+
+canvas {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}

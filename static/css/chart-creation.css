@@ -82,4 +82,6 @@ label {
     font-size: 1rem;
 }
 
-
+canvas {
+    padding: 0;
+}

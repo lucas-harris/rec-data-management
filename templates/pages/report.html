@@ -28,37 +28,37 @@
         for(var chartIndex = 0; chartIndex<Object.keys(labelJson).length; chartIndex++) {
             var chartTitle = '<div class="row justify-content-center" style="margin-top: 35px;">';
             if(labelJson[chartIndex].common_label.facility.length>0) {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonFacility(labelJson[chartIndex].common_label.facility) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonFacility(labelJson[chartIndex].common_label.facility) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.area.length>0) {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonArea(labelJson[chartIndex].common_label.area) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonArea(labelJson[chartIndex].common_label.area) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.unit.length>0) {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonGrouping(labelJson[chartIndex].common_label.unit) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonGrouping(labelJson[chartIndex].common_label.unit) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.gender.length>0) {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonGender(labelJson[chartIndex].common_label.gender) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonGender(labelJson[chartIndex].common_label.gender) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.date.length>0) {
-                chartTitle += '<div class="col-3"><p class="centerBlock">'+ '<b>Dates: </b>' + labelJson[chartIndex].common_label.date + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">'+ '<b>Dates: </b>' + labelJson[chartIndex].common_label.date + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.month.length>0 && labelJson[chartIndex].common_label.month[0]!='all') {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonMonth(labelJson[chartIndex].common_label.month) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonMonth(labelJson[chartIndex].common_label.month) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.day_of_month.length>0 && labelJson[chartIndex].common_label.day_of_month[0]!='all') {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonDay(labelJson[chartIndex].common_label.day_of_month) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonDay(labelJson[chartIndex].common_label.day_of_month) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.year.length>0 && labelJson[chartIndex].common_label.year[0]!='all') {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonYear(labelJson[chartIndex].common_label.year) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonYear(labelJson[chartIndex].common_label.year) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.week.length>0 && labelJson[chartIndex].common_label.week[0]!='all') {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonWeek(labelJson[chartIndex].common_label.week) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonWeek(labelJson[chartIndex].common_label.week) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.day_of_week.length>0 && labelJson[chartIndex].common_label.day_of_week[0]!='all') {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonWeekday(labelJson[chartIndex].common_label.day_of_week) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonWeekday(labelJson[chartIndex].common_label.day_of_week) + '</p></div>';
             }
             if(labelJson[chartIndex].common_label.time.length>0 && labelJson[chartIndex].common_label.time[0]!='all') {
-                chartTitle += '<div class="col-3"><p class="centerBlock">' + cleanCommonTime(labelJson[chartIndex].common_label.time) + '</p></div>';
+                chartTitle += '<div class="col-4"><p class="centerBlock">' + cleanCommonTime(labelJson[chartIndex].common_label.time) + '</p></div>';
             }
             chartTitle += '</div>';
             var chartVariables = '<div class="container"><br>'; //Whole Graph Container
