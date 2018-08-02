@@ -1,6 +1,3 @@
-"""
-Shows basic usage of the Sheets API. Prints values from a Google Spreadsheet.
-"""
 from __future__ import print_function
 from apiclient.discovery import build
 from httplib2 import Http
@@ -9,6 +6,7 @@ import time
 import datetime
 from pages.models import Data, Date
 
+'''Reads the patron count spread sheet and sends a week's worth of counts to the render_week methods'''
 def parse_sheet(sheet):
     column_dict = {0:'A', 1:'B', 2:'C', 3:'D', 4:'E', 5:'F', 6:'G', 7:'H', 8:'I', 9:'J', 10:'K', 11:'L', 12:'M', 13:'N', 14:'O', 15:'P', 16:'Q', 17:'R', 18:'S', 19:'T', 20:'U', 21:'V', 22:'W', 23:'X', 24:'Y', 25:'Z', 26:'AA', 27:'AB', 28:'AC'}
     SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
@@ -24,7 +22,6 @@ def parse_sheet(sheet):
     whole_sheet = result.get('values', [])
     start_cell = 3
     row = 1
-   
     if sheet == 'Rec Patron Counts':
         current_date = datetime.datetime(2017, 8, 28)
         end_cell = 19
@@ -76,6 +73,7 @@ def parse_sheet(sheet):
             else:
                 row += 1
 
+'''Adds a week of counts from the "Rec Patron Count" sheet to the database'''
 def render_week_rec(week, date):
     for hour in week:
         time_convert_dict = {'6:30 AM':'0630', '7:30 AM':'0730', '8:30 AM':'0830', '9:30 AM':'0930', '10:30 AM':'1030', '11:30 AM':'1130', '12:30 PM':'1230', '1:30 PM':'1330', '2:30 PM':'1430', '3:30 PM':'1530', '4:30 PM':'1630', '5:30 PM':'1730', '6:30 PM':'1830', '7:30 PM':'1930', '8:30 PM':'2030', '9:30 PM':'2130', '10:30 PM':'2230'}
@@ -101,6 +99,7 @@ def render_week_rec(week, date):
                     data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'])
                     data.save()
 
+'''Adds a week of counts from the "Rec Patron Count" sheet to the database'''
 def render_week_clawson(week, date):
     time_convert_dict = {'2:30':'1430', '3:30':'1530', '4:30':'1630', '5:30':'1730', '6:30':'1830', '7:30':'1930', '8:30':'2030', '9:30':'2130'}
     hour_dict = {}
@@ -145,7 +144,8 @@ def render_week_clawson(week, date):
                     key = str(data['date'])[0:10] + ' ' + data['facility'] + ' ' + data['area'] + ' ' + data['time'] + ' ' + data['gender']
                     data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'])
                     data.save()
-            
+
+'''Adds a week of counts from the "North Quad" sheet to the database'''            
 def render_week_nq(week, date):
     time_convert_dict = {'2:30':'1430', '3:30':'1530', '4:30':'1630', '5:30':'1730', '6:30':'1830', '7:30':'1930', '8:30':'2030', '9:30':'2130'}
     hour_dict = {}
@@ -191,6 +191,7 @@ def render_week_nq(week, date):
                     data = Data(key=key, value=data['value'], facility=data['facility'], area=data['area'], time=data['time'], gender=data['gender'], date_id=data['date'], estimated=data['estimated'])
                     data.save()
 
+'''Searches for a date on the selected sheet and adds that week of counts to the database'''
 def update_week(sheet, date):
     sheet_info = update_week_advancer(sheet)
     loop_flag = True
@@ -233,6 +234,7 @@ def update_week(sheet, date):
         else:
             row += 1
 
+'''Returns information needed to parse the sheet for the update_week method'''
 def update_week_advancer(sheet):
     if sheet == 'Rec Patron Counts':
         return {'first week':datetime.datetime(2017, 8, 28), 'start cell': 3, 'end cell': 19, 'increment':16, 'range_end':'AD', 'time':'6:30 AM'}
@@ -241,22 +243,26 @@ def update_week_advancer(sheet):
     elif sheet == 'North Quad':
         return {'first week':datetime.datetime(2017, 10, 30),'start cell': 220, 'end cell': 238, 'increment':18, 'range_end':'S', 'time':'2:30'}
 
+'''Parses all three patron count sheets'''
 def parse_all():
     parse_sheet('Rec Patron Counts')
     parse_sheet('Clawson')
     parse_sheet('North Quad')
 
+'''Updates one week of all three patrons count sheets'''
 def update_all(date):
     update_week('Rec Patron Counts', date)
     update_week('Clawson', date)
     update_week('North Quad', date)
 
+'''Checks that a cell contains a number and not text'''
 def check_string(string):
     try: 
         return int(string)
     except ValueError:
         return None
 
+'''Reads the data in a cell and estimates it if there is none'''
 def gather_data_from_cell(hour, date, day, facility, area, time, gender, current_index):
     estimated = False
     value = 0
@@ -280,6 +286,7 @@ def gather_data_from_cell(hour, date, day, facility, area, time, gender, current
         value = check_string(hour[current_index])
     return {'gender':gender, 'facility':facility, 'time':time, 'area':area, 'date':date + datetime.timedelta(days=day), 'value':value, 'estimated':estimated}
 
+'''Reads the queryset used to estimate an empty cell and finds the average of it'''
 def make_average(queryset):
     total = 0
     length = 0

@@ -4,7 +4,7 @@ from pages.models import Date
 from django.db import models
 
 class DateEntryScript:
-
+    
     def __init__(self, date):
         self.date = date
         self.day_of_month = ''

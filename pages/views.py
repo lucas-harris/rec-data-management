@@ -10,6 +10,7 @@ from .sheet_parser import *
 from pages.entry_scripts.data_entry_script import *
 from pages.entry_scripts.date_entry_script import *
 from django.db.models import Max
+
 #Index View -----------------------------------
 """Home Page"""
 def index(request):
@@ -79,8 +80,7 @@ def savechartsetredirect(request):
             save_template_form = SaveTemplateForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
-"""Redirect that changes the chartset that is currently being focused"""
-#Can probs delete this
+"""Redirect that changes the chartset that is currently being focused, redirected from home page"""
 def changechartset(request):
     if request.method == "POST":
         select_template_form = SelectTemplateForm(request.POST)
@@ -98,7 +98,7 @@ def changechartset(request):
         select_template_form = SelectTemplateForm()
     return HttpResponseRedirect('/data-visualizer/dashboard')
 
-"""Redirect that changes the chartset being focused, redirected from home page"""
+"""Redirect that changes the chart being focused, redirected from home page"""
 def changeselectedchartredirect(request):
     if request.method == "POST":
         select_chart_form = SelectChartForm(request.POST)

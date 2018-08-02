@@ -21,15 +21,6 @@ class Data(models.Model):
     date = models.ForeignKey(Date, on_delete=models.CASCADE)
     estimated = models.BooleanField(default = False)
 
-    class Meta:
-        ordering = ['value']
-
-    def __str__(self):
-        return str(self.value)
-
-    def make_key(self):
-        return str(self.date) + '-' + str(self.facility) + str(self.area) + '-' + str(self.gender) + '-' + str(self.time)
-
 class ChartSet(models.Model):
     id = models.IntegerField(primary_key=True)
     saved = models.BooleanField(default=False)

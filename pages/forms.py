@@ -5,11 +5,6 @@ from django.forms.widgets import *
 from pages.models import *
 import datetime
 
-class DataForm(ModelForm):
-    class Meta:
-        model = Data
-        fields = ['key', 'value', 'date', 'facility', 'area']
-
 class DatasetForm(forms.Form):
     label = forms.CharField(max_length=40)
     facility = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(), initial=('all', 'All'), 
