@@ -1,1 +1,1 @@
-web: gunicorn rec_data_django.wsgi:views
+web: gunicorn rec_data_django.wsgi
