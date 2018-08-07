@@ -25,7 +25,7 @@ SECRET_KEY = '08l^!@h3j4k$_7wk7^#vkj5l$u2jx$#b8=oarg$g6no9ex02!q'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'fathomless-tundra-23808.herokuapp.com']
 
 
 # Application definition
