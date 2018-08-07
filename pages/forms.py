@@ -5,6 +5,7 @@ from django.forms.widgets import *
 from pages.models import *
 import datetime
 
+'''Used to select the variables that define the dataset queries'''
 class DatasetForm(forms.Form):
     label = forms.CharField(max_length=40)
     facility = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(), initial=('all', 'All'), 
@@ -47,35 +48,39 @@ class DatasetForm(forms.Form):
     day_of_week = forms.MultipleChoiceField(initial=('all', 'All'), choices=(('all', 'All'), ('0', 'Monday'), ('1', 'Tuesday'), ('2', 'Wednesday'), ('3', 'Thursday'),
                                                      ('4', 'Friday'), ('5', 'Saturday'), ('6', 'Sunday')))
 
+'''Used to define a chart's type on the chart creation page'''
 class ChartForm(forms.Form):
     type = forms.ChoiceField(initial=('line', 'Line Chart'), required=True, widget=forms.RadioSelect(), choices=(('line', 'Line Chart'), ('bar', 'Bar Chart'), ('pie', 'Pie Chart'),
                                                   ('scatter', 'Scatter Plot')))
 
+'''Used to name a template on the home page'''
 class SaveTemplateForm(forms.Form):
     name = forms.CharField()
 
+'''Helper method that displays the names of saved templates to select from'''
 class SelectTemplateChoiceField(ModelChoiceField):
     def label_from_instance(self, obj):
         return str(obj.name)
 
+'''Used to select a different template on the home page'''
 class SelectTemplateForm(forms.Form):
     name = SelectTemplateChoiceField(queryset = ChartSet.objects.filter(saved=1), widget=forms.RadioSelect(), empty_label=None)
 
+'''Used to select a chart on the home page'''
 class SelectChartForm(forms.Form):
     selected_chart_id = forms.CharField()
 
+'''Used to select a graph on the chart creation page'''
 class SelectGraphForm(forms.Form):
     selected_graph_id = forms.CharField()
 
+'''Used to update one week of the database on the update page'''
 class UpdateWeekDBForm(forms.Form):
     date = forms.DateTimeField(label='Date', initial=datetime.datetime.now().strftime("%Y-%m-%d"))
     type_week = forms.ChoiceField(initial=('all', 'All'), required=True, widget=forms.RadioSelect(), choices=(('all', 'All'), ('Rec Patron Counts', 'Rec Center'), ('North Quad', 'North Quad'),
                                                   ('Clawson', 'Clawson')))
 
+'''Used to update alll weeks of the database on the update page'''
 class UpdateAllDBForm(forms.Form):
     type_all = forms.ChoiceField(initial=('all', 'All'), required=True, widget=forms.RadioSelect(), choices=(('all', 'All'), ('Rec Patron Counts', 'Rec Center'), ('North Quad', 'North Quad'),
                                                   ('Clawson', 'Clawson')))
-
-class EditChartLabel(ModelChoiceField):
-    def label_from_instance(self, obj):
-        return str(obj.name)

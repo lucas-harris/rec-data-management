@@ -76,13 +76,22 @@ WSGI_APPLICATION = 'rec_data_django.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'recdb',
+        'USER': 'postgres',
+        'PASSWORD': 'Lh090197!!',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
+SESSION_COOKIE_SECURE = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE = True
+X_FRAME_OPTIONS = 'DENY'
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 

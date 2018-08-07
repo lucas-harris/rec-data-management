@@ -1,7 +1,7 @@
 from django.db import models
 
 class Date(models.Model):
-    date = models.DateTimeField(primary_key=True)
+    date = models.DateTimeField(primary_key=True, db_index=True)
     week = models.CharField(max_length=3)
     year = models.CharField(max_length=4)
     month = models.CharField(max_length=3)
@@ -22,12 +22,12 @@ class Data(models.Model):
     estimated = models.BooleanField(default = False)
 
 class ChartSet(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, db_index=True)
     saved = models.BooleanField(default=False)
     name = models.CharField(default='unsaved', max_length=60)
 
 class Chart(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, db_index=True)
     type = models.CharField(max_length=10, default='line')
     title = models.CharField(max_length=50)
     chart_set = models.ForeignKey(ChartSet, on_delete=models.CASCADE)

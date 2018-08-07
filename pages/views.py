@@ -7,8 +7,7 @@ from datetime import timedelta
 from .forms import *
 from .queries import *
 from .sheet_parser import *
-from pages.entry_scripts.data_entry_script import *
-from pages.entry_scripts.date_entry_script import *
+from .date_entry_script import *
 from django.db.models import Max
 
 #Index View -----------------------------------
