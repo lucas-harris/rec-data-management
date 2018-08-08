@@ -1,2 +1,1 @@
 web: gunicorn rec_data_django.wsgi
-web: python manage.py runserver
