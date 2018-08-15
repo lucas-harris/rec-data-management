@@ -38,6 +38,7 @@ def index(request):
         chartset = ChartSet()
         saved_chartsets = ChartSet.objects.filter(saved=True)
         request.session['current_chartset'] = saved_chartsets[0].id
+    request.session['current_chartset'] = 94
     charts = Chart.objects.filter(chart_set_id=request.session['current_chartset'])
     charts = charts & Chart.objects.filter(saved=True)
     chart_number = len(charts)
@@ -65,6 +66,7 @@ def savechartsetredirect(request):
         save_template_form = SaveTemplateForm(request.POST)
         if save_template_form.is_valid():
             if ChartSet.objects.filter(name=save_template_form.cleaned_data['name']).count()==0:
+                variable = request.session.get('current_chartset')
                 chartset = ChartSet.objects.get(id=request.session.get('current_chartset'))
                 chartset.name = save_template_form.cleaned_data['name']
                 chartset.saved = True
@@ -112,7 +114,7 @@ def changeselectedchartredirect(request):
         elif 'new' in request.POST:
             if select_chart_form.is_valid():
                 request.session['current_page'] = 'chart-creation'
-                chart = Chart(chart_set_id=ChartSet.objects.get(id=request.session.get('current_chartset')).id)
+                chart = Chart(chart_set_id=request.session.get('current_chartset'))
                 chart.save()
                 request.session['current_chart'] = Chart.objects.latest('id').id
                 request.session['current_chart_action'] = 'new'
