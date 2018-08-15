@@ -26,7 +26,7 @@ class ChartSet(models.Model):
     name = models.CharField(default='unsaved', max_length=60)
 
 class Chart(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, default=1)
     type = models.CharField(max_length=10)
     title = models.CharField(max_length=50)
     chart_set = models.ForeignKey(ChartSet, on_delete=models.CASCADE)

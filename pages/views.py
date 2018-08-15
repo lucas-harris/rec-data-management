@@ -121,7 +121,12 @@ def changeselectedchartredirect(request):
         elif 'new' in request.POST:
             if select_chart_form.is_valid():
                 request.session['current_page'] = 'chart-creation'
-                chart = Chart(chart_set_id=request.session.get('current_chartset'))
+                chart_id = -1
+                if len(Chart.objects.all()) == 0:
+                    chart_id = 0
+                else:
+                    chart_id = Chart.objects.latest('id').id 
+                chart = Chart(id=chart_id+1, chart_set_id=request.session.get('current_chartset'))
                 chart.save()
                 request.session['current_chart'] = Chart.objects.latest('id').id
                 request.session['current_chart_action'] = 'new'
