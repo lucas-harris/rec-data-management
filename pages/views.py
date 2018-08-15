@@ -52,7 +52,15 @@ def index(request):
 
 """Page that opens when a new chartset is created"""
 def createchartset(request):
-    new_chart_set = ChartSet()
+    loop_flag = True
+    new_chartset_id = ChartSet.objects.latest('id').id
+    while loop_flag:
+        try:
+            new_chartset_id += 1
+            ChartSet.objects.get(id=new_chartset_id)
+        except RealEstateListing.DoesNotExist:
+            loop_flag = False
+    new_chart_set = ChartSet(id=new_chart_set_id)
     new_chart_set.save()
     request.session['current_chartset'] = ChartSet.objects.latest('id').id
     request.session['current_page'] = 'create-chartset-redirect'
