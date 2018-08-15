@@ -58,7 +58,7 @@ def createchartset(request):
         try:
             new_chartset_id += 1
             ChartSet.objects.get(id=new_chartset_id)
-        except RealEstateListing.DoesNotExist:
+        except ChartSet.DoesNotExist:
             loop_flag = False
     new_chart_set = ChartSet(id=new_chart_set_id)
     new_chart_set.save()
