@@ -38,7 +38,6 @@ def index(request):
         chartset = ChartSet()
         saved_chartsets = ChartSet.objects.filter(saved=True)
         request.session['current_chartset'] = saved_chartsets[0].id
-    request.session['current_chartset'] = 94
     charts = Chart.objects.filter(chart_set_id=request.session['current_chartset'])
     charts = charts & Chart.objects.filter(saved=True)
     chart_number = len(charts)
