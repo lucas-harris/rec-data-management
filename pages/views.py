@@ -98,7 +98,11 @@ def changechartset(request):
         elif 'delete' in request.POST:
             if select_template_form.is_valid():
                 select_template_form.cleaned_data['name'].delete()
-                chartset = ChartSet()
+                if len(ChartSet.objects.all()) == 0:
+                    chartset_id = 0
+                else:
+                    chartset_id = ChartSet.objects.latest('id').id 
+                chartset = ChartSet(id=chartset_id+1)
                 chartset.save()
                 request.session['current_chartset'] = ChartSet.objects.latest('id').id
         return HttpResponseRedirect('/data-visualizer/dashboard')
