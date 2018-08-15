@@ -60,7 +60,7 @@ def createchartset(request):
             ChartSet.objects.get(id=new_chartset_id)
         except ChartSet.DoesNotExist:
             loop_flag = False
-    new_chart_set = ChartSet(id=new_chart_set_id)
+    new_chart_set = ChartSet(id=new_chartset_id)
     new_chart_set.save()
     request.session['current_chartset'] = ChartSet.objects.latest('id').id
     request.session['current_page'] = 'create-chartset-redirect'
