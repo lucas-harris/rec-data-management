@@ -19,6 +19,6 @@ from django.urls import path
 from django.conf.urls import include, url
 
 urlpatterns = [
-    path('data-visualizer/', include('pages.urls')),
+    path('', include('pages.urls')),
     path('admin/', admin.site.urls),
 ]
