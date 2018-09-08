@@ -32,7 +32,7 @@
             </div>
             
             <!--Facilities-->
-            <form action="/data-visualizer/chart-creation/" method="POST" class="form-group">
+            <form action="/chart-creation/" method="POST" class="form-group">
                 {% csrf_token %}
                 {% for field in dataset_form %}
                     {% if field.label == 'Label' or field.label == 'Facility' or field.label == 'Area' %}

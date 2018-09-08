@@ -35,7 +35,7 @@
                                 <p class='warning'>* takes several minutes *</p>
                             </div>
                         </div>
-                        <form action="/data-visualizer/db-updater-all-redirect/" method="POST" class="form-group">
+                        <form action="/db-updater-all-redirect/" method="POST" class="form-group">
                         {% csrf_token %}
                         {% for field in update_form_all %}
                         <div class="row justify-content-center align-items-center">
@@ -61,7 +61,7 @@
                                 <p class='warning'>* will update week that contains the given date *</p>
                             </div>
                         </div>
-                        <form action="/data-visualizer/db-updater-week-redirect/" method="POST" class="form-group">
+                        <form action="/db-updater-week-redirect/" method="POST" class="form-group">
                             {% csrf_token %}
                             {% for field in update_form_week %}
                                 {% if field.label == 'Type week' %}

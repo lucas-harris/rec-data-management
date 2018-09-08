@@ -37,7 +37,7 @@
         <!-- Save Template Bar -->
             <div class="row justify-content-center align-items-center" id='save-template-row'>
                 <div class="col-0">  
-                    <form action="/data-visualizer/save-chartset-redirect/" method="POST" class="form-group">
+                    <form action="/save-chartset-redirect/" method="POST" class="form-group">
                         {% csrf_token %}
                         {{ save_template_form }}
                         <input type="submit" value="Save" class="btn btn-outline-primary facility-button" id="save-template-confirm">
@@ -48,7 +48,7 @@
         <!-- Select Template Bar -->
             <div class="row justify-content-center align-items-center" id='select-template-row'>
                 <div class="col-0">  
-                    <form action="/data-visualizer/change-chartset-redirect/" method="POST" class="form-group">
+                    <form action="/change-chartset-redirect/" method="POST" class="form-group">
                         {% csrf_token %}
                         {{ select_template_form }}
                         <input type="submit" name='change' value="Select" class="btn btn-outline-primary facility-button" id="select-template-confirm">
@@ -86,7 +86,7 @@
         <!--Bottom Bar-->
             <div class="row justify-content-end bottom-bar">
                 <div class='col-2'>
-                <form action="/data-visualizer/change-selected-chart-redirect/" method="POST">   
+                <form action="/change-selected-chart-redirect/" method="POST">   
                     {% csrf_token %}       
                     <div class='hidden'>
                         {{select_chart_form}}

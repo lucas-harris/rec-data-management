@@ -22,7 +22,7 @@
             </div>
             <div class="row justify-content-center">
                 <div class="col-0">
-                    <form name="select-dataset-form" action="/data-visualizer/edit-dataset-redirect/" method="POST">
+                    <form name="select-dataset-form" action="/edit-dataset-redirect/" method="POST">
                         {% csrf_token %}
                         <input type="submit" name='choose' value="Choose Dataset" class="btn btn-outline-primary" id="choose-dataset-button">
                     </form>
@@ -34,7 +34,7 @@
                     {% for index in graph_count %}
                     <div class="row justify-content-center" id='label-row-{{index}}'>
                         <div class="col-1">
-                        <form name="form{{index}}" action="/data-visualizer/edit-dataset-redirect/" method="POST">
+                        <form name="form{{index}}" action="/edit-dataset-redirect/" method="POST">
                             {% csrf_token %}
                             <div class="hidden">
                                 {{select_graph_form}}
@@ -57,7 +57,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <form action="/data-visualizer/dashboard/" method="POST" class="form-group">
+            <form action="/dashboard/" method="POST" class="form-group">
                 {% csrf_token %}
                 {{ chart_form }}
                 <div class="row justify-content-center">
