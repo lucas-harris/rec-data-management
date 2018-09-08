@@ -24,13 +24,13 @@ def index(request):
                 chart.type=chart_form.cleaned_data['type']
                 chart.saved = True
                 chart.save()
-                return HttpResponseRedirect('/data-visualizer/dashboard')
+                return HttpResponseRedirect('/dashboard')
         elif 'edit-chart' in request.POST:
             if chart_form.is_valid():
                 chart = Chart.objects.get(id=request.session.get('current_edit'))
                 chart.type = chart_form.cleaned_data['type']
                 chart.save()
-                return HttpResponseRedirect('/data-visualizer/dashboard')
+                return HttpResponseRedirect('/dashboard')
         else:
             chart_form = ChartForm()
     request.session['current_page'] = 'dashboard'
@@ -64,7 +64,7 @@ def createchartset(request):
     new_chart_set.save()
     request.session['current_chartset'] = ChartSet.objects.latest('id').id
     request.session['current_page'] = 'create-chartset-redirect'
-    return HttpResponseRedirect('/data-visualizer/dashboard')
+    return HttpResponseRedirect('/dashboard')
 
 """Redirect for when a chartset is saved, redirected from home page"""
 def savechartsetredirect(request):
@@ -83,10 +83,10 @@ def savechartsetredirect(request):
                 request.session['current_chartset'] = chartset.id
             else:
                 request.session['name_taken_flag'] = 'true'
-            return HttpResponseRedirect('/data-visualizer/dashboard')
+            return HttpResponseRedirect('/dashboard')
         else:
             save_template_form = SaveTemplateForm()
-    return HttpResponseRedirect('/data-visualizer/dashboard')
+    return HttpResponseRedirect('/dashboard')
 
 """Redirect that changes the chartset that is currently being focused, redirected from home page"""
 def changechartset(request):
@@ -105,10 +105,10 @@ def changechartset(request):
                 chartset = ChartSet(id=chartset_id+1)
                 chartset.save()
                 request.session['current_chartset'] = ChartSet.objects.latest('id').id
-        return HttpResponseRedirect('/data-visualizer/dashboard')
+        return HttpResponseRedirect('/dashboard')
     else:
         select_template_form = SelectTemplateForm()
-    return HttpResponseRedirect('/data-visualizer/dashboard')
+    return HttpResponseRedirect('/dashboard')
 
 """Redirect that changes the chart being focused, redirected from home page"""
 def changeselectedchartredirect(request):
@@ -121,7 +121,7 @@ def changeselectedchartredirect(request):
             if select_chart_form.is_valid():
                 request.session['current_edit'] = select_chart_form.cleaned_data['selected_chart_id']
                 request.session['current_chart_action'] = 'edit'
-                return HttpResponseRedirect('/data-visualizer/chart-creation')
+                return HttpResponseRedirect('/chart-creation')
         elif 'new' in request.POST:
             if select_chart_form.is_valid():
                 request.session['current_page'] = 'chart-creation'
@@ -134,11 +134,11 @@ def changeselectedchartredirect(request):
                 chart.save()
                 request.session['current_chart'] = Chart.objects.latest('id').id
                 request.session['current_chart_action'] = 'new'
-                return HttpResponseRedirect('/data-visualizer/chart-creation')
-        return HttpResponseRedirect('/data-visualizer/dashboard')
+                return HttpResponseRedirect('/chart-creation')
+        return HttpResponseRedirect('/dashboard')
     else:
         select_chart_form = SelectChartForm()
-    return HttpResponseRedirect('/data-visualizer/dashboard')
+    return HttpResponseRedirect('/dashboard')
 
 #Chart Creation View -----------------------------------
 """Redirect that creates a new chart or edits a previous chart, redirected from home page"""
@@ -154,10 +154,10 @@ def confirmchartredirect(request):
             chart.saved = True
             chart.type = chart_form.cleaned_data['type']
             chart.save()
-            return HttpResponseRedirect('/data-visualizer/dashboard') 
+            return HttpResponseRedirect('/dashboard') 
         else:
             chart_form = ChartForm()
-    return HttpResponseRedirect('/data-visualizer/dashboard')
+    return HttpResponseRedirect('/dashboard')
 
 """Page that displays information about the selected chart"""
 def chartcreation(request):
@@ -216,7 +216,7 @@ def chartcreation(request):
                     for data_object in query_dicts[single_dictionary]:
                         graph.data.add(data_object)
                 graph.save()
-            return HttpResponseRedirect('/data-visualizer/chart-creation')
+            return HttpResponseRedirect('/chart-creation')
         else:
             dataset_form = DatasetForm()
     if request.session.get('current_chart_action') == 'new':
@@ -236,7 +236,7 @@ def chartcreation(request):
 
 """Redirect that exits the current chart process, redirected from the chart creation page"""
 def deletechartredirect(request):
-    return HttpResponseRedirect('/data-visualizer/dashboard')
+    return HttpResponseRedirect('/dashboard')
 
 #Data Selection View -----------------------------------
 """Page that allows user to edit or select the dataset to be added to the current chart"""
@@ -269,19 +269,19 @@ def selectdatasetredirect(request):
         if 'delete' in request.POST:
             if select_graph_form.is_valid():
                 Graph.objects.get(id=select_graph_form.cleaned_data['selected_graph_id']).delete()
-                return HttpResponseRedirect('/data-visualizer/chart-creation')
+                return HttpResponseRedirect('/chart-creation')
         elif 'edit' in request.POST:
             if select_graph_form.is_valid():
                 request.session['current_graph_edit'] = select_graph_form.cleaned_data['selected_graph_id']
                 request.session['current_graph_action'] = 'edit'
-                return HttpResponseRedirect('/data-visualizer/data-selection')
+                return HttpResponseRedirect('/data-selection')
         elif 'new' in request.POST:
             request.session['current_graph_action'] = 'new'
-            return HttpResponseRedirect('/data-visualizer/data-selection')
-        return HttpResponseRedirect('/data-visualizer/chart-creation')
+            return HttpResponseRedirect('/data-selection')
+        return HttpResponseRedirect('/chart-creation')
     else:
         select_graph_form = SelectGraphForm()
-    return HttpResponseRedirect('/data-visualizer/dashboard')    
+    return HttpResponseRedirect('/dashboard')    
 
 
 #Report View --------------------------------------
@@ -318,10 +318,10 @@ def updatedballredirect(request):
             else:
                 sheet = update_form.cleaned_data['type_all']
                 parse_sheet(sheet)
-            return HttpResponseRedirect('/data-visualizer/dashboard')
+            return HttpResponseRedirect('/dashboard')
     else:
         update_form = UpdateAllDBForm()
-    return HttpResponseRedirect('/data-visualizer/dashboard')
+    return HttpResponseRedirect('/dashboard')
 
 """Redirect that reads one week of the google sheet to update the database, redirected from the update db page"""
 def updatedbweekredirect(request):
@@ -335,10 +335,10 @@ def updatedbweekredirect(request):
                 sheet = update_form.cleaned_data['type_week']
                 date = update_form.cleaned_data['date']
                 update_week(sheet, date)
-            return HttpResponseRedirect('/data-visualizer/dashboard')
+            return HttpResponseRedirect('/dashboard')
     else:
         update_form = UpdateWeekDBForm()
-    return HttpResponseRedirect('/data-visualizer/dashboard')
+    return HttpResponseRedirect('/dashboard')
 
 #Additional Methods -----------------------------------
 """Adds date objects to the database"""
