@@ -233,10 +233,9 @@ def chartcreation(request):
         chart_type = Chart.objects.get(id=current_chart).type
         labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=current_chart))
         graphs_json = json.dumps(labels_and_colors) 
-        # graph_count = range(len(Graph.objects.filter(chart_id=current_chart)))
-    return render(request, 'pages/chart-creation.html', {'chart_form':chart_form, 'chart_type':chart_type,
+        graph_count = range(len(Graph.objects.filter(chart_id=current_chart)))
+    return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 'chart_type':chart_type,
     'graphs':graphs_json, 'select_graph_form':select_graph_form, 'current_chart':current_chart})
-    #PUT THIS BACK IN THE DICTIONARY FOR RENDER 'graph_count':graph_count, 
 
 """Redirect that exits the current chart process, redirected from the chart creation page"""
 def deletechartredirect(request):

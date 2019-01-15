@@ -1,6 +1,6 @@
 import datetime
 from datetime import timedelta
-from pages.models import Date
+# from pages.models import Date
 from django.db import models
 """
 Class that creates dates to be added to the database

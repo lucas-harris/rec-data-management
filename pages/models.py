@@ -1,32 +1,25 @@
 from django.db import models
 
-class Date(models.Model):
-    date = models.DateTimeField(primary_key=True, db_index=True)
-    week = models.CharField(max_length=3)
-    year = models.CharField(max_length=4)
-    month = models.CharField(max_length=3)
-    day_of_week = models.CharField(max_length=4)
-    day_of_month = models.CharField(max_length=3)
+# class Date(models.Model):
+#     date = models.DateTimeField(primary_key=True, db_index=True)
+#     week = models.CharField(max_length=3)
+#     year = models.CharField(max_length=4)
+#     month = models.CharField(max_length=3)
+#     day_of_week = models.CharField(max_length=4)
+#     day_of_month = models.CharField(max_length=3)
 
-    def __str__(self):
-        return str(self.date)
+#     def __str__(self):
+#         return str(self.date)
 
-class Data(models.Model):
-    key = models.CharField(primary_key=True, max_length=50)
-    value = models.IntegerField(default = 0)
-    facility = models.CharField(max_length=10)
-    area = models.CharField(max_length=10)
-    time = models.CharField(max_length=5)
-    gender = models.CharField(max_length=3)
-    date = models.ForeignKey(Date, on_delete=models.CASCADE)
+# class Data(models.Model):
+#     key = models.CharField(primary_key=True, max_length=50)
+#     value = models.IntegerField(default = 0)
+#     facility = models.CharField(max_length=10)
+#     area = models.CharField(max_length=10)
+#     time = models.CharField(max_length=5)
+#     gender = models.CharField(max_length=3)
+#     date = models.ForeignKey(Date, on_delete=models.CASCADE)
 
-class DayData(models.Model):
-    key = models.CharField(primary_key=True, max_length=50)
-    value = models.IntegerField(default = 0)
-    facility = models.CharField(max_length=10)
-    area = models.CharField(max_length=10)
-    gender = models.CharField(max_length=3)
-    date = models.ForeignKey(Date, on_delete=models.CASCADE)
 
 class ChartSet(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -43,7 +36,6 @@ class Chart(models.Model):
 class Graph(models.Model):
     id = models.IntegerField(primary_key=True)
     chart = models.ForeignKey(Chart, on_delete=models.CASCADE)
-    data = models.ManyToManyField('Data')
     color = models.CharField(max_length=25, default='rgb(255, 0, 0, .3')
     label = models.CharField(max_length=60, default='set')
     unit = models.CharField(max_length=15, default='hour')
@@ -58,4 +50,4 @@ class Graph(models.Model):
     day_of_month = models.CharField(max_length=500, default='1')
     day_of_week = models.CharField(max_length=500, default='Monday')
     time = models.CharField(max_length=500, default='0630')
-    data_json = models.CharField(max_length=100000, default='-')
+    data_json = models.CharField(max_length=1000000, default='-')

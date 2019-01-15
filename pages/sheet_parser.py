@@ -4,7 +4,7 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 import time
 import datetime
-from pages.models import Data, Date
+# from pages.models import Data, Date
 
 '''Reads the patron count spread sheet and sends a week's worth of counts to the render_week methods'''
 def parse_sheet(sheet):
