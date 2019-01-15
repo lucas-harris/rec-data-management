@@ -20,6 +20,14 @@ class Data(models.Model):
     gender = models.CharField(max_length=3)
     date = models.ForeignKey(Date, on_delete=models.CASCADE)
 
+class DayData(models.Model):
+    key = models.CharField(primary_key=True, max_length=50)
+    value = models.IntegerField(default = 0)
+    facility = models.CharField(max_length=10)
+    area = models.CharField(max_length=10)
+    gender = models.CharField(max_length=3)
+    date = models.ForeignKey(Date, on_delete=models.CASCADE)
+
 class ChartSet(models.Model):
     id = models.IntegerField(primary_key=True)
     saved = models.BooleanField(default=False)

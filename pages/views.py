@@ -37,7 +37,10 @@ def index(request):
     if 'current_chartset' not in request.session:
         chartset = ChartSet()
         saved_chartsets = ChartSet.objects.filter(saved=True)
-        request.session['current_chartset'] = saved_chartsets[0].id
+        if len(saved_chartsets) != 0:
+            request.session['current_chartset'] = saved_chartsets[0].id
+        else:
+            request.session['current_chartset'] = ChartSet.objects.latest('id').id
     charts = Chart.objects.filter(chart_set_id=request.session['current_chartset'])
     charts = charts & Chart.objects.filter(saved=True)
     chart_number = len(charts)
@@ -73,7 +76,7 @@ def savechartsetredirect(request):
         save_template_form = SaveTemplateForm(request.POST)
         if save_template_form.is_valid():
             if ChartSet.objects.filter(name=save_template_form.cleaned_data['name']).count()==0:
-                variable = request.session.get('current_chartset')
+                variable = request.session.get('current_chartset')  
                 chartset = ChartSet.objects.get(id=request.session.get('current_chartset'))
                 chartset.name = save_template_form.cleaned_data['name']
                 chartset.saved = True
@@ -230,9 +233,10 @@ def chartcreation(request):
         chart_type = Chart.objects.get(id=current_chart).type
         labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=current_chart))
         graphs_json = json.dumps(labels_and_colors) 
-        graph_count = range(len(Graph.objects.filter(chart_id=current_chart)))
-    return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 'chart_type':chart_type,
+        # graph_count = range(len(Graph.objects.filter(chart_id=current_chart)))
+    return render(request, 'pages/chart-creation.html', {'chart_form':chart_form, 'chart_type':chart_type,
     'graphs':graphs_json, 'select_graph_form':select_graph_form, 'current_chart':current_chart})
+    #PUT THIS BACK IN THE DICTIONARY FOR RENDER 'graph_count':graph_count, 
 
 """Redirect that exits the current chart process, redirected from the chart creation page"""
 def deletechartredirect(request):
