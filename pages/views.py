@@ -35,18 +35,20 @@ def index(request):
             chart_form = ChartForm()
     request.session['current_page'] = 'dashboard'
     if 'current_chartset' not in request.session:
-        chartset = ChartSet()
         saved_chartsets = ChartSet.objects.filter(saved=True)
         if len(saved_chartsets) != 0:
             request.session['current_chartset'] = saved_chartsets[0].id
         else:
-            request.session['current_chartset'] = ChartSet.objects.latest('id').id
-    charts = Chart.objects.filter(chart_set_id=request.session['current_chartset'])
+            new_cs = ChartSet(id=1)
+            new_cs.save()
+            request.session['current_chartset'] = new_cs.id
+    charts = Chart.objects.filter(chart_set_id=request.session.get('current_chartset'))
     charts = charts & Chart.objects.filter(saved=True)
     chart_number = len(charts)
     chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
-    title = ChartSet.objects.get(id=request.session.get('current_chartset')).name
+    # title = ChartSet.objects.get(id=request.session.get('current_chartset')).name
+    title = request.session.get('current_chartset')
     name_taken_flag = request.session.get('name_taken_flag')
     request.session['name_taken_flag'] = 'false'
     current_saved = str(ChartSet.objects.get(id=request.session.get('current_chartset')).saved)
@@ -65,7 +67,7 @@ def createchartset(request):
             loop_flag = False
     new_chart_set = ChartSet(id=new_chartset_id)
     new_chart_set.save()
-    request.session['current_chartset'] = ChartSet.objects.latest('id').id
+    request.session['current_chartset'] = new_chartset_id
     request.session['current_page'] = 'create-chartset-redirect'
     return HttpResponseRedirect('/dashboard')
 
@@ -76,7 +78,6 @@ def savechartsetredirect(request):
         save_template_form = SaveTemplateForm(request.POST)
         if save_template_form.is_valid():
             if ChartSet.objects.filter(name=save_template_form.cleaned_data['name']).count()==0:
-                variable = request.session.get('current_chartset')  
                 chartset = ChartSet.objects.get(id=request.session.get('current_chartset'))
                 chartset.name = save_template_form.cleaned_data['name']
                 chartset.saved = True
