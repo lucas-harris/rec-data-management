@@ -4,16 +4,27 @@ from functools import cmp_to_key
 from django import forms
 from .models import *
 from datetime import *
+import psycopg2
+import json
 
-class Query():
-#Return Methods
+conn = psycopg2.connect(user="postgres", password="password", host='35.239.79.43', dbname="recdb")
+sql = conn.cursor()
+# cur.execute("SELECT * FROM data where facility='rec' and area='gf' and gender='m' and value=10")
+
+month_dict = {'1':'January', '2':'February', '3':'March', '4':'April', '5':'May', '6':'June', '7':'July', '8':'August', '9':'September', '10':'October', '11':'November', '12':'December'}
+time_dict = {'06:30': '6:30 AM', '07:30':'7:30 AM', '08:30':'8:30 AM' ,'09:30':'9:30 AM' ,'10:30':'10:30 AM' ,'11:30':'11:30 AM' ,'12:30':'12:30 PM' ,'13:30':'1:30 PM' ,'14:30':'2:30 PM' ,'15:30':'3:30 PM' ,'16:30':'4:30 PM' ,'17:30':'5:30 PM' ,
+'18:30':'6:30 PM', '19:30':'7:30 PM', '20:30':'8:30 PM', '21:30':'9:30 PM', '22:30':'10:30 PM'}
+
+class Query:
+
+    #Return Methods
     """Returns a list of all keys from the dictionary containing the sorted results"""
     def return_keys(self, dictionary):
         ret_list = []
         for x in dictionary:
             ret_list.append(x)
         return ret_list
-    
+
     """Returns a list of all values from the dictionary containing the sorted results"""
     def return_values(self, dictionary):
         ret_list = []
@@ -21,7 +32,7 @@ class Query():
             ret_list.append(dictionary[x])
         return ret_list
 
-#Sort Results
+    #Sort Results
     """Sorts a dictionary based on the increment units selected in Dataset form"""
     def sort_results(self, graph):
         dictionary = self.group_queries(graph)
@@ -158,7 +169,7 @@ class Query():
         else:
             return 1
 
-#Increment Grouping
+    #Increment Grouping
     """Returns a dictionary containing the values of the Data selected in the Dataset form"""
     """grouped by the increment unit selected in the form"""
     def group_queries(self, graph):
@@ -278,7 +289,7 @@ class Query():
         return hour_dict
 
     """Returns a string that represents a hour group"""
-    def make_hour_key(self, data):        
+    def make_hour_key(self, data):      
         month = ''
         day = ''
         if int(data.date.month)<10:
@@ -293,54 +304,108 @@ class Query():
         minute = data.time[2:5]
         return hour + ':' + minute + ', ' + month + '/' + day + '/' + str(data.date.year)
 
-#Combination of Queries-------------------------
-    #Creates a dictionary of dictionaries. The upper level dicts contain 100 or less dicts that contain query results
-    """Returns a QuerySet of all date and non-date variables of the Dataset form combined"""
-    def query_every_day(self, graph):
-        queries_dict = dict()
-        dates = self.create_date_group(graph)
-        data = self.query_all(graph)
-        queries_dict[0] = data & Data.objects.filter(date_id__in=dates)
-        return queries_dict
+    def run(graph):
+        queries = Query.query_all(graph)
+        labels = Query.make_labels(graph, queries)
+        results = {}
+        for index, value in enumerate(queries):
+            results[labels[index]] = value[0]
+        return results
+
+    def make_labels(graph, queries):
+        labels = []
+        if graph.cleaned_data['units'] == 'hour':
+            for hour in queries:
+                date = hour[2]
+                labels.append(hour[1] + ", " + date.strftime('%m/%d/%Y'))
+        elif graph.cleaned_data['units'] == 'day':
+            for day in queries:
+                date = day[1]
+                labels.append(date.strftime('%m/%d/%Y'))
+        elif graph.cleaned_data['units'] == 'week':
+            for week in queries:
+                labels.append("Week " + week[1] + ", " + week[2])
+        elif graph.cleaned_data['units'] == 'month':
+            for month in queries:
+                labels.append(month_dict[month[1]] + " " + month[2])
+        elif graph.cleaned_data['units'] == 'year':
+            for year in queries:
+                labels.append(year[1] + " " + year[2])
+        else:
+            labels.append("All")
+        return labels
 
     """Returns a QuerySet that matches all the non-date attributes of Dataset form"""
-    def query_all(self, graph):
-        dates = '' #Currently a placeholder, need to add dates implementation to query methods for the time period being queried
-        facilities = self.query_facilities(graph, dates)
-        area = self.query_area(graph, dates)
-        gender = self.query_gender(graph, dates)
-        time = self.query_time(graph, dates)
-        ret = Data.objects.all()
-        if facilities == 'all' and area == 'all' and gender == 'all' and time == 'all':
-            return ret
-        if not facilities == 'all':
-            ret = ret & facilities
-        if not area == 'all':
-            ret = ret & area
-        if not gender == 'all':
-            ret = ret & gender
-        if not time == 'all':
-            ret = ret & time
-        return ret
+    def query_all(graph):
+        facility = Query.query_facility(graph)
+        area = Query.query_area(graph)
+        dates = Query.query_dates(graph)
+        gender = Query.query_gender(graph)
+        time =  Query.query_time(graph)
+        year = Query.query_year(graph)
+        month = Query.query_month(graph)
+        week = Query.query_week(graph)
+        day_of_month = Query.query_day_of_month(graph)
+        day_of_week = Query.query_day_of_week(graph)
+        group_by = Query.group_by(graph)
+        units = Query.columns_to_query(graph)
+        order_by = Query.order_by(graph)
+        query = "SELECT SUM(data.value)" + units + " FROM date, data WHERE date.date=data.date"  + facility + area + dates + gender + time + year + month + week + day_of_month + day_of_week + group_by + order_by + ";"
+        # return query
+        sql.execute(query)
+        return sql.fetchall()
+
+    def columns_to_query(graph):
+        if graph.cleaned_data['units'] == 'hour':
+            return ", data.time, data.date"
+        elif graph.cleaned_data['units'] == 'day':
+            return ", data.date"
+        elif graph.cleaned_data['units'] == 'week':
+            return ", date.week, date.year"
+        elif graph.cleaned_data['units'] == 'month':
+            return ", date.month, date.year"
+        elif graph.cleaned_data['units'] == 'year':
+            return ", date.year"
+        else:
+            return ""
 
     """Returns a QuerySet that is the period and date queries combined"""
-    def create_date_group(self, graph):
-        return self.get_period_queries(graph) & self.get_date_queries(graph)
+    def group_by(graph):
+        if graph.cleaned_data['units'] == 'hour':
+            return " GROUP BY data.time, data.date"
+        elif graph.cleaned_data['units'] == 'day':
+            return " GROUP BY data.date"
+        elif graph.cleaned_data['units'] == 'week':
+            return " GROUP BY date.week, date.year"
+        elif graph.cleaned_data['units'] == 'month':
+            return " GROUP BY date.month, date.year"
+        elif graph.cleaned_data['units'] == 'year':
+            return " GROUP BY date.year"
+        else:
+            return ""
+
+    def order_by(graph):
+        if graph.cleaned_data['units'] == 'hour':
+            return " ORDER BY data.time, data.date"
+        elif graph.cleaned_data['units'] == 'day':
+            return " ORDER BY data.date"
+        elif graph.cleaned_data['units'] == 'week':
+            return " ORDER BY date.week, date.year"
+        elif graph.cleaned_data['units'] == 'month':
+            return " ORDER BY date.month, date.year"
+        elif graph.cleaned_data['units'] == 'year':
+            return " ORDER BY date.year"
+        else:
+            return ""
 
     """Returns a QuerySet of all dates between the start and end date in Dataset form"""
-    def get_period_queries(self, graph):
-        start = graph.start_date
-        end = graph.end_date
-        dates = Date.objects.none()
-        flag = True
-        while (flag):
-            if (start == end):
-                flag = False
-            dates = dates | Date.objects.filter(date=start)
-            start += timedelta(days=1)
-        dates = dates
-        return dates
-    
+    def query_dates(graph):
+        start_date = graph.cleaned_data['start_date'] - timedelta(days=1)
+        start_date = start_date.strftime('%m/%d/%Y')
+        end_date = graph.cleaned_data['end_date'] - timedelta(days=1)
+        end_date = end_date.strftime('%m/%d/%Y')
+        return " AND (data.date>='" + start_date + "' AND data.date<='" + end_date + "')"
+
     """Returns a QuerySet of all dates that match the values chosen in Dataset form"""
     def get_date_queries(self, graph):
         month = self.query_month(graph)
@@ -364,96 +429,93 @@ class Query():
         return ret
 
 
-#Date Queries-------------------------
+    #Date Queries-------------------------
     """Returns a QuerySet of all the years selected in the Dataset form"""
-    def query_year(self, graph):
-        years = self.replace_characters(graph.year)
-        ret = Date.objects.none()
-        for x in years:
-            if x == 'all':
-                return 'all'
-            ret = ret | Date.objects.filter(year=x)
-        return ret
+    def query_year(graph):
+        return Query.query_form_date_checkbox(graph, 'year')
+
     """Returns a QuerySet of all the months selected in the Dataset form"""
-    def query_month(self, graph):
-        months = self.replace_characters(graph.month)
-        ret = Date.objects.none()
-        for x in months:
-            if x == 'all':
-                return 'all'
-            ret = ret | Date.objects.filter(month=x)
-        return ret
+    def query_month(graph):
+        return Query.query_form_date_checkbox(graph, 'month')
 
     """Returns a QuerySet of all the days of the month selected in the Dataset form"""
-    def query_day_of_month(self, graph):
-        days = self.replace_characters(graph.day_of_month)
-        ret = Date.objects.none()
-        for x in days:
-            if x == 'all':
-                return 'all'
-            ret = ret | Date.objects.filter(day_of_month=x)
-        return ret
+    def query_day_of_month(graph):
+        return Query.query_form_date_checkbox(graph, 'day_of_month')
 
     """Returns a QuerySet of all the weeks selected in the Dataset form"""
-    def query_week(self, graph):
-        weeks = self.replace_characters(graph.week)
-        ret = Date.objects.none()
-        for x in weeks:
-            if x == 'all':
-                return 'all'
-            ret = ret | Date.objects.filter(week=x)
-        return ret
+    def query_week(graph):
+        return Query.query_form_date_checkbox(graph, 'week')
 
     """Returns a QuerySet of all the days of the week selected in the Dataset form"""
-    def query_day_of_week(self, graph):
-        days = self.replace_characters(graph.day_of_week)
-        ret = Date.objects.none()
-        for x in days:
-            if x == 'all':
-                return 'all'
-            ret = ret | Date.objects.filter(day_of_week=x)
-        return ret
+    def query_day_of_week(graph):
+        return Query.query_form_date_checkbox(graph, 'day_of_week')
 
-#Data Queries-------------------------
+    #Data Queries-------------------------
     """Returns a QuerySet of all the facilities selected in the Dataset form"""
-    def query_facilities(self, graph, dates):
-        facilities = self.replace_characters(graph.facility)
-        ret = Data.objects.none()
-        for x in facilities:
-            if x == 'all':
-                return 'all'
-            ret = ret | Data.objects.filter(facility=x)
-        return ret
+    def query_facility(graph):
+        return Query.query_form_data_checkbox(graph, 'facility')
 
     """Returns a QuerySet of all the areas selected in the Dataset form"""
-    def query_area(self, graph, dates):
-        areas = self.replace_characters(graph.area)
-        ret = Data.objects.none()
-        for x in areas:
-            if x == 'all':
-                return 'all'
-            ret = ret | Data.objects.filter(area=x)
-        return ret
+    def query_area(graph):
+        return Query.query_form_data_checkbox(graph, 'area')
 
     """Returns a QuerySet of the gender selected in the Dataset form"""
-    def query_gender(self, graph, dates):
-        gender = graph.gender
-        if gender == 'all':
-            return 'all'
-        else:
-            return Data.objects.filter(gender=gender)
+    def query_gender(graph):
+        return Query.query_form_data_radio(graph, 'gender')
 
     """Returns a QuerySet of all the times selected in the Dataset form"""
-    def query_time(self, graph, dates):
-        times = self.replace_characters(graph.time)
-        ret = Data.objects.none()
-        for x in times:
-            if x == 'all':
-                return 'all'
-            ret = ret | Data.objects.filter(time=x)
-        return ret
+    def query_time(graph):
+        return Query.query_form_data_checkbox(graph, 'time')
 
-#Replace Characters----------------
+    def query_form_data_checkbox(graph, attribute):
+        attributes = graph.cleaned_data[attribute]
+        query_string = ' AND ('
+        for index, row in enumerate(attributes):
+            if index==0:
+                if row =='all':
+                    return ''
+                else: 
+                    query_string += "data." + attribute + "='" + row + "'"
+            else:
+                query_string += " OR data." + attribute + "='" + row + "'"
+        query_string += ')'
+        return query_string
+
+    def query_form_data_radio(graph, attribute):
+        attributes = graph.cleaned_data[attribute]
+        query_string = ' AND ('
+        if attributes =='all':
+            return ''
+        else: 
+            query_string += "data." + attribute + "='" + attributes + "'"
+        query_string += ')'
+        return query_string
+
+    def query_form_date_checkbox(graph, attribute):
+        attributes = graph.cleaned_data[attribute]
+        query_string = ' AND ('
+        for index, row in enumerate(attributes):
+            if index==0:
+                if row =='all':
+                    return ''
+                else: 
+                    query_string += "date." + attribute + "='" + row + "'"
+            else:
+                query_string += " OR date." + attribute + "='" + row + "'"
+        query_string += ')'
+        return query_string
+
+    def query_form_date_radio(graph, attribute):
+        attributes = graph.cleaned_data[attribute]
+        query_string = ' AND ('
+        if attributes =='all':
+            return ''
+        else: 
+            query_string += "date." + attribute + "='" + attributes + "'"
+        query_string += ')'
+        return query_string
+
+    #Replace Characters----------------
     """Replaces characters and splits a attributes to return a list of strings"""
     def replace_characters(self, attributes):
         if type(attributes) is list:

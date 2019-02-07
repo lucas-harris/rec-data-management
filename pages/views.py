@@ -34,7 +34,8 @@ def index(request):
         else:
             chart_form = ChartForm()
     request.session['current_page'] = 'dashboard'
-    if 'current_chartset' not in request.session:
+    if request.session.get('current_chartset') == None:
+        var = request.session.get('current_chartset')
         saved_chartsets = ChartSet.objects.filter(saved=True)
         if len(saved_chartsets) != 0:
             request.session['current_chartset'] = saved_chartsets[0].id
@@ -47,8 +48,7 @@ def index(request):
     chart_number = len(charts)
     chartset_dict = chartset_to_json(ChartSet.objects.get(id=request.session.get('current_chartset')))
     chartset_json = json.dumps(chartset_dict) 
-    # title = ChartSet.objects.get(id=request.session.get('current_chartset')).name
-    title = request.session.get('current_chartset')
+    title = ChartSet.objects.get(id=request.session.get('current_chartset')).name
     name_taken_flag = request.session.get('name_taken_flag')
     request.session['name_taken_flag'] = 'false'
     current_saved = str(ChartSet.objects.get(id=request.session.get('current_chartset')).saved)
@@ -67,7 +67,8 @@ def createchartset(request):
             loop_flag = False
     new_chart_set = ChartSet(id=new_chartset_id)
     new_chart_set.save()
-    request.session['current_chartset'] = new_chartset_id
+    request.session['current_chartset'] = new_chart_set.id
+    request.session.modified = True
     request.session['current_page'] = 'create-chartset-redirect'
     return HttpResponseRedirect('/dashboard')
 
@@ -185,16 +186,14 @@ def chartcreation(request):
                     end_date=dataset_form.cleaned_data['end_date'], gender=dataset_form.cleaned_data['gender'], year=dataset_form.cleaned_data['year'], 
                     month=dataset_form.cleaned_data['month'], week=dataset_form.cleaned_data['week'], day_of_month=dataset_form.cleaned_data['day_of_month'], 
                     day_of_week=dataset_form.cleaned_data['day_of_week'], time=dataset_form.cleaned_data['time'],
-                    color=dataset_form.cleaned_data['color'], unit=dataset_form.cleaned_data['units'] )
+                    color=dataset_form.cleaned_data['color'], unit=dataset_form.cleaned_data['units'], data_json=Query.run(dataset_form))
                 graph.save()
                 for graph_loop in Graph.objects.filter(chart_id=current_id):
                     graph_loop.unit = dataset_form.cleaned_data['units']
                     graph_loop.save()
-                query_dicts = Query().query_every_day(graph)
-                for single_dictionary in query_dicts:
-                    for data_object in query_dicts[single_dictionary]:
-                        graph.data.add(data_object)
-                graph.save()
+                # main()
+                # request.session['current_graph'] = graph.id
+                # request.session['temp_var'] = Query.query_dates(dataset_form)
             elif request.session.get('current_graph_action') == 'edit':
                 graph = Graph.objects.get(id=request.session.get('current_graph_edit'))
                 graph.label=dataset_form.cleaned_data['label']
@@ -211,15 +210,11 @@ def chartcreation(request):
                 graph.time=dataset_form.cleaned_data['time']
                 graph.color=dataset_form.cleaned_data['color']
                 graph.unit=dataset_form.cleaned_data['units'] 
+                graph.data_json=Query.run(dataset_form)
                 graph.save()
                 for graph_loop in Graph.objects.filter(chart_id=current_id):
                     graph_loop.unit=dataset_form.cleaned_data['units'] 
                     graph_loop.save()
-                query_dicts = Query().query_every_day(graph)
-                for single_dictionary in query_dicts:
-                    for data_object in query_dicts[single_dictionary]:
-                        graph.data.add(data_object)
-                graph.save()
             return HttpResponseRedirect('/chart-creation')
         else:
             dataset_form = DatasetForm()
@@ -235,8 +230,12 @@ def chartcreation(request):
         labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=current_chart))
         graphs_json = json.dumps(labels_and_colors) 
         graph_count = range(len(Graph.objects.filter(chart_id=current_chart)))
+    temp_var = 'yes'
+    # temp_var = 'yes'
+    # return render(request, 'pages/chart-creation.html', {'chart_form':chart_form, 'chart_type':chart_type,
+    # 'select_graph_form':select_graph_form, 'current_chart':current_chart, 'temp_var':temp_var})
     return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 'chart_type':chart_type,
-    'graphs':graphs_json, 'select_graph_form':select_graph_form, 'current_chart':current_chart})
+    'graphs':graphs_json, 'select_graph_form':select_graph_form, 'current_chart':current_chart, 'temp_var':temp_var})
 
 """Redirect that exits the current chart process, redirected from the chart creation page"""
 def deletechartredirect(request):
@@ -603,12 +602,12 @@ def chart_to_json(chart, passed_index):
 
 """Converts dataset information from a given chart to json"""
 def graph_to_json(graph, passed_index):
-    graph_values = Query().sort_results(graph)
+    graph_json = graph.data_json
     data_list = []
     index = 0
-    for data in graph_values:
-        data_list.append(data_to_json(data, graph_values[data]))
-        index+=1
+    for data in graph_json:
+        data_list.append(data_to_json(data, graph_json[data]))
+        index+=1    
     return {'graph':data_list, 'color':graph.color, 'label':graph.label}
 
 """Converts data information to json"""
@@ -619,8 +618,7 @@ def data_to_json(key, value):
 def graph_to_json_no_data(graph_list):
     return_list = []
     for graph in graph_list:
-        graph_values = Query().sort_results(graph)
-        return_list.append({'label':graph.label, 'color':graph.color, 'id':graph.id, 'length':len(graph_values)})
+        return_list.append({'label':graph.label, 'color':graph.color, 'id':graph.id})
     return return_list
 
 """Converts all the information about a dataset to json, this is for report label creation"""

@@ -2,7 +2,7 @@ from django.conf.urls import url
 from . import views
 from wkhtmltopdf.views import PDFTemplateView
 urlpatterns = [
-    url(r'dashboard/', views.index, name='dashboard'),
+    url(r'dashboard/', views.index, name='index'),
     url(r'chart-creation/', views.chartcreation, name='chart-creation'),
     url(r'data-selection/', views.dataselection, name='data-selection'),
     url(r'create-chartset-redirect/', views.createchartset, name='create-chartset-redirect'),

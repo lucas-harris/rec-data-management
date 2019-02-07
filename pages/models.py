@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres import fields
 
 # class Date(models.Model):
 #     date = models.DateTimeField(primary_key=True, db_index=True)
@@ -50,4 +51,4 @@ class Graph(models.Model):
     day_of_month = models.CharField(max_length=500, default='1')
     day_of_week = models.CharField(max_length=500, default='Monday')
     time = models.CharField(max_length=500, default='0630')
-    data_json = models.CharField(max_length=1000000, default='-')
+    data_json = fields.JSONField(default={'',''})
