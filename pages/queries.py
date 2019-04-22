@@ -8,6 +8,7 @@ import psycopg2
 import json
 
 conn = psycopg2.connect(user="postgres", password="password", host='35.239.79.43', dbname="recdb")
+# conn.rollback()
 sql = conn.cursor()
 # cur.execute("SELECT * FROM data where facility='rec' and area='gf' and gender='m' and value=10")
 
@@ -400,9 +401,9 @@ class Query:
 
     """Returns a QuerySet of all dates between the start and end date in Dataset form"""
     def query_dates(graph):
-        start_date = graph.cleaned_data['start_date'] - timedelta(days=1)
+        start_date = graph.cleaned_data['start_date']
         start_date = start_date.strftime('%m/%d/%Y')
-        end_date = graph.cleaned_data['end_date'] - timedelta(days=1)
+        end_date = graph.cleaned_data['end_date']
         end_date = end_date.strftime('%m/%d/%Y')
         return " AND (data.date>='" + start_date + "' AND data.date<='" + end_date + "')"
 
