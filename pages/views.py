@@ -11,6 +11,10 @@ from .date_entry_script import *
 from django.db.models import Max
 
 #Index View -----------------------------------
+
+def blankredirect(request):
+    return HttpResponseRedirect('/dashboard')
+
 """Home Page"""
 def index(request):
     save_template_form = SaveTemplateForm()
