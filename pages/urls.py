@@ -16,5 +16,5 @@ urlpatterns = [
     url(r'db-updater/', views.updatedb, name='db-updater'),
     url(r'db-updater-all-redirect/', views.updatedballredirect, name='db-updater-all-redirect'),
     url(r'db-updater-week-redirect/', views.updatedbweekredirect, name='db-updater-week-redirect'),
-    url(r'^', views.blankredirect, name='blank-redirect')
+    url(r'^$', views.blankredirect, name='blank-redirect')
 ]

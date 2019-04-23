@@ -7,7 +7,9 @@ from datetime import *
 import psycopg2
 import json
 
+
 conn = psycopg2.connect(user="postgres", password="password", host='35.239.79.43', dbname="recdb")
+# conn.rollback()
 # conn.rollback()
 sql = conn.cursor()
 # cur.execute("SELECT * FROM data where facility='rec' and area='gf' and gender='m' and value=10")
