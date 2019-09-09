@@ -160,6 +160,12 @@ def confirmchartredirect(request):
         chart_form = ChartForm(request.POST)
         if chart_form.is_valid():
             chart = Chart.objects.get(id=chart_id)
+            graph_list = Graph.objects.filter(chart=chart_id)
+            index = 0
+            for graph in graph_list:
+                graph.order = request.POST.get('dataset-order-'+str(index))
+                graph.save()
+                index = index+1
             chart.saved = True
             chart.type = chart_form.cleaned_data['type']
             chart.save()
@@ -234,12 +240,10 @@ def chartcreation(request):
         labels_and_colors = graph_to_json_no_data(Graph.objects.filter(chart_id=current_chart))
         graphs_json = json.dumps(labels_and_colors) 
         graph_count = range(len(Graph.objects.filter(chart_id=current_chart)))
-    temp_var = 'yes'
-    # temp_var = 'yes'
     # return render(request, 'pages/chart-creation.html', {'chart_form':chart_form, 'chart_type':chart_type,
     # 'select_graph_form':select_graph_form, 'current_chart':current_chart, 'temp_var':temp_var})
     return render(request, 'pages/chart-creation.html', {'graph_count':graph_count, 'chart_form':chart_form, 'chart_type':chart_type,
-    'graphs':graphs_json, 'select_graph_form':select_graph_form, 'current_chart':current_chart, 'temp_var':temp_var})
+    'graphs':graphs_json, 'select_graph_form':select_graph_form, 'current_chart':current_chart})
 
 """Redirect that exits the current chart process, redirected from the chart creation page"""
 def deletechartredirect(request):
@@ -596,7 +600,7 @@ def chartset_to_json(chartset):
 
 """Converts chart information from a given chartset to json"""
 def chart_to_json(chart, passed_index):
-    query = Graph.objects.filter(chart_id=chart.id)
+    query = Graph.objects.filter(chart_id=chart.id).order_by('order')
     graph_list = []
     index = 0
     for graph in query:
@@ -612,7 +616,7 @@ def graph_to_json(graph, passed_index):
     for data in graph_json:
         data_list.append(data_to_json(data, graph_json[data]))
         index+=1    
-    return {'graph':data_list, 'color':graph.color, 'label':graph.label}
+    return {'graph':data_list, 'color':graph.color, 'label':graph.label, 'order':graph.order}
 
 """Converts data information to json"""
 def data_to_json(key, value):
@@ -622,7 +626,7 @@ def data_to_json(key, value):
 def graph_to_json_no_data(graph_list):
     return_list = []
     for graph in graph_list:
-        return_list.append({'label':graph.label, 'color':graph.color, 'id':graph.id})
+        return_list.append({'label':graph.label, 'color':graph.color, 'id':graph.id, 'order':graph.order})
     return return_list
 
 """Converts all the information about a dataset to json, this is for report label creation"""

@@ -51,4 +51,5 @@ class Graph(models.Model):
     day_of_month = models.CharField(max_length=500, default='1')
     day_of_week = models.CharField(max_length=500, default='Monday')
     time = models.CharField(max_length=500, default='0630')
+    order = models.IntegerField(default=-1)
     data_json = fields.JSONField(default={'',''})
